@@ -77,7 +77,8 @@ io.on('connection', socket => {
       return s.players[id]
     })
 
-    socket.emit('SIT_USER_SUCCESS', {payload: {table, user, players}})
+    socket.emit('SIT_USER_SUCCESS', {payload: {user}})
+    io.sockets.emit('UPDATE_TABLE_SUCCESS', {payload: {table, players}})
   })
 })
 

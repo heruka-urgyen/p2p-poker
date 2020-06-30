@@ -4,7 +4,7 @@ const tableReducer = createReducer(null, {
   GET_TABLE_SUCCESS: (_, {payload: {table}}) => {
     return table
   },
-  SIT_USER_SUCCESS: (state, {payload: {table}}) => {
+  UPDATE_TABLE_SUCCESS: (state, {payload: {table}}) => {
     return table
   },
 })

@@ -8,19 +8,20 @@ import {Maybe} from 'client/util'
 function App() {
   const user = useSelector(s => s.user)
   const table = useSelector(s => s.table)
+  const players = useSelector(s => s.players)
 
   if (!(user && table)) {return null}
 
   return (
-    <div className="App">
+    <div className="app">
       <Maybe cond={user.type === 'guest'}>
         <Login table={table} />
       </Maybe>
 
-      <header className="App-header" data-testid="App-header">
+      <header className="app-header">
       </header>
       <main>
-        <Table table={table} />
+        <Table user={user} table={table} players={players} />
       </main>
     </div>
   )
