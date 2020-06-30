@@ -4,6 +4,17 @@ const {v4} = require('uuid')
 const immer = require('immer')
 const {produce} = immer
 
+/************************** util **************************/
+
+const safe = def => f => {
+  try {
+    const res = f()
+    return res != null? res : def
+  } catch (e) {
+    return def
+  }
+}
+
 /******************** state management ********************/
 // _state is a private variable not to be directly accessed or mutated
 let _state = {}
@@ -29,7 +40,7 @@ update(s => {
 io.on('connection', socket => {
   console.log('connected to ' + socket.id)
 
-  const c = cookie.parse(socket.request.headers.cookie)['connect.sid']
+  const c = safe('')(() => cookie.parse(socket.request.headers.cookie)['connect.sid'])
 
   socket.on('GET_USER', _ => {
     console.log('received GET_USER from', socket.id)
