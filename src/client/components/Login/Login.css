@@ -1,0 +1,42 @@
+.login-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 3;
+
+  background-color: grey;
+  opacity: 0.9;
+}
+
+.login-form {
+  position: absolute;
+  top: calc(50vh - 150px);
+  left: calc(50vw - 200px);
+
+  border: 1px solid red;
+  height: 300px;
+  width: 400px;
+  z-index: 4;
+
+  background-color: aliceblue;
+  text-align: center;
+}
+
+.login-form__username {
+  display: block;
+  margin: 60px auto 0;
+  width: 90%;
+  height: 40px;
+  font-size: 26px;
+}
+
+.login-form__submit {
+  display: block;
+  margin: 70px auto 0;
+  width: 50%;
+  height: 40px;
+  font-size: 26px;
+  cursor: pointer;
+}
