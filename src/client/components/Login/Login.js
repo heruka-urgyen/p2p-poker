@@ -1,8 +1,11 @@
 import React, {useState} from 'react'
 import {useDispatch} from 'react-redux'
 
+import {sitUser} from 'client/reducers/table'
+
 const handleSubmitForm = dispatch => formValues => e => {
   e.preventDefault()
+  dispatch(sitUser(formValues))
 }
 
 function Login({table}) {
