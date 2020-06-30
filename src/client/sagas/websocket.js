@@ -12,9 +12,11 @@ function createSocketChannel(socket) {
     }
 
     socket.on('GET_USER_SUCCESS', handler('GET_USER_SUCCESS'))
+    socket.on('GET_TABLE_SUCCESS', handler('GET_TABLE_SUCCESS'))
 
     return () => {
       socket.off('GET_USER_SUCCESS', handler('GET_USER_SUCCESS'))
+      socket.off('GET_TABLE_SUCCESS', handler('GET_TABLE_SUCCESS'))
     }
   })
 }

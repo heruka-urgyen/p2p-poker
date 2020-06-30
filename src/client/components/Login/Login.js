@@ -5,16 +5,21 @@ const handleSubmitForm = dispatch => formValues => e => {
   e.preventDefault()
 }
 
-function Login() {
+function Login({table}) {
   const dispatch = useDispatch()
   const [formValues, updateName] = useState({username: ""})
+  const {maxPlayers, players} = table
 
-  const submitIsDisabled = formValues.username.length === 0
+  const tableIsFull = players.length === maxPlayers
+  const submitIsDisabled = formValues.username.length === 0 || tableIsFull
 
   return (
     <div>
       <div className="login-overlay" />
       <form className="login-form" onSubmit={handleSubmitForm(dispatch)(formValues)}>
+        <h1>
+          {tableIsFull? "Table is full" : `${players.length} / ${maxPlayers} players`}
+        </h1>
         <input
           className="login-form__username"
           placeholder="your name"

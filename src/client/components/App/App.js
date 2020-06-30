@@ -7,13 +7,14 @@ import {Maybe} from 'client/util'
 
 function App() {
   const user = useSelector(s => s.user)
+  const table = useSelector(s => s.table)
 
-  if (!user) {return null}
+  if (!(user && table)) {return null}
 
   return (
     <div className="App">
       <Maybe cond={user.type === 'guest'}>
-        <Login />
+        <Login table={table} />
       </Maybe>
 
       <header className="App-header" data-testid="App-header">
