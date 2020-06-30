@@ -20,7 +20,7 @@ function App() {
       <header className="App-header" data-testid="App-header">
       </header>
       <main>
-        <Table />
+        <Table table={table} />
       </main>
     </div>
   )
