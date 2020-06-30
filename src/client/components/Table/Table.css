@@ -1,0 +1,9 @@
+.Table {
+  position: relative;
+  height: 400px;
+  margin: 200px auto 200px;
+  width: 800px;
+
+  background: green;
+  border-radius: 150px / 200px;
+}
