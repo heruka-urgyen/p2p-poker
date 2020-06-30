@@ -41,6 +41,22 @@ io.on('connection', socket => {
 
     socket.emit('GET_TABLE_SUCCESS', {payload: {table}})
   })
+
+  socket.on('SIT_USER', (payload) => {
+    console.log('received SIT_USER from', socket.id)
+
+    update(s => {
+      const user = {type: 'player', ...payload}
+
+      s.users[c] = user
+      s.table.players.push(user)
+    })
+
+    const table = select(s => s.table)
+    const user = select(s => s.users)[c]
+
+    socket.emit('SIT_USER_SUCCESS', {payload: {table, user}})
+  })
 })
 
 
