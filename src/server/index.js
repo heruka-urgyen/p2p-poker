@@ -33,6 +33,11 @@ update(s => {
     maxPlayers: 2,
     players: [],
   }
+  s.round = {
+    id: 1,
+    players: [],
+    status: 'FINISHED',
+  }
 })
 
 /******************** socket handlers ********************/
@@ -59,7 +64,14 @@ io.on('connection', socket => {
     socket.emit('GET_TABLE_SUCCESS', {payload: {table}})
   })
 
-  socket.on('SIT_USER', (payload) => {
+  socket.on('GET_ROUND', _ => {
+    console.log('received GET_ROUND from', socket.id)
+    const round = select(s => s.round)
+
+    socket.emit('GET_ROUND_SUCCESS', {payload: {round}})
+  })
+
+  socket.on('SIT_USER', payload => {
     console.log('received SIT_USER from', socket.id)
 
     update(s => {
@@ -81,6 +93,5 @@ io.on('connection', socket => {
     io.sockets.emit('UPDATE_TABLE_SUCCESS', {payload: {table, players}})
   })
 })
-
 
 io.listen(3001)
