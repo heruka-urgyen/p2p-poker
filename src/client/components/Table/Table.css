@@ -94,3 +94,53 @@
     left: 0;
     top: 170px;
   }
+
+
+.bet {
+  position: absolute;
+}
+
+  .bet__1 {
+    top: -30px;
+  }
+
+  .bet__2 {
+    top: 220px;
+    left: 60px;
+  }
+
+.bet-amount {
+  display: block;
+  width: 30px;
+  border: 1px solid grey;
+  padding: 0 10px;
+  border-radius: 5px;
+  background-color: grey;
+  opacity: 0.8;
+}
+
+.chips {
+  position: relative;
+}
+
+.chip {
+  position: absolute;
+  height: 20px;
+  width: 20px;
+}
+
+  .chip__1 {
+    left: 20px;
+    bottom: 8px;
+  }
+
+  .chip__2 {
+    left: 10px;
+    bottom: 6px;
+  }
+
+  .chip__3 {
+    left: 15px;
+    bottom: 15px;
+  }
+
