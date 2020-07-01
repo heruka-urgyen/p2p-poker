@@ -71,3 +71,26 @@
   background-color: aliceblue;
   font-weight: bold;
 }
+
+.dealer-button {
+  position: absolute;
+  height: 10px;
+  width: 10px;
+
+  padding: 10px;
+  border: 2px solid black;
+  border-radius: 50px;
+  line-height: 10px;
+  background-color: aliceblue;
+  font-weight: bold;
+}
+
+  .dealer-button__1 {
+    left: 80px;
+    top: -50px;
+  }
+
+  .dealer-button__2 {
+    left: 0;
+    top: 170px;
+  }

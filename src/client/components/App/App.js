@@ -9,6 +9,7 @@ function App() {
   const user = useSelector(s => s.user)
   const table = useSelector(s => s.table)
   const players = useSelector(s => s.players)
+  const round = useSelector(s => s.round)
 
   if (!(user && table)) {return null}
 
@@ -21,7 +22,7 @@ function App() {
       <header className="app-header">
       </header>
       <main>
-        <Table user={user} table={table} players={players} />
+        <Table user={user} table={table} players={players} round={round} />
       </main>
     </div>
   )
