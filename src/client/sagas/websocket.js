@@ -13,14 +13,18 @@ function createSocketChannel(socket) {
 
     socket.on('GET_USER_SUCCESS', handler('GET_USER_SUCCESS'))
     socket.on('GET_TABLE_SUCCESS', handler('GET_TABLE_SUCCESS'))
+    socket.on('GET_ROUND_SUCCESS', handler('GET_ROUND_SUCCESS'))
     socket.on('SIT_USER_SUCCESS', handler('SIT_USER_SUCCESS'))
     socket.on('UPDATE_TABLE_SUCCESS', handler('UPDATE_TABLE_SUCCESS'))
+    socket.on('GET_ROUND_SUCCESS', handler('GET_ROUND_SUCCESS'))
 
     return () => {
       socket.off('GET_USER_SUCCESS', handler('GET_USER_SUCCESS'))
       socket.off('GET_TABLE_SUCCESS', handler('GET_TABLE_SUCCESS'))
+      socket.off('GET_ROUND_SUCCESS', handler('GET_ROUND_SUCCESS'))
       socket.off('SIT_USER_SUCCESS', handler('SIT_USER_SUCCESS'))
       socket.off('UPDATE_TABLE_SUCCESS', handler('UPDATE_TABLE_SUCCESS'))
+      socket.off('GET_ROUND_SUCCESS', handler('GET_ROUND_SUCCESS'))
     }
   })
 }
