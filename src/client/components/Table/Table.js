@@ -1,7 +1,7 @@
 import React from 'react'
 
 import Player from './Player'
-import {Maybe} from 'client/util'
+import {Maybe, safe} from 'client/util'
 
 function Table({user, table, players}) {
   return (
@@ -12,8 +12,8 @@ function Table({user, table, players}) {
         </div>
       </Maybe>
       <ul className="players">
-        <Maybe cond={user.type !== 'guest'}>
-          <Player key={1} i={1} player={user} />
+        <Maybe cond={user.type !== 'guest' && safe(false)(() => !!players[user.id])}>
+          {(() => <Player key={1} i={1} player={players[user.id]} />)}
         </Maybe>
         <Maybe cond={players != null && Object.keys(players).length > 0}>
           {() => table.players

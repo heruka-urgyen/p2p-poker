@@ -7,6 +7,9 @@ const roundReducer = createReducer(null, {
   NEXT_ROUND_SUCCESS: (_, {payload: {round}}) => {
     return round
   },
+  POST_BLINDS_SUCCESS: (_, {payload: {round}}) => {
+    return round
+  },
 })
 
 export default roundReducer

@@ -37,6 +37,14 @@ const nextRound = socket => function* (action) {
   yield apply(socket, socket.emit, ['NEXT_ROUND'])
 }
 
+const nextRoundSuccess = socket => function* (action) {
+  yield put({type: 'POST_BLINDS'})
+}
+
+const postBlinds = socket => function* (action) {
+  yield apply(socket, socket.emit, ['POST_BLINDS'])
+}
+
 function* subscribe(socket) {
   yield takeEvery('GET_USER', getUser(socket))
   yield takeEvery('GET_TABLE', getTable(socket))
@@ -45,6 +53,8 @@ function* subscribe(socket) {
   yield takeEvery('SIT_USER', sitUser(socket))
   yield takeEvery('UPDATE_TABLE_PLAYERS', maybeNextRound(socket))
   yield takeEvery('NEXT_ROUND', nextRound(socket))
+  yield takeEvery('NEXT_ROUND_SUCCESS', nextRoundSuccess(socket))
+  yield takeEvery('POST_BLINDS', postBlinds(socket))
 }
 
 function* initialize() {

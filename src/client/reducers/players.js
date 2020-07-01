@@ -7,6 +7,9 @@ const playersReducer = createReducer(null, {
   UPDATE_TABLE_PLAYERS: (_, {payload: {players}}) => {
     return players
   },
+  POST_BLINDS_SUCCESS: (_, {payload: {players}}) => {
+    return players
+  },
 })
 
 export default playersReducer

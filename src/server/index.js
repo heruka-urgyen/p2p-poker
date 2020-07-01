@@ -24,6 +24,7 @@ const select = f => produce(_state, f)
 /********************* default state *********************/
 
 const defaultUser = {type: 'guest'}
+const defaultBlinds = [1, 2]
 
 update(s => {
   s.sessions = {}
@@ -37,6 +38,7 @@ update(s => {
     id: 1,
     players: [],
     status: 'FINISHED',
+    blinds: defaultBlinds,
   }
 })
 
@@ -97,7 +99,7 @@ io.on('connection', socket => {
     })
 
     socket.emit('SIT_USER_SUCCESS', {payload: {user}})
-    io.sockets.emit('UPDATE_TABLE_PLAYERS', {payload: {table, players}})
+    socket.emit('UPDATE_TABLE_PLAYERS', {payload: {table, players}})
   })
 
   socket.on('NEXT_ROUND', _ => {
@@ -112,6 +114,27 @@ io.on('connection', socket => {
 
     const round = select(s => s.round)
     socket.emit('NEXT_ROUND_SUCCESS', {payload: {round}})
+  })
+
+  socket.on('POST_BLINDS', _ => {
+    console.log('received POST_BLINDS from', socket.id)
+
+    update(s => {
+      const {round: {players, button, blinds}} = s
+      const bets = [
+        {playerId: players[button], amount: blinds[0]},
+        {playerId: players[(button + 1) % players.length], amount: blinds[1]},
+      ]
+
+      bets.forEach(bet => {
+        s.players[bet.playerId].stack = s.players[bet.playerId].stack - bet.amount})
+      s.round.bets = bets
+    })
+
+    const round = select(s => s.round)
+    const players = select(s => s.players)
+
+    io.sockets.emit('POST_BLINDS_SUCCESS', {payload: {round, players}})
   })
 })
 

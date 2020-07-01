@@ -19,6 +19,7 @@ function createSocketChannel(socket) {
     socket.on('GET_ROUND_SUCCESS', handler('GET_ROUND_SUCCESS'))
     socket.on('NEXT_ROUND_SUCCESS', handler('NEXT_ROUND_SUCCESS'))
     socket.on('UPDATE_TABLE_PLAYERS', handler('UPDATE_TABLE_PLAYERS'))
+    socket.on('POST_BLINDS_SUCCESS', handler('POST_BLINDS_SUCCESS'))
 
     return () => {
       socket.off('GET_USER_SUCCESS', handler('GET_USER_SUCCESS'))
@@ -29,6 +30,7 @@ function createSocketChannel(socket) {
       socket.off('GET_ROUND_SUCCESS', handler('GET_ROUND_SUCCESS'))
       socket.off('NEXT_ROUND_SUCCESS', handler('NEXT_ROUND_SUCCESS'))
       socket.off('UPDATE_TABLE_PLAYERS', handler('UPDATE_TABLE_PLAYERS'))
+      socket.off('POST_BLINDS_SUCCESS', handler('POST_BLINDS_SUCCESS'))
     }
   })
 }
