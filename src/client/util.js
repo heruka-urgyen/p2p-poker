@@ -7,9 +7,20 @@ export const safe = def => f => {
   }
 }
 
-export const Maybe =({cond, children}) => {
-  if (typeof cond === 'function') {
+export const Maybe = ({cond, children}) => {
+  const a = typeof cond === 'function'
+  const b = typeof children === 'function'
+
+  if (a && b) {
+    return safe(false)(cond)? children() : null
+  }
+
+  if (a && !b) {
     return safe(false)(cond)? children : null
+  }
+
+  if (!a && b) {
+    return cond? children() : null
   }
 
   return cond? children : null
