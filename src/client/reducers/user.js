@@ -1,7 +1,7 @@
 import {createReducer} from '@reduxjs/toolkit'
 
 const userReducer = createReducer(null, {
-  GET_USER_SUCCESS: (_, {payload: {user}}) => {
+  INITIALIZE_SUCCESS: (_, {payload: {user}}) => {
     return user
   },
   SIT_USER_SUCCESS: (_, {payload: {user}}) => {

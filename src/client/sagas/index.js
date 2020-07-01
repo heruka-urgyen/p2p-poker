@@ -1,23 +1,11 @@
-import {all, apply, put, takeEvery, select} from 'redux-saga/effects'
+import {all, apply, put, takeEvery, takeLatest, select} from 'redux-saga/effects'
 
 import {connectToWebsocket} from './websocket'
 
 import {safe} from 'client/util'
 
-const getUser = socket => function* (action) {
-  yield apply(socket, socket.emit, ['GET_USER'])
-}
-
-const getTable = socket => function* (action) {
-  yield apply(socket, socket.emit, ['GET_TABLE'])
-}
-
-const getPlayers = socket => function* (action) {
-  yield apply(socket, socket.emit, ['GET_PLAYERS'])
-}
-
-const getRound = socket => function* (action) {
-  yield apply(socket, socket.emit, ['GET_ROUND'])
+const getInitialState = socket => function* (action) {
+  yield apply(socket, socket.emit, ['INITIALIZE'])
 }
 
 const sitUser = socket => function* (action) {
@@ -46,22 +34,16 @@ const postBlinds = socket => function* (action) {
 }
 
 function* subscribe(socket) {
-  yield takeEvery('GET_USER', getUser(socket))
-  yield takeEvery('GET_TABLE', getTable(socket))
-  yield takeEvery('GET_PLAYERS', getPlayers(socket))
-  yield takeEvery('GET_ROUND', getRound(socket))
+  yield takeEvery('INITIALIZE', getInitialState(socket))
   yield takeEvery('SIT_USER', sitUser(socket))
   yield takeEvery('UPDATE_TABLE_PLAYERS', maybeNextRound(socket))
   yield takeEvery('NEXT_ROUND', nextRound(socket))
   yield takeEvery('NEXT_ROUND_SUCCESS', nextRoundSuccess(socket))
-  yield takeEvery('POST_BLINDS', postBlinds(socket))
+  yield takeLatest('POST_BLINDS', postBlinds(socket))
 }
 
 function* initialize() {
-  yield put({type: 'GET_USER'})
-  yield put({type: 'GET_TABLE'})
-  yield put({type: 'GET_PLAYERS'})
-  yield put({type: 'GET_ROUND'})
+  yield put({type: 'INITIALIZE'})
 }
 
 function* mainSaga() {

@@ -27,6 +27,7 @@ const defaultUser = {type: 'guest'}
 const defaultBlinds = [1, 2]
 
 update(s => {
+  s._local = {postBlinds: 0}
   s.sessions = {}
   s.players = {}
   s.table = {
@@ -49,35 +50,17 @@ io.on('connection', socket => {
 
   const c = safe('')(() => cookie.parse(socket.request.headers.cookie)['connect.sid'])
 
-  socket.on('GET_USER', _ => {
-    console.log('received GET_USER from', socket.id)
+  socket.on('INITIALIZE', _ => {
+
+    console.log('received INITIALIZE from', socket.id)
     const user = select(s => {
       const id = s.sessions[c]
-      return s.players[id] || defaultUser
-    })
-
-    socket.emit('GET_USER_SUCCESS', {payload: {user}})
-  })
-
-  socket.on('GET_PLAYERS', _ => {
-    console.log('received GET_PLAYERS from', socket.id)
+      return s.players[id] || defaultUser})
     const players = select(s => s.players)
-
-    socket.emit('GET_PLAYERS_SUCCESS', {payload: {players}})
-  })
-
-  socket.on('GET_TABLE', _ => {
-    console.log('received GET_TABLE from', socket.id)
     const table = select(s => s.table)
-
-    socket.emit('GET_TABLE_SUCCESS', {payload: {table}})
-  })
-
-  socket.on('GET_ROUND', _ => {
-    console.log('received GET_ROUND from', socket.id)
     const round = select(s => s.round)
 
-    socket.emit('GET_ROUND_SUCCESS', {payload: {round}})
+    socket.emit('INITIALIZE_SUCCESS', {payload: {user, players, table, round}})
   })
 
   socket.on('SIT_USER', payload => {
@@ -99,7 +82,7 @@ io.on('connection', socket => {
     })
 
     socket.emit('SIT_USER_SUCCESS', {payload: {user}})
-    socket.emit('UPDATE_TABLE_PLAYERS', {payload: {table, players}})
+    io.sockets.emit('UPDATE_TABLE_PLAYERS', {payload: {table, players}})
   })
 
   socket.on('NEXT_ROUND', _ => {
@@ -118,23 +101,29 @@ io.on('connection', socket => {
 
   socket.on('POST_BLINDS', _ => {
     console.log('received POST_BLINDS from', socket.id)
+    update(s => s._local.postBlinds = s._local.postBlinds + 1)
+    const {postBlinds} = select(s => s._local)
 
-    update(s => {
-      const {round: {players, button, blinds}} = s
-      const bets = [
-        {playerId: players[button], amount: blinds[0]},
-        {playerId: players[(button + 1) % players.length], amount: blinds[1]},
-      ]
+    if (postBlinds === Object.keys(io.sockets.sockets).length) {
+      update(s => {
+        s._local.postBlinds = 0
 
-      bets.forEach(bet => {
-        s.players[bet.playerId].stack = s.players[bet.playerId].stack - bet.amount})
-      s.round.bets = bets
-    })
+        const {round: {players, button, blinds}} = s
+        const bets = [
+          {playerId: players[button], amount: blinds[0]},
+          {playerId: players[(button + 1) % players.length], amount: blinds[1]},
+        ]
 
-    const round = select(s => s.round)
-    const players = select(s => s.players)
+        bets.forEach(bet => {
+          s.players[bet.playerId].stack = s.players[bet.playerId].stack - bet.amount})
+        s.round.bets = bets
+      })
 
-    io.sockets.emit('POST_BLINDS_SUCCESS', {payload: {round, players}})
+      const round = select(s => s.round)
+      const players = select(s => s.players)
+
+      io.sockets.emit('POST_BLINDS_SUCCESS', {payload: {round, players}})
+    }
   })
 })
 
