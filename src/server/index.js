@@ -57,6 +57,13 @@ io.on('connection', socket => {
     socket.emit('GET_USER_SUCCESS', {payload: {user}})
   })
 
+  socket.on('GET_PLAYERS', _ => {
+    console.log('received GET_PLAYERS from', socket.id)
+    const players = select(s => s.players)
+
+    socket.emit('GET_PLAYERS_SUCCESS', {payload: {players}})
+  })
+
   socket.on('GET_TABLE', _ => {
     console.log('received GET_TABLE from', socket.id)
     const table = select(s => s.table)
@@ -90,7 +97,7 @@ io.on('connection', socket => {
     })
 
     socket.emit('SIT_USER_SUCCESS', {payload: {user}})
-    io.sockets.emit('UPDATE_TABLE_SUCCESS', {payload: {table, players}})
+    io.sockets.emit('UPDATE_TABLE_PLAYERS', {payload: {table, players}})
   })
 
   socket.on('NEXT_ROUND', _ => {

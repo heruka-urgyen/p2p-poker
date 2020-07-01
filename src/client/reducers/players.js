@@ -1,7 +1,10 @@
 import {createReducer} from '@reduxjs/toolkit'
 
 const playersReducer = createReducer(null, {
-  UPDATE_TABLE_SUCCESS: (state, {payload: {players}}) => {
+  GET_PLAYERS_SUCCESS: (_, {payload: {players}}) => {
+    return players
+  },
+  UPDATE_TABLE_PLAYERS: (_, {payload: {players}}) => {
     return players
   },
 })

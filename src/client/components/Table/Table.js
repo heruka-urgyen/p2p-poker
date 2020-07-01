@@ -15,7 +15,7 @@ function Table({user, table, players}) {
         <Maybe cond={user.type !== 'guest'}>
           <Player key={1} i={1} player={user} />
         </Maybe>
-        <Maybe cond={players != null}>
+        <Maybe cond={players != null && Object.keys(players).length > 0}>
           {() => table.players
             .filter(id => id !== user.id)
             .map((id, i) => <Player key={i + 2} i={i + 2} player={players[id]} />
