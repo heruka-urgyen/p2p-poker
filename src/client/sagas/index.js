@@ -33,6 +33,14 @@ const postBlinds = socket => function* (action) {
   yield apply(socket, socket.emit, ['POST_BLINDS'])
 }
 
+const postBlindsSuccess = socket => function* (action) {
+  yield put({type: 'DEAL_CARDS'})
+}
+
+const dealCards = socket => function* (action) {
+  yield apply(socket, socket.emit, ['DEAL_CARDS'])
+}
+
 function* subscribe(socket) {
   yield takeEvery('INITIALIZE', getInitialState(socket))
   yield takeEvery('SIT_USER', sitUser(socket))
@@ -40,6 +48,8 @@ function* subscribe(socket) {
   yield takeEvery('NEXT_ROUND', nextRound(socket))
   yield takeEvery('NEXT_ROUND_SUCCESS', nextRoundSuccess(socket))
   yield takeLatest('POST_BLINDS', postBlinds(socket))
+  yield takeLatest('POST_BLINDS_SUCCESS', postBlindsSuccess(socket))
+  yield takeLatest('DEAL_CARDS', dealCards(socket))
 }
 
 function* initialize() {

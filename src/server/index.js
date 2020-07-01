@@ -2,7 +2,8 @@ const io = require('socket.io')()
 const cookie = require('cookie')
 const {v4} = require('uuid')
 const immer = require('immer')
-const {produce} = immer
+const Pair = require('sanctuary-pair')
+const {STREETS, deal, newDeck} = require('@heruka_urgyen/poker-solver')
 
 /************************** util **************************/
 
@@ -16,6 +17,8 @@ const safe = def => f => {
 }
 
 /******************** state management ********************/
+
+const {produce} = immer
 // _state is a private variable not to be directly accessed or mutated
 let _state = {}
 const update = f => _state = produce(_state, d => {f(d)})
@@ -27,7 +30,7 @@ const defaultUser = {type: 'guest'}
 const defaultBlinds = [1, 2]
 
 update(s => {
-  s._local = {postBlinds: 0}
+  s._local = {postBlinds: 0, dealCards: 0}
   s.sessions = {}
   s.players = {}
   s.table = {
@@ -41,10 +44,10 @@ update(s => {
     status: 'FINISHED',
     blinds: defaultBlinds,
   }
+  s.streetState = {}
 })
 
 /******************** socket handlers ********************/
-
 io.on('connection', socket => {
   console.log('connected to ' + socket.id)
 
@@ -54,7 +57,7 @@ io.on('connection', socket => {
 
     console.log('received INITIALIZE from', socket.id)
     const user = select(s => {
-      const id = s.sessions[c]
+      const id = safe('')(() => s.sessions[c].userId)
       return s.players[id] || defaultUser})
     const players = select(s => s.players)
     const table = select(s => s.table)
@@ -70,14 +73,14 @@ io.on('connection', socket => {
       const user = {type: 'player', id: v4(), stack: 100, ...payload}
 
       s.players[user.id] = user
-      s.sessions[c] = user.id
+      s.sessions[c] = {userId: user.id, socketId: socket.id}
       s.table.players.push(user.id)
     })
 
     const table = select(s => s.table)
     const players = select(s => s.players)
     const user = select(s => {
-      const id = s.sessions[c]
+      const id = safe('')(() => s.sessions[c].userId)
       return s.players[id]
     })
 
@@ -90,7 +93,7 @@ io.on('connection', socket => {
 
     update(s => {
       s.round.status = 'IN_PROGRESS'
-      s.round.street = 'PREFLOP'
+      s.round.street = STREETS[0]
       s.round.players = s.table.players
       s.round.button = ((s.round.button || -1) + 1) % s.round.players.length
     })
@@ -125,6 +128,65 @@ io.on('connection', socket => {
       io.sockets.emit('POST_BLINDS_SUCCESS', {payload: {round, players}})
     }
   })
+
+  socket.on('DEAL_CARDS', _ => {
+    console.log('received DEAL_CARDS from', socket.id)
+    update(s => s._local.dealCards = s._local.dealCards + 1)
+    const {dealCards} = select(s => s._local)
+
+    if (dealCards === Object.keys(io.sockets.sockets).length) {
+      const street = select(s => s.round.street)
+      if (street === 'PREFLOP') {
+        update(s => {
+          s._local.dealCards = 0
+
+          s.streetState = deal(street)({
+            id: s.round.id,
+            table: {
+              id: s.table.id,
+              maxPlayers: s.table.maxPlayers,
+              players: s.round.players.map(id => ({id})),
+              button: s.round.button},
+            deck: newDeck('shuffle'),
+            communityCards: [],
+            cards: s.round.players.map((id, i) => Pair(id)([])),
+            winners: [],
+          })
+        })
+
+        const cs = select(s => s.streetState.cards)
+        const sessions = select(s => s.sessions)
+
+        Object.keys(io.sockets.sockets).forEach(id => {
+          const socket = io.sockets.sockets[id]
+
+          Object.keys(sessions).forEach(c => {
+            if (sessions[c].socketId === id) {
+              const cards = cs
+                .map(p => {
+                  const {userId} = sessions[c]
+                  if (Pair.fst(p) === userId) {
+                    return {userId, cards: Pair.snd(p)}
+                  }
+
+                  return {userId: Pair.fst(p), cards: [{type: 'hidden'}, {type: 'hidden'}]}
+                })
+                // .reduce((acc, p) => {
+                //   return {
+                //     ...acc,
+                //     [p.userId]: p.cards
+                //   }
+                // }, {})
+
+              socket.emit('DEAL_CARDS_SUCCESS', {payload: {cards}})
+            }
+          })
+        })
+      }
+    }
+
+  })
+
 })
 
 io.listen(3001)
