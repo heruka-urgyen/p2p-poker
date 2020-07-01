@@ -92,6 +92,20 @@ io.on('connection', socket => {
     socket.emit('SIT_USER_SUCCESS', {payload: {user}})
     io.sockets.emit('UPDATE_TABLE_SUCCESS', {payload: {table, players}})
   })
+
+  socket.on('NEXT_ROUND', _ => {
+    console.log('received NEXT_ROUND from', socket.id)
+
+    update(s => {
+      s.round.status = 'IN_PROGRESS'
+      s.round.street = 'PREFLOP'
+      s.round.players = s.table.players
+      s.round.button = ((s.round.button || -1) + 1) % s.round.players.length
+    })
+
+    const round = select(s => s.round)
+    socket.emit('NEXT_ROUND_SUCCESS', {payload: {round}})
+  })
 })
 
 io.listen(3001)
