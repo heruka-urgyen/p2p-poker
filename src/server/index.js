@@ -43,6 +43,7 @@ update(s => {
     players: [],
     status: 'FINISHED',
     blinds: defaultBlinds,
+    communityCards: [],
   }
   s.streetState = {}
 })

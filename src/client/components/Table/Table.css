@@ -201,3 +201,42 @@
     left: 18px;
     bottom: 10px;
   }
+
+.community-cards {
+  list-style: none;
+
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+
+  margin: 0;
+  padding: 0;
+}
+
+  .community-card__1 {
+    top: calc(100% - 240px);
+    left: calc(50% - 250px);
+  }
+
+  .community-card__2 {
+    top: calc(100% - 240px);
+    left: calc(50% - 150px);
+  }
+
+  .community-card__3 {
+    top: calc(100% - 240px);
+    left: calc(50% - 50px);
+  }
+
+  .community-card__4 {
+    top: calc(100% - 240px);
+    left: calc(50% + 50px);
+  }
+
+  .community-card__5 {
+    top: calc(100% - 240px);
+    left: calc(50% + 150px);
+  }
+

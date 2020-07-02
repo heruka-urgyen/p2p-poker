@@ -1,4 +1,5 @@
 import React from 'react'
+import Card from '@heruka_urgyen/react-playing-cards'
 
 import Player from './Player'
 import {Maybe, safe} from 'client/util'
@@ -24,6 +25,13 @@ function Table({user, table, players, round}) {
               <Player key={i + 2} i={i + 2} player={players[id]} round={round} />
           )}
         </Maybe>
+      </ul>
+      <ul className="community-cards">
+        {round.communityCards.map((c, i) =>
+          <li key={`cc${i + 1}`} className={`card community-card__${i + 1}`}>
+            <Card card={c.rank + c.suit} />
+          </li>
+        )}
       </ul>
       <Maybe cond={round.pot > 0}>
         <div className="pot">
