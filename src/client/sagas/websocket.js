@@ -19,6 +19,7 @@ function createSocketChannel(socket) {
     socket.on('DEAL_CARDS_SUCCESS', handler('DEAL_CARDS_SUCCESS'))
     socket.on('FOLD_SUCCESS', handler('FOLD_SUCCESS'))
     socket.on('END_ROUND_SUCCESS', handler('END_ROUND_SUCCESS'))
+    socket.on('BET_SUCCESS', handler('BET_SUCCESS'))
 
     return () => {
       socket.on('INITIALIZE_SUCCESS', handler('INITIALIZE_SUCCESS'))
@@ -29,6 +30,7 @@ function createSocketChannel(socket) {
       socket.off('DEAL_CARDS_SUCCESS', handler('DEAL_CARDS_SUCCESS'))
       socket.off('FOLD_SUCCESS', handler('FOLD_SUCCESS'))
       socket.off('END_ROUND_SUCCESS', handler('END_ROUND_SUCCESS'))
+      socket.off('BET_SUCCESS', handler('BET_SUCCESS'))
     }
   })
 }

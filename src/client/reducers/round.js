@@ -16,7 +16,11 @@ const roundReducer = createReducer(null, {
   END_ROUND_SUCCESS: (_, {payload: {round}}) => {
     return round
   },
+  BET_SUCCESS: (_, {payload: {round}}) => {
+    return round
+  },
 })
 
 export const fold = createAction('FOLD')
+export const bet = createAction('BET')
 export default roundReducer

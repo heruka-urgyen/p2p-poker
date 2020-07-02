@@ -56,6 +56,10 @@ const endRound = socket => function* (action) {
   yield apply(socket, socket.emit, ['END_ROUND', action])
 }
 
+const bet = socket => function* (action) {
+  yield apply(socket, socket.emit, ['BET', action])
+}
+
 function* subscribe(socket) {
   yield takeEvery('INITIALIZE', getInitialState(socket))
   yield takeEvery('SIT_USER', sitUser(socket))
@@ -69,6 +73,7 @@ function* subscribe(socket) {
   yield takeEvery('FOLD_SUCCESS', foldSuccess(socket))
   yield takeEvery('END_ROUND', endRound(socket))
   yield takeEvery('END_ROUND_SUCCESS', maybeNextRound(socket))
+  yield takeEvery('BET', bet(socket))
 }
 
 function* initialize() {

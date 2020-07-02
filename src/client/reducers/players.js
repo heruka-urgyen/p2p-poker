@@ -19,6 +19,9 @@ const playersReducer = createReducer(null, {
   END_ROUND_SUCCESS: (_, {payload: {players}}) => {
     return players
   },
+  BET_SUCCESS: (players, {payload: {updatedStack}}) => {
+    players[updatedStack.playerId].stack = updatedStack.stack
+  },
 })
 
 export default playersReducer

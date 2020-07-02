@@ -3,7 +3,7 @@ const cookie = require('cookie')
 const {v4} = require('uuid')
 const immer = require('immer')
 const Pair = require('sanctuary-pair')
-const {STREETS, deal, newDeck} = require('@heruka_urgyen/poker-solver')
+const {STREETS, deal, newDeck, computeRoundWinners} = require('@heruka_urgyen/poker-solver')
 
 /************************** util **************************/
 
@@ -125,6 +125,8 @@ io.on('connection', socket => {
         s.round.whoseTurn = s.round.players[s.round.button]
         s.round.pot = 0
         s.round.bets = []
+        s.round.whoActed = []
+        s.round.winners = []
       })
 
       const round = select(s => s.round)
@@ -240,6 +242,7 @@ io.on('connection', socket => {
       const pot = s.round.bets.reduce((pot, bet) => pot + bet.amount, s.round.pot)
       s.round.pot = 0
       s.round.bets = []
+      s.communityCards = []
       s.round.status = 'FINISHED'
 
       s.players[playerId].cards = []
@@ -250,6 +253,80 @@ io.on('connection', socket => {
     const players = select(s => s.players)
 
     socket.emit('END_ROUND_SUCCESS', {payload: {round, players}})
+  })
+
+  socket.on('BET', ({payload}) => {
+    console.log('received BET from', socket.id)
+
+    const {player, amount} = payload
+
+    update(s => {
+      s.round.whoActed.push(player.id)
+
+      if (amount !== 0) {
+        s.round.bets =
+          s.round.bets.concat({playerId: player.id, amount}).reduce((acc, bet) => {
+            if (acc.filter(b => b.playerId === bet.playerId).length > 0) {
+              return acc.map(b => {
+                if (b.playerId === bet.playerId) {
+                  return {
+                    ...b,
+                    amount: b.amount + bet.amount,
+                  }
+                }
+
+                return b
+              })
+            }
+
+            return acc.concat(bet)
+        }, [])
+
+        s.players[player.id].stack = s.players[player.id].stack - amount
+      }
+
+      const tableIsBalanced = s.round.whoActed.length === s.round.players.length
+        && s.round.bets.every((bet, _, bets) => bet.amount === bets[0].amount)
+
+      if (tableIsBalanced) {
+        if (s.round.street === 'RIVER') {
+          s.streetState = computeRoundWinners(s.streetState)
+          s.round.winners = s.streetState.winners
+
+          const pot = s.round.bets.reduce((pot, bet) => pot + bet.amount, s.round.pot)
+          s.round.pot = 0
+          s.round.bets = []
+          s.communityCards = []
+          s.round.status = 'FINISHED'
+
+          s.players[player.id].cards = []
+          s.players[player.id].stack = pot + s.players[player.id].stack
+        } else {
+          s.round.street = STREETS[(STREETS.indexOf(s.round.street) + 1)]
+          s.round.pot = s.round.bets.reduce((pot, bet) => pot + bet.amount, s.round.pot)
+          s.round.bets = []
+          s.round.whoActed = []
+          s.streetState = deal(s.round.street)(s.streetState)
+          s.round.communityCards = s.streetState.communityCards
+          s.round.whoseTurn = s.round.players[s.round.button]
+        }
+      } else {
+        const {players} = s.round
+        s.round.whoseTurn = players[(players.indexOf(player.id) + 1) % players.length]
+      }
+    })
+
+    const round = select(s => s.round)
+    const players = select(s => s.players)
+
+    if (round.winners.length > 0) {
+      io.sockets.emit('END_ROUND_SUCCESS', {payload: {round, players}})
+    } else {
+      io.sockets.emit(
+        'BET_SUCCESS',
+        {payload:
+          {round, updatedStack: {playerId: player.id, stack: players[player.id].stack}}})
+    }
   })
 })
 
