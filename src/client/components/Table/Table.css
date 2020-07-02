@@ -144,3 +144,28 @@
     bottom: 15px;
   }
 
+.hole-cards {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  position: absolute;
+  height: 100px;
+  left: 10px;
+}
+
+.card__2 {
+  left: 20px;
+  top: 10px;
+}
+
+  .player__1 .card__1 {
+    left: -20px;
+  }
+
+  .player__1 .card__2 {
+    left: 50px;
+    top: 0;
+  }

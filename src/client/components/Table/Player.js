@@ -1,4 +1,5 @@
 import React from 'react'
+import Card from '@heruka_urgyen/react-playing-cards'
 
 import {Maybe, safe} from 'client/util'
 
@@ -7,9 +8,19 @@ import chip from 'client/images/poker-chip.svg'
 function Player({i, player, round}) {
   const buttonPlayerId = safe(null)(() => round.players[round.button])
   const bet = safe({})(() => round.bets.filter(b => b.playerId === player.id)[0])
+  const cards = safe([])(() => player.cards)
 
   return (
     <li className={`player player__${i}`}>
+      <Maybe cond={cards.length > 0}>
+        <ul className="hole-cards">
+          {cards.map((c, i) => (
+            <li key={`card__${i + 1}`} className={`card card__${i + 1}`}>
+              <Card card={c.rank + c.suit} back={c.type === 'hidden'} />
+            </li>
+          ))}
+        </ul>
+      </Maybe>
       <label className="player-name">{player.username}</label>
       <label className="player-stack">${player.stack}</label>
       <Maybe cond={() => buttonPlayerId === player.id}>
