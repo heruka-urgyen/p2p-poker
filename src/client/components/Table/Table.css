@@ -156,10 +156,10 @@
   left: 10px;
 }
 
-.card__2 {
-  left: 20px;
-  top: 10px;
-}
+  .card__2 {
+    left: 20px;
+    top: 10px;
+  }
 
   .player__1 .card__1 {
     left: -20px;
@@ -168,4 +168,36 @@
   .player__1 .card__2 {
     left: 50px;
     top: 0;
+  }
+
+.pot {
+  position: absolute;
+  left: calc(50% - 50px);
+  top: calc(50% + 100px);
+}
+
+.pot-amount {
+  position: absolute;
+  left: 44px;
+  top: -30px;
+  border: 1px solid grey;
+  padding: 0 10px;
+  border-radius: 5px;
+  background-color: grey;
+  opacity: 0.8;
+}
+
+  .pot .chip__1 {
+    left: 2px;
+    bottom: 10px;
+  }
+
+  .pot .chip__2 {
+    left: 10px;
+    bottom: 10px;
+  }
+
+  .pot .chip__3 {
+    left: 18px;
+    bottom: 10px;
   }

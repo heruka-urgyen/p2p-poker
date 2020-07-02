@@ -3,6 +3,8 @@ import React from 'react'
 import Player from './Player'
 import {Maybe, safe} from 'client/util'
 
+import chip from 'client/images/poker-chip.svg'
+
 function Table({user, table, players, round}) {
   return (
     <div className="table">
@@ -23,6 +25,14 @@ function Table({user, table, players, round}) {
           )}
         </Maybe>
       </ul>
+      <Maybe cond={round.pot > 0}>
+        <div className="pot">
+          <img className={`chip chip__1`} src={chip} alt="chip" />
+          <img className={`chip chip__2`} src={chip} alt="chip" />
+          <img className={`chip chip__3`} src={chip} alt="chip" />
+          <label className="pot-amount">${round.pot}</label>
+        </div>
+      </Maybe>
     </div>
   )
 }

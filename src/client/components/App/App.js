@@ -2,8 +2,9 @@ import React from 'react'
 import {useSelector} from 'react-redux'
 
 import Table from 'client/components/Table'
+import Controls from 'client/components/Controls'
 import Login from 'client/components/Login'
-import {Maybe} from 'client/util'
+import {Maybe, safe} from 'client/util'
 
 function App() {
   const user = useSelector(s => s.user)
@@ -12,6 +13,9 @@ function App() {
   const round = useSelector(s => s.round)
 
   if (!(user && table)) {return null}
+
+  const controlsDisabled = round.status === 'FINISHED'
+    || safe(true)(() => round.whoseTurn !== user.id)
 
   return (
     <div className="app">
@@ -23,6 +27,7 @@ function App() {
       </header>
       <main>
         <Table user={user} table={table} players={players} round={round} />
+        <Controls player={user} isDisabled={controlsDisabled} />
       </main>
     </div>
   )

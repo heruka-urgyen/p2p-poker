@@ -96,6 +96,8 @@ io.on('connection', socket => {
       s.round.street = STREETS[0]
       s.round.players = s.table.players
       s.round.button = ((s.round.button || -1) + 1) % s.round.players.length
+      s.round.whoseTurn = s.round.players[s.round.button]
+      s.round.pot = 0
     })
 
     const round = select(s => s.round)
@@ -171,12 +173,6 @@ io.on('connection', socket => {
 
                   return {userId: Pair.fst(p), cards: [{type: 'hidden'}, {type: 'hidden'}]}
                 })
-                // .reduce((acc, p) => {
-                //   return {
-                //     ...acc,
-                //     [p.userId]: p.cards
-                //   }
-                // }, {})
 
               socket.emit('DEAL_CARDS_SUCCESS', {payload: {cards}})
             }
@@ -184,8 +180,22 @@ io.on('connection', socket => {
         })
       }
     }
-
   })
+
+  socket.on('FOLD', ({payload}) => {
+    console.log('received FOLD from', socket.id)
+
+    const playerId = payload.id
+
+    update(s => {
+      s.round.pot = s.round.bets.filter(b => b.playerId === playerId)[0].amount
+      s.round.bets = s.round.bets.filter(b => b.playerId !== playerId)
+    })
+
+    const round = select(s => s.round)
+    socket.emit('FOLD_SUCCESS', {payload: {round}})
+  })
+
 
 })
 

@@ -1,4 +1,4 @@
-import {createReducer} from '@reduxjs/toolkit'
+import {createReducer, createAction} from '@reduxjs/toolkit'
 
 const roundReducer = createReducer(null, {
   INITIALIZE_SUCCESS: (_, {payload: {round}}) => {
@@ -10,6 +10,10 @@ const roundReducer = createReducer(null, {
   POST_BLINDS_SUCCESS: (_, {payload: {round}}) => {
     return round
   },
+  FOLD_SUCCESS: (_, {payload: {round}}) => {
+    return round
+  },
 })
 
+export const fold = createAction('FOLD')
 export default roundReducer

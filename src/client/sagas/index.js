@@ -1,4 +1,4 @@
-import {all, apply, put, takeEvery, takeLatest, select} from 'redux-saga/effects'
+import {all, apply, put, takeEvery, select} from 'redux-saga/effects'
 
 import {connectToWebsocket} from './websocket'
 
@@ -41,15 +41,20 @@ const dealCards = socket => function* (action) {
   yield apply(socket, socket.emit, ['DEAL_CARDS'])
 }
 
+const fold = socket => function* (action) {
+  yield apply(socket, socket.emit, ['FOLD', action])
+}
+
 function* subscribe(socket) {
   yield takeEvery('INITIALIZE', getInitialState(socket))
   yield takeEvery('SIT_USER', sitUser(socket))
   yield takeEvery('UPDATE_TABLE_PLAYERS', maybeNextRound(socket))
   yield takeEvery('NEXT_ROUND', nextRound(socket))
   yield takeEvery('NEXT_ROUND_SUCCESS', nextRoundSuccess(socket))
-  yield takeLatest('POST_BLINDS', postBlinds(socket))
-  yield takeLatest('POST_BLINDS_SUCCESS', postBlindsSuccess(socket))
-  yield takeLatest('DEAL_CARDS', dealCards(socket))
+  yield takeEvery('POST_BLINDS', postBlinds(socket))
+  yield takeEvery('POST_BLINDS_SUCCESS', postBlindsSuccess(socket))
+  yield takeEvery('DEAL_CARDS', dealCards(socket))
+  yield takeEvery('FOLD', fold(socket))
 }
 
 function* initialize() {

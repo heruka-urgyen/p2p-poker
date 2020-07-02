@@ -1,0 +1,15 @@
+.controls {
+  text-align: center;
+}
+
+.controls > * {
+  display: inline-block;
+  margin: 0 10px;
+}
+
+.controls__button {
+  height: 60px;
+  width: 100px;
+  font-size: 20px;
+}
+
