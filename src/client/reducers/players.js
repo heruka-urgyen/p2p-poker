@@ -13,6 +13,9 @@ const playersReducer = createReducer(null, {
   DEAL_CARDS_SUCCESS: (_, {payload: {players}}) => {
     return players
   },
+  FOLD_SUCCESS: (_, {payload: {players}}) => {
+    return players
+  },
 })
 
 export default playersReducer

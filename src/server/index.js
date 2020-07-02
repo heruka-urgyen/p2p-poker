@@ -118,6 +118,7 @@ io.on('connection', socket => {
       s.round.button = ((s.round.button || -1) + 1) % s.round.players.length
       s.round.whoseTurn = s.round.players[s.round.button]
       s.round.pot = 0
+      s.round.bets = []
     })
 
     const round = select(s => s.round)
@@ -208,12 +209,43 @@ io.on('connection', socket => {
     const playerId = payload.id
 
     update(s => {
-      s.round.pot = s.round.bets.filter(b => b.playerId === playerId)[0].amount
-      s.round.bets = s.round.bets.filter(b => b.playerId !== playerId)
+      s.round.pot = s.round.pot +
+        s.round.bets.filter(bet => bet.playerId === playerId)[0].amount
+
+      s.round.bets = s.round.bets.filter(bet => bet.playerId !== playerId)
+      s.round.players = s.round.players.filter(id => id !== playerId)
+
+      s.players[playerId].cards = []
     })
 
     const round = select(s => s.round)
-    socket.emit('FOLD_SUCCESS', {payload: {round}})
+    const players = select(s => s.players)
+
+    io.sockets.emit('FOLD_SUCCESS', {payload: {round, players: hideCards(players, playerId)}})
+  })
+
+  socket.on('END_ROUND', ({payload}) => {
+    console.log('received END_ROUND from', socket.id)
+
+    const playerId = payload.id
+
+    update(s => {
+      s.round.pot = s.round.bets.reduce((pot, bet) => pot + bet.amount, s.round.pot)
+      s.round.bets = []
+      s.round.status = 'FINISHED'
+
+      Object.keys(s.players).forEach(id => {
+        s.players[id].cards = []
+        if (id !== playerId) {
+          s.players[id].stack = s.round.pot + s.players[id].stack
+        }
+      })
+    })
+
+    const round = select(s => s.round)
+    const players = select(s => s.players)
+
+    io.sockets.emit('FOLD_SUCCESS', {payload: {round, players}})
   })
 
 
