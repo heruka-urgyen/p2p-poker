@@ -16,6 +16,9 @@ const playersReducer = createReducer(null, {
   FOLD_SUCCESS: (_, {payload: {players}}) => {
     return players
   },
+  END_ROUND_SUCCESS: (_, {payload: {players}}) => {
+    return players
+  },
 })
 
 export default playersReducer

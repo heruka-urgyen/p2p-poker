@@ -18,6 +18,7 @@ function createSocketChannel(socket) {
     socket.on('POST_BLINDS_SUCCESS', handler('POST_BLINDS_SUCCESS'))
     socket.on('DEAL_CARDS_SUCCESS', handler('DEAL_CARDS_SUCCESS'))
     socket.on('FOLD_SUCCESS', handler('FOLD_SUCCESS'))
+    socket.on('END_ROUND_SUCCESS', handler('END_ROUND_SUCCESS'))
 
     return () => {
       socket.on('INITIALIZE_SUCCESS', handler('INITIALIZE_SUCCESS'))
@@ -27,6 +28,7 @@ function createSocketChannel(socket) {
       socket.off('POST_BLINDS_SUCCESS', handler('POST_BLINDS_SUCCESS'))
       socket.off('DEAL_CARDS_SUCCESS', handler('DEAL_CARDS_SUCCESS'))
       socket.off('FOLD_SUCCESS', handler('FOLD_SUCCESS'))
+      socket.off('END_ROUND_SUCCESS', handler('END_ROUND_SUCCESS'))
     }
   })
 }

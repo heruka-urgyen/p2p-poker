@@ -30,7 +30,7 @@ const defaultUser = {type: 'guest'}
 const defaultBlinds = [1, 2]
 
 update(s => {
-  s._local = {postBlinds: 0, dealCards: 0}
+  s._local = {nextRound: 0, postBlinds: 0, dealCards: 0}
   s.sessions = {}
   s.players = {}
   s.table = {
@@ -110,19 +110,26 @@ io.on('connection', socket => {
 
   socket.on('NEXT_ROUND', _ => {
     console.log('received NEXT_ROUND from', socket.id)
+    update(s => s._local.nextRound = s._local.nextRound + 1)
+    const {nextRound} = select(s => s._local)
 
-    update(s => {
-      s.round.status = 'IN_PROGRESS'
-      s.round.street = STREETS[0]
-      s.round.players = s.table.players
-      s.round.button = ((s.round.button || -1) + 1) % s.round.players.length
-      s.round.whoseTurn = s.round.players[s.round.button]
-      s.round.pot = 0
-      s.round.bets = []
-    })
+    if (nextRound === Object.keys(io.sockets.sockets).length) {
+      update(s => {
+        s._local.nextRound = 0
 
-    const round = select(s => s.round)
-    socket.emit('NEXT_ROUND_SUCCESS', {payload: {round}})
+        s.round.status = 'IN_PROGRESS'
+        s.round.street = STREETS[0]
+        s.round.players = s.table.players
+        s.round.button =
+          (s.round.button != null? s.round.button + 1 : 0) % s.round.players.length
+        s.round.whoseTurn = s.round.players[s.round.button]
+        s.round.pot = 0
+        s.round.bets = []
+      })
+
+      const round = select(s => s.round)
+      io.sockets.emit('NEXT_ROUND_SUCCESS', {payload: {round}})
+    }
   })
 
   socket.on('POST_BLINDS', _ => {
@@ -227,28 +234,23 @@ io.on('connection', socket => {
   socket.on('END_ROUND', ({payload}) => {
     console.log('received END_ROUND from', socket.id)
 
-    const playerId = payload.id
+    const {playerId} = payload
 
     update(s => {
-      s.round.pot = s.round.bets.reduce((pot, bet) => pot + bet.amount, s.round.pot)
+      const pot = s.round.bets.reduce((pot, bet) => pot + bet.amount, s.round.pot)
+      s.round.pot = 0
       s.round.bets = []
       s.round.status = 'FINISHED'
 
-      Object.keys(s.players).forEach(id => {
-        s.players[id].cards = []
-        if (id !== playerId) {
-          s.players[id].stack = s.round.pot + s.players[id].stack
-        }
-      })
+      s.players[playerId].cards = []
+      s.players[playerId].stack = pot + s.players[playerId].stack
     })
 
     const round = select(s => s.round)
     const players = select(s => s.players)
 
-    io.sockets.emit('FOLD_SUCCESS', {payload: {round, players}})
+    socket.emit('END_ROUND_SUCCESS', {payload: {round, players}})
   })
-
-
 })
 
 io.listen(3001)

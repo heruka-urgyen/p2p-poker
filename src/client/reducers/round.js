@@ -13,6 +13,9 @@ const roundReducer = createReducer(null, {
   FOLD_SUCCESS: (_, {payload: {round}}) => {
     return round
   },
+  END_ROUND_SUCCESS: (_, {payload: {round}}) => {
+    return round
+  },
 })
 
 export const fold = createAction('FOLD')

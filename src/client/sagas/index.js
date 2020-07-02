@@ -15,7 +15,6 @@ const sitUser = socket => function* (action) {
 const maybeNextRound = socket => function* (action) {
   const round = yield select(state => state.round)
   const table = yield select(state => state.table)
-
   if (safe(false)(() => round.status === 'FINISHED') && table.players.length > 1) {
     yield put({type: 'NEXT_ROUND'})
   }
@@ -45,6 +44,18 @@ const fold = socket => function* (action) {
   yield apply(socket, socket.emit, ['FOLD', action])
 }
 
+const foldSuccess = socket => function* (action) {
+  const round = yield select(state => state.round)
+
+  if (round.players.length === 1) {
+    yield put({type: 'END_ROUND', payload: {playerId: round.players[0]}})
+  }
+}
+
+const endRound = socket => function* (action) {
+  yield apply(socket, socket.emit, ['END_ROUND', action])
+}
+
 function* subscribe(socket) {
   yield takeEvery('INITIALIZE', getInitialState(socket))
   yield takeEvery('SIT_USER', sitUser(socket))
@@ -55,6 +66,9 @@ function* subscribe(socket) {
   yield takeEvery('POST_BLINDS_SUCCESS', postBlindsSuccess(socket))
   yield takeEvery('DEAL_CARDS', dealCards(socket))
   yield takeEvery('FOLD', fold(socket))
+  yield takeEvery('FOLD_SUCCESS', foldSuccess(socket))
+  yield takeEvery('END_ROUND', endRound(socket))
+  yield takeEvery('END_ROUND_SUCCESS', maybeNextRound(socket))
 }
 
 function* initialize() {
