@@ -47,6 +47,24 @@ update(s => {
   s.streetState = {}
 })
 
+/*********************** functions ***********************/
+
+function hideCards(players, userId) {
+  return Object.keys(players).map(playerId => {
+    if (playerId !== userId) {
+      return {
+        [playerId]: {
+          ...players[playerId],
+          cards: [{type: 'hidden'}, {type: 'hidden'}],
+        }
+      }
+    }
+
+    return {[playerId]: players[playerId]}
+  })
+  .reduce((acc, x) => ({...acc, ...x}), {})
+}
+
 /******************** socket handlers ********************/
 io.on('connection', socket => {
   console.log('connected to ' + socket.id)
@@ -63,7 +81,9 @@ io.on('connection', socket => {
     const table = select(s => s.table)
     const round = select(s => s.round)
 
-    socket.emit('INITIALIZE_SUCCESS', {payload: {user, players, table, round}})
+    socket.emit(
+      'INITIALIZE_SUCCESS',
+      {payload: {user, players: hideCards(players, user.id), table, round}})
   })
 
   socket.on('SIT_USER', payload => {
@@ -154,9 +174,15 @@ io.on('connection', socket => {
             cards: s.round.players.map((id, i) => Pair(id)([])),
             winners: [],
           })
+
+          s.streetState.cards.forEach(c => {
+            const playerId = Pair.fst(c)
+            s.players[playerId].cards = Pair.snd(c)
+          })
         })
 
         const cs = select(s => s.streetState.cards)
+        const players = select(s => s.players)
         const sessions = select(s => s.sessions)
 
         Object.keys(io.sockets.sockets).forEach(id => {
@@ -164,17 +190,11 @@ io.on('connection', socket => {
 
           Object.keys(sessions).forEach(c => {
             if (sessions[c].socketId === id) {
-              const cards = cs
-                .map(p => {
-                  const {userId} = sessions[c]
-                  if (Pair.fst(p) === userId) {
-                    return {userId, cards: Pair.snd(p)}
-                  }
+              const {userId} = sessions[c]
 
-                  return {userId: Pair.fst(p), cards: [{type: 'hidden'}, {type: 'hidden'}]}
-                })
-
-              socket.emit('DEAL_CARDS_SUCCESS', {payload: {cards}})
+              socket.emit(
+                'DEAL_CARDS_SUCCESS',
+                {payload: {players: hideCards(players, userId)}})
             }
           })
         })
