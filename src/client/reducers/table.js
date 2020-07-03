@@ -7,6 +7,9 @@ const tableReducer = createReducer(null, {
   UPDATE_TABLE_PLAYERS: (_, {payload: {table}}) => {
     return table
   },
+  END_ROUND_SUCCESS: (_, {payload: {table}}) => {
+    return table
+  },
 })
 
 export const sitUser = createAction('SIT_USER')

@@ -44,6 +44,7 @@ update(s => {
     status: 'FINISHED',
     blinds: defaultBlinds,
     communityCards: [],
+    winners: [],
   }
   s.streetState = {}
 })
@@ -113,6 +114,7 @@ io.on('connection', socket => {
     console.log('received NEXT_ROUND from', socket.id)
     update(s => s._local.nextRound = s._local.nextRound + 1)
     const {nextRound} = select(s => s._local)
+    const {players} = select(s => s.table)
 
     if (nextRound === Object.keys(io.sockets.sockets).length) {
       update(s => {
@@ -252,12 +254,26 @@ io.on('connection', socket => {
         s.players[w.playerId].cards = []
         s.players[w.playerId].stack = pot + (s.players[w.playerId].stack / winners.length)
       })
+
+      s.players = Object.keys(s.players)
+        .filter(id => s.players[id].stack > 0)
+        .reduce((acc, id) => {
+          return {...acc, [id]: s.players[id]}
+        }, {})
+
+      s.table.players = Object.keys(s.players)
+
+      if (!s.players[s.sessions[c].userId]) {
+        s.user = {type: 'guest'}
+      }
     })
 
     const round = select(s => s.round)
     const players = select(s => s.players)
+    const table = select(s => s.table)
+    const user = select(s => s.user)
 
-    socket.emit('END_ROUND_SUCCESS', {payload: {round, players}})
+    socket.emit('END_ROUND_SUCCESS', {payload: {table, round, players, user,}})
   })
 
   socket.on('BET', ({payload}) => {
@@ -298,6 +314,10 @@ io.on('connection', socket => {
       const tableIsBalanced = s.round.whoActed.length === s.round.players.length
         && (s.round.bets.length === 0 || s.round.bets.length > 1)
         && s.round.bets.every((bet, _, bets) => bet.amount === bets[0].amount)
+
+      if (tableIsBalanced && s.players[player.id].stack === 0) {
+        s.round.status = 'ALL_IN'
+      }
 
       if (tableIsBalanced) {
         if (s.round.street === 'RIVER') {

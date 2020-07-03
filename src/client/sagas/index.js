@@ -15,6 +15,7 @@ const sitUser = socket => function* (action) {
 const maybeNextRound = socket => function* (action) {
   const round = yield select(state => state.round)
   const table = yield select(state => state.table)
+
   if (safe(false)(() => round.status === 'FINISHED') && table.players.length > 1) {
     yield put({type: 'NEXT_ROUND'})
   }
@@ -60,6 +61,16 @@ const bet = socket => function* (action) {
   yield apply(socket, socket.emit, ['BET', action])
 }
 
+const betSuccess = socket => function* (action) {
+  const user = yield select(state => state.user)
+  const {round} = action.payload
+
+  if (round.status === 'ALL_IN' && user.id === round.whoseTurn) {
+    yield delay(500)
+    yield put({type: 'BET', payload: {player: {id: round.whoseTurn}, amount: 0}})
+  }
+}
+
 const showdownSuccess = socket => function* (action) {
   const round = yield select(state => state.round)
 
@@ -81,6 +92,7 @@ function* subscribe(socket) {
   yield takeEvery('END_ROUND', endRound(socket))
   yield takeEvery('END_ROUND_SUCCESS', maybeNextRound(socket))
   yield takeEvery('BET', bet(socket))
+  yield takeEvery('BET_SUCCESS', betSuccess(socket))
   yield takeEvery('SHOWDOWN_SUCCESS', showdownSuccess(socket))
 }
 
