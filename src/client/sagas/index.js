@@ -1,4 +1,4 @@
-import {all, apply, put, takeEvery, select} from 'redux-saga/effects'
+import {all, apply, put, takeEvery, select, delay} from 'redux-saga/effects'
 
 import {connectToWebsocket} from './websocket'
 
@@ -48,7 +48,7 @@ const foldSuccess = socket => function* (action) {
   const round = yield select(state => state.round)
 
   if (round.players.length === 1) {
-    yield put({type: 'END_ROUND', payload: {playerId: round.players[0]}})
+    yield put({type: 'END_ROUND', payload: {winners: [{playerId: round.players[0]}]}})
   }
 }
 
@@ -58,6 +58,13 @@ const endRound = socket => function* (action) {
 
 const bet = socket => function* (action) {
   yield apply(socket, socket.emit, ['BET', action])
+}
+
+const showdownSuccess = socket => function* (action) {
+  const round = yield select(state => state.round)
+
+  yield delay(3000)
+  yield put({type: 'END_ROUND', payload: {winners: round.winners}})
 }
 
 function* subscribe(socket) {
@@ -74,6 +81,7 @@ function* subscribe(socket) {
   yield takeEvery('END_ROUND', endRound(socket))
   yield takeEvery('END_ROUND_SUCCESS', maybeNextRound(socket))
   yield takeEvery('BET', bet(socket))
+  yield takeEvery('SHOWDOWN_SUCCESS', showdownSuccess(socket))
 }
 
 function* initialize() {

@@ -20,6 +20,7 @@ function createSocketChannel(socket) {
     socket.on('FOLD_SUCCESS', handler('FOLD_SUCCESS'))
     socket.on('END_ROUND_SUCCESS', handler('END_ROUND_SUCCESS'))
     socket.on('BET_SUCCESS', handler('BET_SUCCESS'))
+    socket.on('SHOWDOWN_SUCCESS', handler('SHOWDOWN_SUCCESS'))
 
     return () => {
       socket.on('INITIALIZE_SUCCESS', handler('INITIALIZE_SUCCESS'))
@@ -31,6 +32,7 @@ function createSocketChannel(socket) {
       socket.off('FOLD_SUCCESS', handler('FOLD_SUCCESS'))
       socket.off('END_ROUND_SUCCESS', handler('END_ROUND_SUCCESS'))
       socket.off('BET_SUCCESS', handler('BET_SUCCESS'))
+      socket.off('SHOWDOWN_SUCCESS', handler('SHOWDOWN_SUCCESS'))
     }
   })
 }

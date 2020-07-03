@@ -118,6 +118,7 @@ io.on('connection', socket => {
       update(s => {
         s._local.nextRound = 0
 
+        s.round.id = s.round.id + 1
         s.round.status = 'IN_PROGRESS'
         s.round.street = STREETS[0]
         s.round.players = s.table.players
@@ -238,17 +239,19 @@ io.on('connection', socket => {
   socket.on('END_ROUND', ({payload}) => {
     console.log('received END_ROUND from', socket.id)
 
-    const {playerId} = payload
+    const {winners} = payload
 
     update(s => {
       const pot = s.round.bets.reduce((pot, bet) => pot + bet.amount, s.round.pot)
       s.round.pot = 0
       s.round.bets = []
-      s.communityCards = []
+      s.round.communityCards = []
       s.round.status = 'FINISHED'
 
-      s.players[playerId].cards = []
-      s.players[playerId].stack = pot + s.players[playerId].stack
+      winners.forEach(w => {
+        s.players[w.playerId].cards = []
+        s.players[w.playerId].stack = pot + (s.players[w.playerId].stack / winners.length)
+      })
     })
 
     const round = select(s => s.round)
@@ -317,7 +320,7 @@ io.on('connection', socket => {
     const players = select(s => s.players)
 
     if (round.winners.length > 0) {
-      io.sockets.emit('END_ROUND_SUCCESS', {payload: {round, players}})
+      io.sockets.emit('SHOWDOWN_SUCCESS', {payload: {round}})
     } else {
       io.sockets.emit(
         'BET_SUCCESS',
