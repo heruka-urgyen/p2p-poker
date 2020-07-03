@@ -1,5 +1,5 @@
 .controls {
-  text-align: center;
+  text-align: right;
 }
 
 .controls > * {
@@ -13,3 +13,24 @@
   font-size: 20px;
 }
 
+.bet-size__input {
+  width: 56px;
+  height: 56px;
+  font-size: 20px;
+  line-height: 20px;
+
+  -moz-appearance:textfield; /* hide spinner in Firefox */
+}
+
+/* hide spinner https://stackoverflow.com/questions/3790935/can-i-hide-the-html5-number-input-s-spin-box */
+.bet-size__input::-webkit-outer-spin-button,
+.bet-size__input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+.bet-size__slider {
+  width: 300px;
+  margin: 0 10px;
+}

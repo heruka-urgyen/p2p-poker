@@ -1,10 +1,11 @@
-import React from 'react'
+import React, {useState} from 'react'
 import {useDispatch} from 'react-redux'
 
 import {fold, bet} from 'client/reducers/round'
 
-function Controls({player, minBet, isDisabled}) {
+function Controls({player, stack, minBet, isDisabled}) {
   const dispatch = useDispatch()
+  const [betAmount, updateBet] = useState(minBet)
 
   return (
     <div className="controls">
@@ -19,6 +20,32 @@ function Controls({player, minBet, isDisabled}) {
         disabled={isDisabled}
         onClick={_ => dispatch(bet({player, amount: minBet}))}
       >{minBet === 0? "Check" : "Call"}</button>
+
+      <button
+        className="controls__button"
+        disabled={isDisabled || minBet > parseInt(betAmount)}
+        onClick={_ => dispatch(bet({player, amount: parseInt(betAmount)}))}
+      >Bet</button>
+
+      <div className="controls__bet-size">
+        <input
+          className="bet-size__input"
+          type="number"
+          placeholder="Bet size"
+          value={betAmount}
+          onChange={e => updateBet(e.target.value)}
+          disabled={isDisabled} />
+
+        <input
+          className="bet-size__slider"
+          type="range"
+          min={minBet}
+          max={stack}
+          value={betAmount}
+          onChange={e => updateBet(e.target.value)}
+          disabled={isDisabled}
+        />
+      </div>
     </div>
   )
 }

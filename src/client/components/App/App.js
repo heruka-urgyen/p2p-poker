@@ -28,6 +28,7 @@ function App() {
   if (!(user && table)) {return null}
 
   const minBet = getMinBet({round, user})
+  const stack = safe(minBet)(() => players[user.id].stack)
   const controlsDisabled = round.status === 'FINISHED'
     || round.status === 'SHOWDOWN'
     || safe(true)(() => round.whoseTurn !== user.id)
@@ -42,7 +43,13 @@ function App() {
       </header>
       <main>
         <Table user={user} table={table} players={players} round={round} />
-        <Controls player={user} minBet={minBet} isDisabled={controlsDisabled} />
+        <Maybe cond={minBet != null}>
+          <Controls
+            player={user}
+            stack={stack}
+            minBet={minBet}
+            isDisabled={controlsDisabled} />
+        </Maybe>
       </main>
     </div>
   )
