@@ -5,7 +5,7 @@ import {Maybe, safe} from 'client/util'
 
 import chip from 'client/images/poker-chip.svg'
 
-function Player({i, player, round}) {
+function Player({i, player, round, showWinningCards}) {
   const buttonPlayerId = safe(null)(() => round.players[round.button])
   const bet = safe({})(() => round.bets.filter(b => b.playerId === player.id)[0])
   const cards = safe([])(() => player.cards)
@@ -14,11 +14,13 @@ function Player({i, player, round}) {
     <li className={`player player__${i}`}>
       <Maybe cond={cards.length > 0}>
         <ul className="hole-cards">
-          {cards.map((c, i) => (
-            <li key={`card__${i + 1}`} className={`card card__${i + 1}`}>
+          {cards.map((c, i) =>
+            <li
+              key={`card__${i + 1}`}
+              className={`card card__${i + 1} ${showWinningCards(round)(c)}`}>
               <Card card={c.rank + c.suit} back={c.type === 'hidden'} />
             </li>
-          ))}
+          )}
         </ul>
       </Maybe>
       <label className="player-name">{player.username}</label>

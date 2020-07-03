@@ -29,6 +29,7 @@ function App() {
 
   const minBet = getMinBet({round, user})
   const controlsDisabled = round.status === 'FINISHED'
+    || round.status === 'SHOWDOWN'
     || safe(true)(() => round.whoseTurn !== user.id)
 
   return (

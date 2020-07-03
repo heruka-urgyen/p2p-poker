@@ -220,10 +220,11 @@ io.on('connection', socket => {
 
     update(s => {
       s.round.pot = s.round.pot +
-        s.round.bets.filter(bet => bet.playerId === playerId)[0].amount
+        safe(0)(() => s.round.bets.filter(bet => bet.playerId === playerId)[0].amount)
 
       s.round.bets = s.round.bets.filter(bet => bet.playerId !== playerId)
       s.round.players = s.round.players.filter(id => id !== playerId)
+      s.round.communityCards = []
 
       s.players[playerId].cards = []
     })
@@ -294,14 +295,9 @@ io.on('connection', socket => {
           s.streetState = computeRoundWinners(s.streetState)
           s.round.winners = s.streetState.winners
 
-          const pot = s.round.bets.reduce((pot, bet) => pot + bet.amount, s.round.pot)
-          s.round.pot = 0
+          s.round.pot = s.round.bets.reduce((pot, bet) => pot + bet.amount, s.round.pot)
           s.round.bets = []
-          s.communityCards = []
-          s.round.status = 'FINISHED'
-
-          s.players[player.id].cards = []
-          s.players[player.id].stack = pot + s.players[player.id].stack
+          s.round.status = 'SHOWDOWN'
         } else {
           s.round.street = STREETS[(STREETS.indexOf(s.round.street) + 1)]
           s.round.pot = s.round.bets.reduce((pot, bet) => pot + bet.amount, s.round.pot)

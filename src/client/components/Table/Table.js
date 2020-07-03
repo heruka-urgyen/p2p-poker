@@ -6,6 +6,15 @@ import {Maybe, safe} from 'client/util'
 
 import chip from 'client/images/poker-chip.svg'
 
+const showCard = c => c.rank + c.suit
+const showWinningCards = round => card => {
+  const isWinner =
+    round.winners.filter(w => w.cards.map(showCard).indexOf(showCard(card)) > -1).length > 0
+  const isShowdown = round.status === 'SHOWDOWN'
+
+  return (isShowdown? 'showdown' : '') + (isWinner? ' winner' : '')
+}
+
 function Table({user, table, players, round}) {
   return (
     <div className="table">
@@ -16,19 +25,33 @@ function Table({user, table, players, round}) {
       </Maybe>
       <ul className="players">
         <Maybe cond={user.type !== 'guest' && safe(false)(() => !!players[user.id])}>
-          {(() => <Player key={1} i={1} player={players[user.id]} round={round} />)}
+          {(() =>
+          <Player
+            key={1}
+            i={1}
+            player={players[user.id]}
+            round={round}
+            showWinningCards={showWinningCards} />)}
         </Maybe>
         <Maybe cond={players != null && Object.keys(players).length > 0}>
           {() => table.players
             .filter(id => id !== user.id)
             .map((id, i) =>
-              <Player key={i + 2} i={i + 2} player={players[id]} round={round} />
+              <Player
+                key={i + 2}
+                i={i + 2}
+                player={players[id]}
+                round={round}
+                showWinningCards={showWinningCards} />
           )}
         </Maybe>
       </ul>
       <ul className="community-cards">
         {round.communityCards.map((c, i) =>
-          <li key={`cc${i + 1}`} className={`card community-card__${i + 1}`}>
+          <li
+            key={`cc${i + 1}`}
+            className={`card community-card__${i + 1} ${showWinningCards(round)(c)}`}>
+
             <Card card={c.rank + c.suit} />
           </li>
         )}

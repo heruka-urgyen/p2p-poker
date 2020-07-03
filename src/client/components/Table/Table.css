@@ -156,6 +156,15 @@
   left: 10px;
 }
 
+.card.showdown {
+  filter: invert(45%) sepia(100%) saturate(0%);
+}
+
+.card.winner {
+  filter: none;
+  z-index: 2;
+}
+
   .card__2 {
     left: 20px;
     top: 10px;
