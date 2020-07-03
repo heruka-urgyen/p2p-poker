@@ -266,7 +266,12 @@ io.on('connection', socket => {
     const {player, amount} = payload
 
     update(s => {
-      s.round.whoActed.push(player.id)
+      s.round.whoActed = s.round.whoActed.concat(player.id).reduce((acc, id) => {
+        if (acc.indexOf(id) > -1) {
+          return acc
+        }
+        return acc.concat(id)
+      }, [])
 
       if (amount !== 0) {
         s.round.bets =
@@ -291,6 +296,7 @@ io.on('connection', socket => {
       }
 
       const tableIsBalanced = s.round.whoActed.length === s.round.players.length
+        && (s.round.bets.length === 0 || s.round.bets.length > 1)
         && s.round.bets.every((bet, _, bets) => bet.amount === bets[0].amount)
 
       if (tableIsBalanced) {
