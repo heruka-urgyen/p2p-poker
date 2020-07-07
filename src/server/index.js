@@ -187,7 +187,6 @@ io.on('connection', socket => {
         Object.keys(io.sockets.sockets).forEach(id => {
           const socket = io.sockets.sockets[id]
 
-          console.log(socket.request.session.id)
           store.get(socket.request.session.id, (err, session = {}) => {
             if (session.user) {
               const userId = session.user.id
@@ -249,17 +248,19 @@ io.on('connection', socket => {
 
       s.table.players = Object.keys(s.players)
 
-      if (!s.players[s.sessions[c].userId]) {
-        s.user = {type: 'guest'}
-      }
     })
 
-    const round = select(s => s.round)
-    const players = select(s => s.players)
-    const table = select(s => s.table)
-    const user = select(s => s.user)
+    store.get(socket.request.session.id, (err, session = {}) => {
+      const id = safe('')(() => session.user.id)
+      const players = select(s => s.players)
+      const user = players[id] || defaultUser
 
-    socket.emit('END_ROUND_SUCCESS', {payload: {table, round, players, user,}})
+      const round = select(s => s.round)
+      const table = select(s => s.table)
+
+      socket.emit('END_ROUND_SUCCESS', {payload: {table, round, players, user,}})
+    })
+
   })
 
   socket.on('BET', ({payload}) => {
