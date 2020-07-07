@@ -6,7 +6,7 @@ import Controls from 'client/components/Controls'
 import Login from 'client/components/Login'
 import {Maybe, safe} from 'client/util'
 
-const getMinBet = ({round, user}) => {
+const getMinBet = ({round, user, stack}) => {
   if (round.status !== 'IN_PROGRESS') {
     return null
   }
@@ -15,8 +15,8 @@ const getMinBet = ({round, user}) => {
     return 0
   }
 
-  return Math.max.apply([], round.bets.map(b => b.amount)) -
-    safe(0)(() => round.bets.filter(p => p.playerId === user.id)[0].amount)
+  return Math.min(stack, Math.max.apply([], round.bets.map(b => b.amount)) -
+    safe(0)(() => round.bets.filter(p => p.playerId === user.id)[0].amount))
 }
 
 function App() {
@@ -27,8 +27,8 @@ function App() {
 
   if (!(user && table)) {return null}
 
-  const minBet = getMinBet({round, user})
-  const stack = safe(minBet)(() => players[user.id].stack)
+  const stack = safe(0)(() => players[user.id].stack)
+  const minBet = getMinBet({round, user, stack})
   const controlsDisabled = round.status === 'FINISHED'
     || round.status === 'SHOWDOWN'
     || safe(true)(() => round.whoseTurn !== user.id)

@@ -56,13 +56,15 @@ function Table({user, table, players, round}) {
           </li>
         )}
       </ul>
-      <Maybe cond={round.pot > 0}>
-        <div className="pot">
-          <img className={`chip chip__1`} src={chip} alt="chip" />
-          <img className={`chip chip__2`} src={chip} alt="chip" />
-          <img className={`chip chip__3`} src={chip} alt="chip" />
-          <label className="pot-amount">${round.pot}</label>
-        </div>
+      <Maybe cond={() => round.pots.pots}>
+        {() => round.pots.pots.map(pot =>
+          <div className="pot">
+            <img className={`chip chip__1`} src={chip} alt="chip" />
+            <img className={`chip chip__2`} src={chip} alt="chip" />
+            <img className={`chip chip__3`} src={chip} alt="chip" />
+            <label className="pot-amount">${pot.amount}</label>
+          </div>
+        )}
       </Maybe>
     </div>
   )

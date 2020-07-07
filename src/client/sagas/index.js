@@ -1,4 +1,4 @@
-import {all, apply, call, put, takeEvery, select, delay} from 'redux-saga/effects'
+import {apply, call, put, takeEvery, select, delay} from 'redux-saga/effects'
 import * as api from 'client/api'
 
 import {connectToWebsocket} from './websocket'
