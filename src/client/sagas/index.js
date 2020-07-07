@@ -1,4 +1,5 @@
-import {all, apply, put, takeEvery, select, delay} from 'redux-saga/effects'
+import {all, apply, call, put, takeEvery, select, delay} from 'redux-saga/effects'
+import * as api from 'client/api'
 
 import {connectToWebsocket} from './websocket'
 
@@ -8,8 +9,14 @@ const getInitialState = socket => function* (action) {
   yield apply(socket, socket.emit, ['INITIALIZE'])
 }
 
-const sitUser = socket => function* (action) {
-  yield apply(socket, socket.emit, ['SIT_USER', action.payload])
+function* sitUser(action) {
+  try {
+    const {payload} = yield call(api.post('table/sitUser'), action.payload)
+
+    yield put({type: 'SIT_USER_SUCCESS', payload})
+  } catch ({message}) {
+    yield put({type: 'SIT_USER_FAILURE', payload: {message}})
+  }
 }
 
 const maybeNextRound = socket => function* (action) {
@@ -80,7 +87,7 @@ const showdownSuccess = socket => function* (action) {
 
 function* subscribe(socket) {
   yield takeEvery('INITIALIZE', getInitialState(socket))
-  yield takeEvery('SIT_USER', sitUser(socket))
+  yield takeEvery('SIT_USER', sitUser)
   yield takeEvery('UPDATE_TABLE_PLAYERS', maybeNextRound(socket))
   yield takeEvery('NEXT_ROUND', nextRound(socket))
   yield takeEvery('NEXT_ROUND_SUCCESS', nextRoundSuccess(socket))

@@ -93,6 +93,30 @@ function hideCards(players, userId) {
 }
 
 /******************** socket handlers ********************/
+
+app.post('/api/v1/table/sitUser/', (req, res) => {
+  const {players, maxPlayers} = select(s => s.table)
+  if (players.length < maxPlayers) {
+
+    const user = {type: 'player', id: v4(), stack: 100, ...req.body}
+    const s = req.session
+
+    store.set(s.id, {...s, user}, err => err && console.error(err))
+    update(s => {
+      s.players[user.id] = user
+      s.table.players.push(user.id)})
+
+    const table = select(s => s.table)
+    const players = select(s => s.players)
+
+    io.sockets.emit('UPDATE_TABLE_PLAYERS', {payload: {table, players}})
+    res.send({payload: {user}})
+  } else {
+    res.statusMessage = 'This table is full'
+    res.status(409).end()
+  }
+})
+
 io.on('connection', socket => {
   console.log('connected to ' + socket.id)
 
@@ -111,28 +135,6 @@ io.on('connection', socket => {
     socket.emit(
       'INITIALIZE_SUCCESS',
       {payload: {user, players: hideCards(players, user.id), table, round}})
-  })
-
-  socket.on('SIT_USER', payload => {
-    console.log('received SIT_USER from', socket.id)
-
-    update(s => {
-      const user = {type: 'player', id: v4(), stack: 100, ...payload}
-
-      s.players[user.id] = user
-      s.sessions[c] = {userId: user.id, socketId: socket.id}
-      s.table.players.push(user.id)
-    })
-
-    const table = select(s => s.table)
-    const players = select(s => s.players)
-    const user = select(s => {
-      const id = safe('')(() => s.sessions[c].userId)
-      return s.players[id]
-    })
-
-    socket.emit('SIT_USER_SUCCESS', {payload: {user}})
-    io.sockets.emit('UPDATE_TABLE_PLAYERS', {payload: {table, players}})
   })
 
   socket.on('NEXT_ROUND', _ => {
