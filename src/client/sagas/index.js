@@ -5,8 +5,14 @@ import {connectToWebsocket} from './websocket'
 
 import {safe} from 'client/util'
 
-const getInitialState = socket => function* (action) {
-  yield apply(socket, socket.emit, ['INITIALIZE'])
+const getInitialState = function* (action) {
+  try {
+    const {payload} = yield call(api.get('table/initialize'), action.payload)
+
+    yield put({type: 'INITIALIZE_SUCCESS', payload})
+  } catch ({message}) {
+    yield put({type: 'INITIALIZE_FAILURE', payload: {message}})
+  }
 }
 
 function* sitUser(action) {
@@ -86,7 +92,7 @@ const showdownSuccess = socket => function* (action) {
 }
 
 function* subscribe(socket) {
-  yield takeEvery('INITIALIZE', getInitialState(socket))
+  yield takeEvery('INITIALIZE', getInitialState)
   yield takeEvery('SIT_USER', sitUser)
   yield takeEvery('UPDATE_TABLE_PLAYERS', maybeNextRound(socket))
   yield takeEvery('NEXT_ROUND', nextRound(socket))

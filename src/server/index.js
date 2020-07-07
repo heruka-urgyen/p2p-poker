@@ -93,6 +93,19 @@ function hideCards(players, userId) {
 }
 
 /******************** socket handlers ********************/
+app.get('/api/v1/table/initialize/', (req, res) => {
+  store.get(req.session.id, (err, session = {}) => {
+    if (err) {console.error(err)}
+    const user = select(s => {
+      const id = safe('')(() => session.user.id)
+      return s.players[id] || defaultUser})
+    const players = select(s => s.players)
+    const table = select(s => s.table)
+    const round = select(s => s.round)
+
+    res.send({payload: {user, players: hideCards(players, user.id), table, round}})
+  })
+})
 
 app.post('/api/v1/table/sitUser/', (req, res) => {
   const {players, maxPlayers} = select(s => s.table)
@@ -121,21 +134,6 @@ io.on('connection', socket => {
   console.log('connected to ' + socket.id)
 
   const c = safe('')(() => cookie.parse(socket.request.headers.cookie)['connect.sid'])
-
-  socket.on('INITIALIZE', _ => {
-
-    console.log('received INITIALIZE from', socket.id)
-    const user = select(s => {
-      const id = safe('')(() => s.sessions[c].userId)
-      return s.players[id] || defaultUser})
-    const players = select(s => s.players)
-    const table = select(s => s.table)
-    const round = select(s => s.round)
-
-    socket.emit(
-      'INITIALIZE_SUCCESS',
-      {payload: {user, players: hideCards(players, user.id), table, round}})
-  })
 
   socket.on('NEXT_ROUND', _ => {
     console.log('received NEXT_ROUND from', socket.id)
