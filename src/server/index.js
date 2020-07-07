@@ -93,47 +93,9 @@ function hideCards(players, userId) {
 }
 
 /******************** socket handlers ********************/
-app.get('/api/v1/table/initialize/', (req, res) => {
-  store.get(req.session.id, (err, session = {}) => {
-    if (err) {console.error(err)}
-    const user = select(s => {
-      const id = safe('')(() => session.user.id)
-      return s.players[id] || defaultUser})
-    const players = select(s => s.players)
-    const table = select(s => s.table)
-    const round = select(s => s.round)
-
-    res.send({payload: {user, players: hideCards(players, user.id), table, round}})
-  })
-})
-
-app.post('/api/v1/table/sitUser/', (req, res) => {
-  const {players, maxPlayers} = select(s => s.table)
-  if (players.length < maxPlayers) {
-
-    const user = {type: 'player', id: v4(), stack: 100, ...req.body}
-    const s = req.session
-
-    store.set(s.id, {...s, user}, err => err && console.error(err))
-    update(s => {
-      s.players[user.id] = user
-      s.table.players.push(user.id)})
-
-    const table = select(s => s.table)
-    const players = select(s => s.players)
-
-    io.sockets.emit('UPDATE_TABLE_PLAYERS', {payload: {table, players}})
-    res.send({payload: {user}})
-  } else {
-    res.statusMessage = 'This table is full'
-    res.status(409).end()
-  }
-})
 
 io.on('connection', socket => {
   console.log('connected to ' + socket.id)
-
-  const c = safe('')(() => cookie.parse(socket.request.headers.cookie)['connect.sid'])
 
   socket.on('NEXT_ROUND', _ => {
     console.log('received NEXT_ROUND from', socket.id)
@@ -220,16 +182,15 @@ io.on('connection', socket => {
           })
         })
 
-        const cs = select(s => s.streetState.cards)
         const players = select(s => s.players)
-        const sessions = select(s => s.sessions)
 
         Object.keys(io.sockets.sockets).forEach(id => {
           const socket = io.sockets.sockets[id]
 
-          Object.keys(sessions).forEach(c => {
-            if (sessions[c].socketId === id) {
-              const {userId} = sessions[c]
+          console.log(socket.request.session.id)
+          store.get(socket.request.session.id, (err, session = {}) => {
+            if (session.user) {
+              const userId = session.user.id
 
               socket.emit(
                 'DEAL_CARDS_SUCCESS',
@@ -380,5 +341,44 @@ io.on('connection', socket => {
     }
   })
 })
+
+app.get('/api/v1/table/initialize/', (req, res) => {
+  store.get(req.session.id, (err, session = {}) => {
+    if (err) {console.error(err)}
+    const user = select(s => {
+      const id = safe('')(() => session.user.id)
+      return s.players[id] || defaultUser})
+    const players = select(s => s.players)
+    const table = select(s => s.table)
+    const round = select(s => s.round)
+
+    res.send({payload: {user, players: hideCards(players, user.id), table, round}})
+  })
+
+})
+
+app.post('/api/v1/table/sitUser/', (req, res) => {
+  const {players, maxPlayers} = select(s => s.table)
+  if (players.length < maxPlayers) {
+
+    const user = {type: 'player', id: v4(), stack: 100, ...req.body}
+    const s = req.session
+
+    store.set(s.id, {...s, user}, err => err && console.error(err))
+    update(s => {
+      s.players[user.id] = user
+      s.table.players.push(user.id)})
+
+    const table = select(s => s.table)
+    const players = select(s => s.players)
+
+    io.sockets.emit('UPDATE_TABLE_PLAYERS', {payload: {table, players}})
+    res.send({payload: {user}})
+  } else {
+    res.statusMessage = 'This table is full'
+    res.status(409).end()
+  }
+})
+
 
 server.listen(port, () => console.log(`poker room app listening at http://localhost:${port}`))

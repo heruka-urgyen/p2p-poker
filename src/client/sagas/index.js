@@ -10,6 +10,8 @@ const getInitialState = function* (action) {
     const {payload} = yield call(api.get('table/initialize'), action.payload)
 
     yield put({type: 'INITIALIZE_SUCCESS', payload})
+
+    yield* connectToWebsocket()
   } catch ({message}) {
     yield put({type: 'INITIALIZE_FAILURE', payload: {message}})
   }
@@ -91,9 +93,12 @@ const showdownSuccess = socket => function* (action) {
   yield put({type: 'END_ROUND', payload: {winners: round.winners}})
 }
 
-function* subscribe(socket) {
+function* subscribeToHttp() {
   yield takeEvery('INITIALIZE', getInitialState)
   yield takeEvery('SIT_USER', sitUser)
+}
+
+function* subscribe(socket) {
   yield takeEvery('UPDATE_TABLE_PLAYERS', maybeNextRound(socket))
   yield takeEvery('NEXT_ROUND', nextRound(socket))
   yield takeEvery('NEXT_ROUND_SUCCESS', nextRoundSuccess(socket))
@@ -114,10 +119,8 @@ function* initialize() {
 }
 
 function* mainSaga() {
-  yield all([
-    connectToWebsocket(),
-    initialize(),
-  ])
+  yield* subscribeToHttp()
+  yield* initialize()
 }
 
 export {subscribe}
