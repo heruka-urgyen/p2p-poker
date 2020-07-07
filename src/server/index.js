@@ -1,9 +1,34 @@
-const io = require('socket.io')()
+const express = require('express')
+const cors = require('cors')
+const session = require('express-session')
 const cookie = require('cookie')
 const {v4} = require('uuid')
 const immer = require('immer')
 const Pair = require('sanctuary-pair')
 const {STREETS, deal, newDeck, computeRoundWinners} = require('@heruka_urgyen/poker-solver')
+
+/************************* app *************************/
+
+const app = express()
+const port = 3001
+
+const server = require('http').createServer(app)
+const io = require('socket.io')(server)
+
+app.use(express.json())
+app.use(cors({credentials: true, origin: 'http://localhost:3000'}))
+
+const MemoryStore = session.MemoryStore
+const store = new MemoryStore()
+const s = session({
+  secret: v4(),
+  resave: false,
+  saveUninitialized: true,
+  store,
+  cookie: {secure: false},
+})
+app.use(s)
+io.use((socket, next) => {s(socket.request, socket.request.res || {}, next)})
 
 /************************** util **************************/
 
@@ -356,4 +381,4 @@ io.on('connection', socket => {
   })
 })
 
-io.listen(3001)
+server.listen(port, () => console.log(`poker room app listening at http://localhost:${port}`))
