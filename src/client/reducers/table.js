@@ -4,8 +4,8 @@ const tableReducer = createReducer(null, {
   INITIALIZE_SUCCESS: (_, {payload: {table}}) => {
     return table
   },
-  UPDATE_TABLE_PLAYERS: (_, {payload: {table}}) => {
-    return table
+  UPDATE_TABLE_PLAYERS: (table, {payload: {players}}) => {
+    table.players = players
   },
   POST_BLINDS_SUCCESS: (table, {payload: {players}}) => {
     table.players = players

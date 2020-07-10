@@ -275,9 +275,9 @@ app.post('/api/v1/table/sitUser/', (req, res) => {
     store.set(s.id, {...s, user}, err => err && console.error(err))
     update(s => {s.table.players.push(user)})
 
-    const table = select(s => s.table)
+    const players = select(s => s.table.players)
 
-    io.sockets.send('UPDATE_TABLE_PLAYERS', {payload: {table}})
+    io.sockets.send('UPDATE_TABLE_PLAYERS', {payload: {players}})
     res.send({payload: {user}})
   } else {
     res.statusMessage = 'This table is full'

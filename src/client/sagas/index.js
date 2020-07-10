@@ -10,7 +10,6 @@ const getInitialState = function* (action) {
     const {payload} = yield call(api.get('table/initialize'), action.payload)
 
     yield put({type: 'INITIALIZE_SUCCESS', payload})
-
     yield* connectToWebsocket()
   } catch ({message}) {
     yield put({type: 'INITIALIZE_FAILURE', payload: {message}})
