@@ -33,7 +33,7 @@ function Controls({round, player, stack, minBet, isDisabled}) {
           type="number"
           placeholder="Bet size"
           value={betAmount || minBet}
-          onChange={e => updateBet(e.target.value)}
+          onChange={e => updateBet(Math.min(e.target.value, stack))}
           disabled={isDisabled} />
 
         <input
