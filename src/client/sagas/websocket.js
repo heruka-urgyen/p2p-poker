@@ -7,32 +7,14 @@ const createWebSocketConnection = () => io('http://localhost:3001')
 
 function createSocketChannel(socket) {
   return eventChannel(emit => {
-    const handler = type => ({payload}) => {
+    const handler = (type, {payload}) => {
       emit({type, payload})
     }
 
-    socket.on('INITIALIZE_SUCCESS', handler('INITIALIZE_SUCCESS'))
-    socket.on('SIT_USER_SUCCESS', handler('SIT_USER_SUCCESS'))
-    socket.on('NEXT_ROUND_SUCCESS', handler('NEXT_ROUND_SUCCESS'))
-    socket.on('UPDATE_TABLE_PLAYERS', handler('UPDATE_TABLE_PLAYERS'))
-    socket.on('POST_BLINDS_SUCCESS', handler('POST_BLINDS_SUCCESS'))
-    socket.on('DEAL_CARDS_SUCCESS', handler('DEAL_CARDS_SUCCESS'))
-    socket.on('FOLD_SUCCESS', handler('FOLD_SUCCESS'))
-    socket.on('END_ROUND_SUCCESS', handler('END_ROUND_SUCCESS'))
-    socket.on('BET_SUCCESS', handler('BET_SUCCESS'))
-    socket.on('SHOWDOWN_SUCCESS', handler('SHOWDOWN_SUCCESS'))
+    socket.on('message', handler)
 
     return () => {
-      socket.on('INITIALIZE_SUCCESS', handler('INITIALIZE_SUCCESS'))
-      socket.off('SIT_USER_SUCCESS', handler('SIT_USER_SUCCESS'))
-      socket.off('NEXT_ROUND_SUCCESS', handler('NEXT_ROUND_SUCCESS'))
-      socket.off('UPDATE_TABLE_PLAYERS', handler('UPDATE_TABLE_PLAYERS'))
-      socket.off('POST_BLINDS_SUCCESS', handler('POST_BLINDS_SUCCESS'))
-      socket.off('DEAL_CARDS_SUCCESS', handler('DEAL_CARDS_SUCCESS'))
-      socket.off('FOLD_SUCCESS', handler('FOLD_SUCCESS'))
-      socket.off('END_ROUND_SUCCESS', handler('END_ROUND_SUCCESS'))
-      socket.off('BET_SUCCESS', handler('BET_SUCCESS'))
-      socket.off('SHOWDOWN_SUCCESS', handler('SHOWDOWN_SUCCESS'))
+      socket.off('message', handler)
     }
   })
 }

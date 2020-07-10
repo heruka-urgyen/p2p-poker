@@ -123,7 +123,7 @@ io.on('connection', socket => {
           (Pair(1)(2))
       }
 
-      socket.emit('NEXT_ROUND_SUCCESS', {payload: {round: s.round}})
+      socket.send('NEXT_ROUND_SUCCESS', {payload: {round: s.round}})
     })
   })
 
@@ -142,7 +142,7 @@ io.on('connection', socket => {
 
       const round = s.round
       const players = s.table.players
-      socket.emit('POST_BLINDS_SUCCESS', {payload: {round, players}})
+      socket.send('POST_BLINDS_SUCCESS', {payload: {round, players}})
     })
   })
 
@@ -174,7 +174,7 @@ io.on('connection', socket => {
         const payload = round.street !== STREETS[0]? {round} :
           {round, players: hideCards(round.cards, players, userId)}
 
-        socket.emit('DEAL_CARDS_SUCCESS', {payload})
+        socket.send('DEAL_CARDS_SUCCESS', {payload})
       }
     })
   })
@@ -190,7 +190,7 @@ io.on('connection', socket => {
       s.table = table
       s.round = round
 
-      io.sockets.emit(
+      io.sockets.send(
         'FOLD_SUCCESS',
         {payload: {round, players: hideCards(round.cards, table.players, playerId)}})
     })
@@ -210,9 +210,9 @@ io.on('connection', socket => {
       if (round.street === 'SHOWDOWN') {
         const {round} = s.run(s => ({...s, round: computeRoundWinners(s.round)}))
 
-        io.sockets.emit('SHOWDOWN_SUCCESS', {payload: {round}})
+        io.sockets.send('SHOWDOWN_SUCCESS', {payload: {round}})
       } else {
-        io.sockets.emit(
+        io.sockets.send(
           'BET_SUCCESS',
           {payload: {
             round,
@@ -243,7 +243,7 @@ io.on('connection', socket => {
       const round = select(s => s.round)
       const user = table.players.find(p => p.id === id) || defaultUser
 
-      socket.emit('END_ROUND_SUCCESS', {payload: {table, round, user,}})
+      socket.send('END_ROUND_SUCCESS', {payload: {table, round, user,}})
     })
 
   })
@@ -277,7 +277,7 @@ app.post('/api/v1/table/sitUser/', (req, res) => {
 
     const table = select(s => s.table)
 
-    io.sockets.emit('UPDATE_TABLE_PLAYERS', {payload: {table}})
+    io.sockets.send('UPDATE_TABLE_PLAYERS', {payload: {table}})
     res.send({payload: {user}})
   } else {
     res.statusMessage = 'This table is full'
