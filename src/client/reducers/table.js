@@ -7,6 +7,18 @@ const tableReducer = createReducer(null, {
   UPDATE_TABLE_PLAYERS: (_, {payload: {table}}) => {
     return table
   },
+  POST_BLINDS_SUCCESS: (table, {payload: {players}}) => {
+    table.players = players
+  },
+  DEAL_CARDS_SUCCESS: (table, {payload: {players}}) => {
+    table.players = players
+  },
+  FOLD_SUCCESS: (table, {payload: {players}}) => {
+    table.players = players
+  },
+  BET_SUCCESS: (table, {payload: {updatedStack: {playerId, stack}}}) => {
+    table.players.find(p => p.id === playerId).stack = stack
+  },
   END_ROUND_SUCCESS: (_, {payload: {table}}) => {
     return table
   },

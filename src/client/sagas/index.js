@@ -80,9 +80,21 @@ const betSuccess = socket => function* (action) {
   const user = yield select(state => state.user)
   const {round} = action.payload
 
-  if (round.status === 'ALL_IN' && user.id === round.whoseTurn) {
+  if (round.street === 'FLOP' && round.communityCards.length === 0) {
+    yield put({type: 'DEAL_CARDS'})
+  }
+
+  if (round.street === 'TURN' && round.communityCards.length === 3) {
+    yield put({type: 'DEAL_CARDS'})
+  }
+
+  if (round.street === 'RIVER' && round.communityCards.length === 4) {
+    yield put({type: 'DEAL_CARDS'})
+  }
+
+  if (round.status === 'ALL_IN' && round.players.indexOf(user.id) === round.nextPlayer) {
     yield delay(500)
-    yield put({type: 'BET', payload: {player: {id: round.whoseTurn}, amount: 0}})
+    yield put({type: 'BET', payload: {player: user, amount: 0}})
   }
 }
 

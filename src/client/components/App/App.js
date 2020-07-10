@@ -22,16 +22,15 @@ const getMinBet = ({round, user, stack}) => {
 function App() {
   const user = useSelector(s => s.user)
   const table = useSelector(s => s.table)
-  const players = useSelector(s => s.players)
   const round = useSelector(s => s.round)
 
   if (!(user && table)) {return null}
 
-  const stack = safe(0)(() => players[user.id].stack)
+  const stack = safe(0)(() => table.players.find(p => p.id === user.id).stack)
   const minBet = getMinBet({round, user, stack})
   const controlsDisabled = round.status === 'FINISHED'
-    || round.status === 'SHOWDOWN'
-    || safe(true)(() => round.whoseTurn !== user.id)
+    || round.street === 'SHOWDOWN'
+    || safe(true)(() => round.players[round.nextPlayer] !== user.id)
 
   return (
     <div className="app">
@@ -42,7 +41,7 @@ function App() {
       <header className="app-header">
       </header>
       <main>
-        <Table user={user} table={table} players={players} round={round} />
+        <Table user={user} table={table} round={round} />
         <Maybe cond={minBet != null}>
           <Controls
             player={user}

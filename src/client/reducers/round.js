@@ -19,6 +19,9 @@ const roundReducer = createReducer(null, {
   BET_SUCCESS: (_, {payload: {round}}) => {
     return round
   },
+  DEAL_CARDS_SUCCESS: (_, {payload: {round}}) => {
+    return round
+  },
   SHOWDOWN_SUCCESS: (_, {payload: {round}}) => {
     return round
   },
