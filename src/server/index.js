@@ -63,13 +63,8 @@ const select = f => produce(_state, f)
 /********************* default state *********************/
 
 const defaultUser = {type: 'guest'}
-const defaultBlinds = [1, 2]
 
 update(s => {
-  s._local = {endRound: 0, nextRound: 0, postBlinds: 0, dealCards: 0}
-  s.sessions = {}
-  s.players = {}
-
   s.table = {
     id: 1,
     maxPlayers: 2,
@@ -79,7 +74,6 @@ update(s => {
     id: 0,
     status: 'FINISHED',
   }
-  s.streetState = {}
 })
 
 /*********************** functions ***********************/
@@ -109,77 +103,70 @@ io.on('connection', socket => {
 
   socket.on('NEXT_ROUND', _ => {
     console.log('received NEXT_ROUND from', socket.id)
-    update(s => s._local.nextRound = s._local.nextRound + 1)
-    const {nextRound} = select(s => s._local)
-    const {players} = select(s => s.table)
 
-    if (nextRound === Object.keys(io.sockets.sockets).length) {
-      update(s => {
-        s._local.nextRound = 0
-
+    update(s => {
+      if (s.round.status === 'FINISHED') {
         s.round = newRound
           (s.round.id + 1)
           (s.table)
           (s.round.button? s.round.button + 1 : 0)
           (Pair(1)(2))
-      })
+      }
 
-      const round = select(s => s.round)
-      io.sockets.emit('NEXT_ROUND_SUCCESS', {payload: {round}})
-    }
+      socket.emit('NEXT_ROUND_SUCCESS', {payload: {round: s.round}})
+    })
   })
 
   socket.on('POST_BLINDS', _ => {
     console.log('received POST_BLINDS from', socket.id)
-    update(s => s._local.postBlinds = s._local.postBlinds + 1)
-    const pb = select(s => s._local.postBlinds)
 
-    if (pb === Object.keys(io.sockets.sockets).length) {
-      update(s => {
-        s._local.postBlinds = 0
-
+    update(s => {
+      if (s.round.bets.length === 0) {
         s.run = newGame({table: s.table, round: s.round})
 
         const {table, round} = s.run(postBlinds)
-        const players = table.players
 
         s.table = table
         s.round = round
+      }
 
-        io.sockets.emit('POST_BLINDS_SUCCESS', {payload: {round, players}})
-      })
-    }
+      const round = s.round
+      const players = s.table.players
+      socket.emit('POST_BLINDS_SUCCESS', {payload: {round, players}})
+    })
   })
 
   socket.on('DEAL_CARDS', _ => {
     console.log('received DEAL_CARDS from', socket.id)
-    update(s => s._local.dealCards = s._local.dealCards + 1)
-    const {dealCards} = select(s => s._local)
 
-    if (dealCards === Object.keys(io.sockets.sockets).length) {
-      update(s => {
-        s._local.dealCards = 0
+    update(s => {
+      const {street, communityCards, cards} = s.round
+      const holeCards = cards.find(c => Pair.snd(c).length > 0)
+      const canDeal = !holeCards
+        || street === STREETS[1] && communityCards.length < 3
+        || street === STREETS[2] && communityCards.length < 4
+        || street === STREETS[3] && communityCards.length < 5
+
+      if (canDeal) {
         const {table, round} = s.run(s => ({...s, round: deal(s.round)}))
-        const {players} = table
 
         s.table = table
         s.round = round
+      }
+    })
 
-        Object.keys(io.sockets.sockets).forEach(id => {
-          const socket = io.sockets.sockets[id]
+    const round = select(s => s.round)
+    const players = select(s => s.table.players)
 
-          store.get(socket.request.session.id, (err, session = {}) => {
-            if (session.user) {
-              const userId = session.user.id
+    store.get(socket.request.session.id, (err, session = {}) => {
+      if (session.user) {
+        const userId = session.user.id
 
-              socket.emit(
-                'DEAL_CARDS_SUCCESS',
-                {payload: {round, players: hideCards(round.cards, players, userId)}})
-            }
-          })
-        })
-      })
-    }
+        socket.emit(
+          'DEAL_CARDS_SUCCESS',
+          {payload: {round, players: hideCards(round.cards, players, userId)}})
+      }
+    })
   })
 
   socket.on('FOLD', ({payload}) => {
@@ -197,39 +184,6 @@ io.on('connection', socket => {
         'FOLD_SUCCESS',
         {payload: {round, players: hideCards(round.cards, table.players, playerId)}})
     })
-  })
-
-  socket.on('END_ROUND', ({payload}) => {
-    console.log('received END_ROUND from', socket.id)
-
-    const {winners} = payload
-    update(s => s._local.endRound = s._local.endRound + 1)
-    const er = select(s => s._local.endRound)
-
-    if (er === Object.keys(io.sockets.sockets).length) {
-      update(s => {
-        s._local.endRound = 0
-
-        const {table, round} = s.run(endRound)
-        s.round = round
-        s.table = table
-        s.table.players = table.players.filter(p => p.stack > 0)
-      })
-
-      Object.keys(io.sockets.sockets).forEach(id => {
-        const socket = io.sockets.sockets[id]
-
-        store.get(socket.request.session.id, (err, session = {}) => {
-          const id = safe('')(() => session.user.id)
-          const table = select(s => s.table)
-          const round = select(s => s.round)
-          const user = table.players.find(p => p.id === id) || defaultUser
-
-          socket.emit('END_ROUND_SUCCESS', {payload: {table, round, user,}})
-        })
-      })
-    }
-
   })
 
   socket.on('BET', ({payload}) => {
@@ -257,6 +211,30 @@ io.on('connection', socket => {
               stack: table.players.find(p => p.id === player.id).stack}}})
       }
     })
+  })
+
+  socket.on('END_ROUND', ({payload}) => {
+    console.log('received END_ROUND from', socket.id)
+
+    const {winners} = payload
+    update(s => {
+      if (s.round.status !== 'FINISHED') {
+        const {table, round} = s.run(endRound)
+        s.round = round
+        s.table = table
+        s.table.players = table.players.filter(p => p.stack > 0)
+      }
+    })
+
+    store.get(socket.request.session.id, (err, session = {}) => {
+      const id = safe('')(() => session.user.id)
+      const table = select(s => s.table)
+      const round = select(s => s.round)
+      const user = table.players.find(p => p.id === id) || defaultUser
+
+      socket.emit('END_ROUND_SUCCESS', {payload: {table, round, user,}})
+    })
+
   })
 })
 
