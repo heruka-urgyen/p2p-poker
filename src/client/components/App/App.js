@@ -20,11 +20,9 @@ const getMinBet = ({round, user, stack}) => {
 }
 
 function App() {
-  const user = useSelector(s => s.user)
-  const table = useSelector(s => s.table)
-  const round = useSelector(s => s.round)
+  const [user, table, round] = useSelector(s => [s.user, s.table, s.round])
 
-  if (!(user && table)) {return null}
+  if (!(user)) {return null}
 
   const stack = safe(0)(() => table.players.find(p => p.id === user.id).stack)
   const minBet = getMinBet({round, user, stack})

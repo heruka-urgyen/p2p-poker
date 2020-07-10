@@ -32,7 +32,7 @@ function Controls({player, stack, minBet, isDisabled}) {
           className="bet-size__input"
           type="number"
           placeholder="Bet size"
-          value={betAmount}
+          value={betAmount || minBet}
           onChange={e => updateBet(e.target.value)}
           disabled={isDisabled} />
 
@@ -41,7 +41,7 @@ function Controls({player, stack, minBet, isDisabled}) {
           type="range"
           min={minBet}
           max={stack}
-          value={betAmount}
+          value={betAmount || minBet}
           onChange={e => updateBet(e.target.value)}
           disabled={isDisabled}
         />
