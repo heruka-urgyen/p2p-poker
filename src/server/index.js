@@ -233,7 +233,7 @@ io.on('connection', socket => {
         const {table, round} = s.run(endRound)
         s.round = round
         s.table = table
-        s.table.players = table.players.filter(p => p.stack > 0)
+        s.table.players = table.players.filter(p => p.stack >= Pair.snd(s.round.blinds))
       }
     })
 
