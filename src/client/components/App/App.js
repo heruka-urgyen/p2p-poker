@@ -42,6 +42,7 @@ function App() {
         <Table user={user} table={table} round={round} />
         <Maybe cond={minBet != null}>
           <Controls
+            round={round}
             player={user}
             stack={stack}
             minBet={minBet}

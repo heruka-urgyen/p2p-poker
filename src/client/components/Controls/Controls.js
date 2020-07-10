@@ -3,10 +3,10 @@ import {useDispatch} from 'react-redux'
 
 import {fold, bet} from 'client/reducers/round'
 
-function Controls({player, stack, minBet, isDisabled}) {
+function Controls({round, player, stack, minBet, isDisabled}) {
   const dispatch = useDispatch()
-  const [betAmount, updateBet] = useState(minBet)
 
+  const [betAmount, updateBet] = useState(minBet)
   return (
     <div className="controls">
       <button
@@ -46,6 +46,18 @@ function Controls({player, stack, minBet, isDisabled}) {
           disabled={isDisabled}
         />
       </div>
+
+      <button
+        className="controls__button"
+        disabled={isDisabled}
+        onClick={_ => updateBet(3 * round.blinds.snd)}
+      >{"3BB"}</button>
+
+      <button
+        className="controls__button"
+        disabled={isDisabled}
+        onClick={_ => updateBet(stack)}
+      >All in</button>
     </div>
   )
 }
