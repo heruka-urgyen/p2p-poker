@@ -78,6 +78,16 @@ update(s => {
 
 /*********************** functions ***********************/
 
+function showCards(cards, players) {
+  return players.map(p => {
+    const cs = Pair.snd(cards.find(c => Pair.fst(c) === p.id))
+    return {
+      ...p,
+      cards: cs,
+    }
+  })
+}
+
 function hideCards(cards, players, userId) {
   const cs = Pair.snd(cards.find(c => Pair.fst(c) === userId))
 
@@ -161,10 +171,10 @@ io.on('connection', socket => {
     store.get(socket.request.session.id, (err, session = {}) => {
       if (session.user) {
         const userId = session.user.id
+        const payload = round.street !== STREETS[0]? {round} :
+          {round, players: hideCards(round.cards, players, userId)}
 
-        socket.emit(
-          'DEAL_CARDS_SUCCESS',
-          {payload: {round, players: hideCards(round.cards, players, userId)}})
+        socket.emit('DEAL_CARDS_SUCCESS', {payload})
       }
     })
   })
@@ -206,6 +216,7 @@ io.on('connection', socket => {
           'BET_SUCCESS',
           {payload: {
             round,
+            players: s.round.status === 'ALL_IN' && showCards(round.cards, table.players),
             updatedStack: {
               playerId: player.id,
               stack: table.players.find(p => p.id === player.id).stack}}})

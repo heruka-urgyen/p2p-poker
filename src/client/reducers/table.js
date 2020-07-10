@@ -11,12 +11,18 @@ const tableReducer = createReducer(null, {
     table.players = players
   },
   DEAL_CARDS_SUCCESS: (table, {payload: {players}}) => {
-    table.players = players
+    if (players) {
+      table.players = players
+    }
   },
   FOLD_SUCCESS: (table, {payload: {players}}) => {
     table.players = players
   },
-  BET_SUCCESS: (table, {payload: {updatedStack: {playerId, stack}}}) => {
+  BET_SUCCESS: (table, {payload: {players, updatedStack: {playerId, stack}}}) => {
+    if (players) {
+      table.players = players
+    }
+
     table.players.find(p => p.id === playerId).stack = stack
   },
   END_ROUND_SUCCESS: (_, {payload: {table}}) => {
