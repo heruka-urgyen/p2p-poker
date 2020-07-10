@@ -106,6 +106,13 @@ function hideCards(cards, players, userId) {
   })
 }
 
+function selectRoundFields(fullRound) {
+  const round = {...fullRound}
+  delete round.deck
+  delete round.cards
+  return round
+}
+
 /******************** socket handlers ********************/
 
 io.on('connection', socket => {
@@ -123,7 +130,7 @@ io.on('connection', socket => {
           (Pair(1)(2))
       }
 
-      socket.send('NEXT_ROUND_SUCCESS', {payload: {round: s.round}})
+      socket.send('NEXT_ROUND_SUCCESS', {payload: {round: selectRoundFields(s.round)}})
     })
   })
 
@@ -140,7 +147,7 @@ io.on('connection', socket => {
         s.round = round
       }
 
-      const round = s.round
+      const round = selectRoundFields(s.round)
       const players = s.table.players
       socket.send('POST_BLINDS_SUCCESS', {payload: {round, players}})
     })
@@ -172,7 +179,7 @@ io.on('connection', socket => {
       if (session.user) {
         const userId = session.user.id
         const payload = round.street !== STREETS[0]? {round} :
-          {round, players: hideCards(round.cards, players, userId)}
+          {round: selectRoundFields(round), players: hideCards(round.cards, players, userId)}
 
         socket.send('DEAL_CARDS_SUCCESS', {payload})
       }
@@ -192,7 +199,9 @@ io.on('connection', socket => {
 
       io.sockets.send(
         'FOLD_SUCCESS',
-        {payload: {round, players: hideCards(round.cards, table.players, playerId)}})
+        {payload: {
+          round: selectRoundFields(round),
+          players: hideCards(round.cards, table.players, playerId)}})
     })
   })
 
@@ -210,12 +219,12 @@ io.on('connection', socket => {
       if (round.street === 'SHOWDOWN') {
         const {round} = s.run(s => ({...s, round: computeRoundWinners(s.round)}))
 
-        io.sockets.send('SHOWDOWN_SUCCESS', {payload: {round}})
+        io.sockets.send('SHOWDOWN_SUCCESS', {payload: {round: selectRoundFields(round)}})
       } else {
         io.sockets.send(
           'BET_SUCCESS',
           {payload: {
-            round,
+            round: selectRoundFields(round),
             players: s.round.status === 'ALL_IN' && showCards(round.cards, table.players),
             updatedStack: {
               playerId: player.id,
@@ -240,7 +249,7 @@ io.on('connection', socket => {
     store.get(socket.request.session.id, (err, session = {}) => {
       const id = safe('')(() => session.user.id)
       const table = select(s => s.table)
-      const round = select(s => s.round)
+      const round = select(s => selectRoundFields(s.round))
       const user = table.players.find(p => p.id === id) || defaultUser
 
       socket.send('END_ROUND_SUCCESS', {payload: {table, round, user,}})
@@ -260,7 +269,7 @@ app.get('/api/v1/table/initialize/', (req, res) => {
     const round = select(s => s.round)
     const players = safe(table.players)(() => hideCards(round.cards, table.players, user.id))
 
-    res.send({payload: {user, round, table: {...table, players}}})
+    res.send({payload: {user, round: selectRoundFields(round), table: {...table, players}}})
   })
 
 })
