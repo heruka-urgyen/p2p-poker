@@ -122,11 +122,15 @@ io.on('connection', socket => {
     console.log('received NEXT_ROUND from', socket.id)
 
     update(s => {
+      const {players} = s.table
+
       if (s.round.status === 'FINISHED') {
         s.round = newRound
           (s.round.id + 1)
           (s.table)
-          (s.round.button? s.round.button + 1 : 0)
+          (
+      players && s.round.button != null? (s.round.button + 1) % players.length : 0
+          )
           (Pair(1)(2))
       }
 
