@@ -1,5 +1,8 @@
 .app {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 
 .app-header {
@@ -11,5 +14,11 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+}
+
+main {
+  overflow: auto;
+  flex: 1;
+  background-image: url('../../images/cloth.jpg');
 }
 
