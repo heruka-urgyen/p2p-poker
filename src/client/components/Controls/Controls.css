@@ -1,16 +1,25 @@
 .controls {
-  text-align: center;
-}
-
-.controls > * {
-  display: inline-block;
-  margin: 0 10px;
+  z-index: 1;
 }
 
 .controls__button {
   height: 50px;
   width: 80px;
   font-size: 20px;
+  margin: 0 13px;
+}
+
+.controls__bet-controls {
+  margin: 0 0 10px 0;
+}
+
+.controls__adjust-bet {
+  text-align: right;
+  margin: 0 0 10px 0;
+}
+
+.controls__bet-size {
+  margin: 0 0 20px 0;
 }
 
 .bet-size__input {
@@ -18,8 +27,9 @@
   height: 44px;
   font-size: 20px;
   line-height: 20px;
+  text-align: center;
 
-  -moz-appearance:textfield; /* hide spinner in Firefox */
+  -moz-appearance: textfield; /* hide spinner in Firefox */
 }
 
 /* hide spinner https://stackoverflow.com/questions/3790935/can-i-hide-the-html5-number-input-s-spin-box */
@@ -31,6 +41,6 @@
 }
 
 .bet-size__slider {
-  width: 200px;
+  width: 230px;
   margin: 0 0 0 10px;
 }

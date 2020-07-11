@@ -9,23 +9,19 @@ function Controls({round, player, stack, minBet, isDisabled}) {
   const [betAmount, updateBet] = useState(minBet)
   return (
     <div className="controls">
-      <button
-        className="controls__button"
-        disabled={isDisabled}
-        onClick={_ => dispatch(fold(player))}
-      >Fold</button>
+      <div className="controls__adjust-bet">
+        <button
+          className="controls__button"
+          disabled={isDisabled}
+          onClick={_ => updateBet(3 * round.blinds.snd)}
+        >{"3BB"}</button>
 
-      <button
-        className="controls__button"
-        disabled={isDisabled}
-        onClick={_ => dispatch(bet({player, amount: minBet}))}
-      >{minBet === 0? "Check" : "Call"}</button>
-
-      <button
-        className="controls__button"
-        disabled={isDisabled || minBet > parseInt(betAmount)}
-        onClick={_ => dispatch(bet({player, amount: parseInt(betAmount)}))}
-      >Bet</button>
+        <button
+          className="controls__button"
+          disabled={isDisabled}
+          onClick={_ => updateBet(stack)}
+        >All in</button>
+      </div>
 
       <div className="controls__bet-size">
         <input
@@ -46,18 +42,25 @@ function Controls({round, player, stack, minBet, isDisabled}) {
           disabled={isDisabled}
         />
       </div>
+      <div className="controls__bet-controls">
+        <button
+          className="controls__button"
+          disabled={isDisabled}
+          onClick={_ => dispatch(fold(player))}
+        >Fold</button>
 
-      <button
-        className="controls__button"
-        disabled={isDisabled}
-        onClick={_ => updateBet(3 * round.blinds.snd)}
-      >{"3BB"}</button>
+        <button
+          className="controls__button"
+          disabled={isDisabled}
+          onClick={_ => dispatch(bet({player, amount: minBet}))}
+        >{minBet === 0? "Check" : "Call"}</button>
 
-      <button
-        className="controls__button"
-        disabled={isDisabled}
-        onClick={_ => updateBet(stack)}
-      >All in</button>
+        <button
+          className="controls__button"
+          disabled={isDisabled || minBet > parseInt(betAmount)}
+          onClick={_ => dispatch(bet({player, amount: parseInt(betAmount)}))}
+        >Bet</button>
+      </div>
     </div>
   )
 }

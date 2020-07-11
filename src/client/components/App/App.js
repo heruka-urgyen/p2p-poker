@@ -36,19 +36,23 @@ function App() {
         <Login table={table} />
       </Maybe>
 
-      <header className="app-header">
-      </header>
-      <main>
-        <Table user={user} table={table} round={round} />
-        <Maybe cond={minBet != null}>
-          <Controls
-            round={round}
-            player={user}
-            stack={stack}
-            minBet={minBet}
-            isDisabled={controlsDisabled} />
-        </Maybe>
-      </main>
+      <header className="app-header" />
+
+      <div className="main-wrapper">
+        <main>
+          <Table user={user} table={table} round={round} />
+        </main>
+        <aside>
+          <Maybe cond={minBet != null}>
+            <Controls
+              round={round}
+              player={user}
+              stack={stack}
+              minBet={minBet}
+              isDisabled={controlsDisabled} />
+          </Maybe>
+        </aside>
+      </div>
     </div>
   )
 }
