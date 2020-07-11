@@ -82,19 +82,17 @@
   font-size: 30px;
   font-weight: bold;
 
-  background: #EBEBEB;
-  background: -webkit-radial-gradient(center, #EBEBEB, #8F8F8F);
-  background: -moz-radial-gradient(center, #EBEBEB, #8F8F8F);
-  background: radial-gradient(ellipse at center, #EBEBEB, #8F8F8F);
+  border: 5px solid #192A29;
+  background: #E9EAEC;
 }
 
   .dealer-button__1 {
-    right: -80px;
+    right: -90px;
     bottom: 20px;
   }
 
   .dealer-button__2 {
-    left: -80px;
+    left: -90px;
     top: 20px;
   }
 
