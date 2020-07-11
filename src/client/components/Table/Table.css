@@ -27,80 +27,89 @@
 
 .player {
   position: absolute;
-  height: 140px;
-  width: 120px;
+  height: 250px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
 
   text-align: center;
 }
 
+
   .player__1 {
-    top: calc(100% - 20px);
-    left: calc(50% - 60px);
+    bottom: 20px;
+    left: calc(50% - 150px);
   }
 
   .player__2 {
-    top: calc(100% - 540px);
-    left: calc(50% - 60px);
+    top: 20px;
+    left: calc(50% - 150px);
+    flex-direction: column-reverse;
   }
 
-.player-name {
-  position: absolute;
-  bottom: 10px;
-  left: 0;
-  right: 0;
-  padding: 12px;
+.player-name-wrapper {
+  display: flex;
+  flex: 1;
+  height: 40px;
+  font-size: 30px;
+}
 
-  background-color: aliceblue;
+.player-name {
+  flex: 1;
+  padding: 0 6px;
+
+  color: #6495ed;
+  text-align: left;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .player-stack {
-  position: absolute;
-  bottom: -20px;
-  left: 0;
-  right: 0;
-  padding: 12px;
-
-  background-color: aliceblue;
+  padding: 0 6px;
   font-weight: bold;
+  color: #fefefe;
 }
 
 .dealer-button {
   position: absolute;
-  height: 10px;
-  width: 10px;
+  height: 20px;
+  width: 20px;
 
-  padding: 10px;
-  border: 2px solid black;
-  border-radius: 50px;
-  line-height: 10px;
-  background-color: aliceblue;
+  padding: 20px;
+  border-radius: 80px;
+  line-height: 20px;
+
+  font-size: 30px;
   font-weight: bold;
+
+  background: #EBEBEB;
+  background: -webkit-radial-gradient(center, #EBEBEB, #8F8F8F);
+  background: -moz-radial-gradient(center, #EBEBEB, #8F8F8F);
+  background: radial-gradient(ellipse at center, #EBEBEB, #8F8F8F);
 }
 
   .dealer-button__1 {
-    left: 80px;
-    top: -50px;
+    right: -80px;
+    bottom: 20px;
   }
 
   .dealer-button__2 {
-    left: 0;
-    top: 170px;
+    left: -80px;
+    top: 20px;
   }
-
 
 .bet {
   position: absolute;
 }
 
   .bet__1 {
-    top: -30px;
+    top: 60px;
+    right: -80px;
   }
 
   .bet__2 {
-    top: 220px;
-    left: 60px;
+    bottom: 0;
+    left: -80px;
   }
 
 .bet-amount {
@@ -119,34 +128,34 @@
 
 .chip {
   position: absolute;
-  height: 20px;
-  width: 20px;
+  height: 50px;
+  width: 50px;
 }
 
   .chip__1 {
-    left: 20px;
+    left: 0px;
     bottom: 8px;
   }
 
   .chip__2 {
-    left: 10px;
-    bottom: 6px;
+    left: 1px;
+    bottom: 9px;
   }
 
   .chip__3 {
-    left: 15px;
-    bottom: 15px;
+    left: 2px;
+    bottom: 10px;
   }
 
 .hole-cards {
   margin: 0;
   padding: 0;
   list-style: none;
+  display: flex;
 }
 
 .card {
-  position: absolute;
-  height: 100px;
+  height: 210px;
   left: 10px;
 }
 
@@ -158,20 +167,6 @@
   filter: none;
   z-index: 2;
 }
-
-  .card__2 {
-    left: 20px;
-    top: 10px;
-  }
-
-  .player__1 .card__1 {
-    left: -20px;
-  }
-
-  .player__1 .card__2 {
-    left: 50px;
-    top: 0;
-  }
 
 .pot {
   position: absolute;

@@ -17,7 +17,7 @@
 }
 
 main {
-  overflow: auto;
+  overflow: hidden;
   flex: 1;
   background-image: url('../../images/cloth.jpg');
 }

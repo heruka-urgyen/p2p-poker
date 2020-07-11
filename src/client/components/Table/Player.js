@@ -23,8 +23,10 @@ function Player({i, player, round, showWinningCards}) {
           )}
         </ul>
       </Maybe>
-      <label className="player-name">{player.username}</label>
-      <label className="player-stack">${player.stack}</label>
+      <div className="player-name-wrapper">
+        <label className="player-name">{player.username}</label>
+        <label className="player-stack">${player.stack}</label>
+      </div>
       <Maybe cond={() => buttonPlayerId === player.id}>
         <label className={`dealer-button dealer-button__${i}`}>D</label>
       </Maybe>
