@@ -39,8 +39,6 @@ function App() {
       <div className="main-wrapper">
         <main>
           <Table user={user} table={table} round={round} />
-        </main>
-        <aside>
           <Maybe cond={minBet != null}>
             <Controls
               round={round}
@@ -49,7 +47,7 @@ function App() {
               minBet={minBet}
               isDisabled={controlsDisabled} />
           </Maybe>
-        </aside>
+        </main>
       </div>
     </div>
   )

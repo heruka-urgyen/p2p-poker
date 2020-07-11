@@ -1,25 +1,93 @@
 .controls {
   z-index: 1;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  padding: 20px 20px 20px 10px;
+  background-color: #E9EAEC;
+  border: 5px solid #192A29;
+  cursor: move;
 }
 
 .controls__button {
   height: 50px;
-  width: 80px;
+  width: 92px;
+  padding: 0;
+
   font-size: 20px;
-  margin: 0 13px;
+  background-color: #E9EAEC;
+  color: #192A29;
+  border: 5px solid #192A29;
+  text-transform: uppercase;
+  font-weight: bold;
+  cursor: pointer;
+  background-color: transparent;
+  outline: none;
 }
 
 .controls__bet-controls {
-  margin: 0 0 10px 0;
+  text-align: right;
 }
+
+  .controls__bet-controls .controls__button {
+    margin: 0 0 0 10px;
+    width: 92px;
+  }
+
+  .controls__bet-controls .controls__button:nth-child(1) {
+    border-color: #E12A2A;
+    color: #E12A2A;
+  }
+
+  .controls__bet-controls .controls__button:nth-child(2) {
+    border-color: #FAD02C;
+    color: #FAD02C;
+  }
+
+  .controls__bet-controls .controls__button:nth-child(3) {
+    border-color: #469A49;
+    color: #469A49;
+  }
+
+  .controls__bet-controls .controls__button:hover {
+    border-width: 6px;
+  }
+
+  .controls__bet-controls .controls__button:disabled {
+    border-color: #90ADC6;
+    color: #90ADC6;
+  }
+
+  .controls__bet-controls .controls__button:disabled:hover {
+    border-width: 5px;
+  }
 
 .controls__adjust-bet {
   text-align: right;
-  margin: 0 0 10px 0;
 }
+
+  .controls__adjust-bet .controls__button {
+    margin: 0 0 0 10px;
+    border-color: #192A29;
+    color: #192A29;
+  }
+
+  .controls__adjust-bet .controls__button:hover {
+    border-width: 6px;
+  }
+
+  .controls__adjust-bet .controls__button:disabled {
+    border-color: #90ADC6;
+    color: #90ADC6;
+  }
+
+  .controls__adjust-bet .controls__button:disabled:hover {
+    border-width: 5px;
+  }
 
 .controls__bet-size {
   margin: 0 0 20px 0;
+  text-align: right;
 }
 
 .bet-size__input {
@@ -28,8 +96,15 @@
   font-size: 20px;
   line-height: 20px;
   text-align: center;
+  background-color: #E9EAEC;
+  border: 5px solid #192A29;
 
   -moz-appearance: textfield; /* hide spinner in Firefox */
+}
+
+.bet-size__input:disabled {
+  border-color: #90ADC6;
+  color: #90ADC6;
 }
 
 /* hide spinner https://stackoverflow.com/questions/3790935/can-i-hide-the-html5-number-input-s-spin-box */
@@ -40,7 +115,75 @@
     margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
 }
 
+/* style range input https://stackoverflow.com/a/60560815 */
+
 .bet-size__slider {
   width: 230px;
+  height: 5px;
   margin: 0 0 0 10px;
+  vertical-align: middle;
+
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #469A49;
+  outline: none;
+}
+
+.bet-size__slider:disabled {
+  background-color: #90ADC6;
+}
+
+/*Chrome thumb*/
+
+.bet-size__slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -webkit-border-radius: 5px;
+  /*16x16px adjusted to be same as 14x14px on moz*/
+  height: 16px;
+  width: 16px;
+  border-radius: 8px;
+  background: #e7e7e7;
+  border: 1px solid #c5c5c5;
+}
+
+
+/*Mozilla thumb*/
+
+.bet-size__slider::-moz-range-thumb {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -moz-border-radius: 5px;
+  height: 14px;
+  width: 14px;
+  border-radius: 8px;
+  background: #e7e7e7;
+  border: 1px solid #c5c5c5;
+}
+
+
+/*IE & Edge input*/
+
+.bet-size__slider::-ms-track {
+  width: 300px;
+  height: 6px;
+  /*remove bg colour from the track, we'll use ms-fill-lower and ms-fill-upper instead */
+  background: transparent;
+  /*leave room for the larger thumb to overflow with a transparent border */
+  border-color: transparent;
+  border-width: 2px 0;
+  /*remove default tick marks*/
+  color: transparent;
+}
+
+
+/*IE & Edge thumb*/
+
+.bet-size__slider::-ms-thumb {
+  height: 14px;
+  width: 14px;
+  border-radius: 7px;
+  background: #e7e7e7;
+  border: 1px solid #c5c5c5;
 }

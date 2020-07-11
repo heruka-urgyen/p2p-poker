@@ -13,18 +13,8 @@
 
 main {
   overflow: hidden;
-  flex: 5;
+  flex: 1;
 
   background-color: #245a26;
   background-image: url('../../images/pattern.png');
 }
-
-aside {
-  flex: 0 1 320px;
-  display: flex;
-  background-color: #282c34;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-
