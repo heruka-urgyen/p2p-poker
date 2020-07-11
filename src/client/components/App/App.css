@@ -28,7 +28,9 @@
 main {
   overflow: hidden;
   flex: 5;
-  background-image: url('../../images/cloth.jpg');
+
+  background-color: #245a26;
+  background-image: url('../../images/pattern.png');
 }
 
 aside {
