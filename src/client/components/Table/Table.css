@@ -1,24 +1,18 @@
 .table {
-  position: relative;
-  height: 400px;
-  margin: 200px auto 200px;
-  width: 800px;
-
-  background: green;
-  border-radius: 150px / 200px;
+  height: 100%;
+  width: 100%;
 }
 
 .table-waiting {
-  position: absolute;
-  height: 100px;
-  left: 150px;
-  padding: 30px 0 0;
-  top: 160px;
-  width: 480px;
-  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  z-index: 5;
 
-  background-color: green;
-  font-size: 30px;
+  font-size: 100px;
+  color: white;
   text-align: center;
 }
 
