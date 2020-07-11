@@ -36,8 +36,6 @@ function App() {
         <Login table={table} />
       </Maybe>
 
-      <header className="app-header" />
-
       <div className="main-wrapper">
         <main>
           <Table user={user} table={table} round={round} />

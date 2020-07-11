@@ -5,20 +5,6 @@
   height: 100vh;
 }
 
-.app-header {
-  background-color: #282c34;
-  height: 100px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: #fff;
-
- box-shadow: 0px 2px 5px rgba(0,0,0,0.5);
- z-index: 1;
-}
-
 .main-wrapper {
   display: flex;
   flex-direction: row;
