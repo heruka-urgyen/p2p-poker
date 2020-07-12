@@ -7,7 +7,7 @@ import {safe} from 'client/util'
 
 const getInitialState = function* (action) {
   try {
-    const {payload} = yield call(api.get('table/initialize'), action.payload)
+    const {payload} = yield call(api.put('table/initialize'), action.payload)
 
     yield put({type: 'INITIALIZE_SUCCESS', payload})
     yield* connectToWebsocket()
@@ -19,6 +19,8 @@ const getInitialState = function* (action) {
 function* sitUser(action) {
   try {
     const {payload} = yield call(api.post('table/sitUser'), action.payload)
+
+    sessionStorage.setItem('currentUser', payload.user.id)
 
     yield put({type: 'SIT_USER_SUCCESS', payload})
   } catch ({message}) {
@@ -126,7 +128,8 @@ function* subscribe(socket) {
 }
 
 function* initialize() {
-  yield put({type: 'INITIALIZE'})
+  const maybeUser = yield call(sessionStorage.getItem.bind(sessionStorage), 'currentUser')
+  yield put({type: 'INITIALIZE', payload: {maybeUser}})
 }
 
 function* mainSaga() {

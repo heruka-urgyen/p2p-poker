@@ -65,6 +65,8 @@ const select = f => produce(_state, f)
 const defaultUser = {type: 'guest'}
 
 update(s => {
+  s._sessions = {}
+  s._users = {}
   s.table = {
     id: 1,
     maxPlayers: 2,
@@ -117,6 +119,22 @@ function selectRoundFields(fullRound) {
 
 io.on('connection', socket => {
   console.log('connected to ' + socket.id)
+
+  socket.on('disconnect', _ => {
+    console.log('disconnected from ' + socket.id)
+
+    if (socket.request.session) {
+      const uid = select(s => s._sessions[socket.request.session.id])
+
+      update(s => {
+        const user = s.table.players.find(p => p.id === uid)
+        s.table.players = s.table.players.filter(p => p.id !== uid)
+        s._users[uid] = user
+      })
+
+      socket.request.session.destroy()
+    }
+  })
 
   socket.on('NEXT_ROUND', _ => {
     console.log('received NEXT_ROUND from', socket.id)
@@ -262,13 +280,31 @@ io.on('connection', socket => {
   })
 })
 
-app.get('/api/v1/table/initialize/', (req, res) => {
+app.put('/api/v1/table/initialize/', (req, res) => {
+  console.log('INITIALIZE')
+  const {maybeUser} = req.body
+  const users = select(s => s._users)
+  const sessionUser = users[maybeUser]
+  const players = select(s => s.table.players)
+
+  if (sessionUser) {
+    store.set(req.session.id, {...req.session, user: sessionUser},
+      err => err && console.error(err))
+
+    update(s => {
+      s._sessions[req.session.id] = maybeUser
+
+      if (!s.table.players.find(p => p.id === sessionUser.id)) {
+        s.table.players.push(sessionUser)
+      }
+    })
+  }
+
   store.get(req.session.id, (err, session = {}) => {
     if (err) {console.error(err)}
     const user = select(s => {
       const id = safe('')(() => session.user.id)
       return s.table.players.find(p => p.id === id) || defaultUser})
-
     const table = select(s => s.table)
     const round = select(s => s.round)
     const players = safe(table.players)(() => hideCards(round.cards, table.players, user.id))
@@ -279,14 +315,19 @@ app.get('/api/v1/table/initialize/', (req, res) => {
 })
 
 app.post('/api/v1/table/sitUser/', (req, res) => {
+  console.log('SIT_USER')
   const {players, maxPlayers} = select(s => s.table)
+
   if (players.length < maxPlayers) {
-
     const user = {type: 'player', id: v4(), stack: 100, ...req.body}
-    const s = req.session
+    const session = req.session
 
-    store.set(s.id, {...s, user}, err => err && console.error(err))
-    update(s => {s.table.players.push(user)})
+    store.set(session.id, {...session, user}, err => err && console.error(err))
+
+    update(s => {
+      s.table.players.push(user)
+      s._sessions[session.id] = user.id
+    })
 
     const players = select(s => s.table.players)
 
