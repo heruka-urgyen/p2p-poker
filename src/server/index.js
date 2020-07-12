@@ -16,6 +16,7 @@ const {
   newRound,
   endRound,
   newGame,
+  leavePlayer,
 } = require('@heruka_urgyen/poker-solver')
 
 /************************* app *************************/
@@ -63,6 +64,7 @@ const select = f => produce(_state, f)
 /********************* default state *********************/
 
 const defaultUser = {type: 'guest'}
+let timeout
 
 update(s => {
   s._sessions = {}
@@ -125,12 +127,35 @@ io.on('connection', socket => {
 
     if (socket.request.session) {
       const uid = select(s => s._sessions[socket.request.session.id])
+      const players = select(s => s.table.players)
 
       update(s => {
         const user = s.table.players.find(p => p.id === uid)
-        s.table.players = s.table.players.filter(p => p.id !== uid)
         s._users[uid] = user
       })
+
+      if (players.length === 2) {
+        timeout = setTimeout(() => {
+          update(s => {
+            const [_1, _2, {round, table}] = ([
+              leavePlayer(uid),
+              s => ({...s, round: computeRoundWinners(s.round)}),
+              endRound,
+            ]).map(s.run)
+
+            s.round = round
+            s.table = table
+            const user = s.table.players[0]
+
+            io.sockets.send('END_ROUND_SUCCESS', {payload: {table, round, user,}})
+          })
+        }, 5000)
+      } else {
+        update(s => {
+          s.table.players = s.table.players.filter(p => p.id !== uid)
+          io.sockets.send('UPDATE_TABLE_PLAYERS', {payload: {players: s.table.players}})
+        })
+      }
 
       socket.request.session.destroy()
     }
@@ -288,6 +313,7 @@ app.put('/api/v1/table/initialize/', (req, res) => {
   const players = select(s => s.table.players)
 
   if (sessionUser) {
+    clearTimeout(timeout)
     store.set(req.session.id, {...req.session, user: sessionUser},
       err => err && console.error(err))
 
