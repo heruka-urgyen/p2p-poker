@@ -1,4 +1,4 @@
-import {apply, call, put, takeEvery, select, delay} from 'redux-saga/effects'
+import {apply, race, call, put, take, takeEvery, select, delay} from 'redux-saga/effects'
 import * as api from 'client/api'
 
 import {connectToWebsocket} from './websocket'
@@ -106,6 +106,29 @@ const showdownSuccess = socket => function* (action) {
   yield put({type: 'END_ROUND', payload: {winners: round.winners}})
 }
 
+const playerTimeout = socket => function* (action) {
+  const {playerId, timeoutLength} = action.payload
+  let run = true
+
+  while (run) {
+    yield race({
+      task: call(update),
+      cancel: take('PLAYER_TIMEOUT_OFF')
+    })
+
+
+    yield put({type: 'UPDATE_PLAYER_TIMEOUT', payload: {playerId, value: 0}})
+    run = false
+  }
+
+  function* update() {
+    for (let i = timeoutLength / 1000; i > 0; i = i - 1) {
+      yield put({type: 'UPDATE_PLAYER_TIMEOUT', payload: {playerId, value: i}})
+      yield delay(1000)
+    }
+  }
+}
+
 function* subscribeToHttp() {
   yield takeEvery('INITIALIZE', getInitialState)
   yield takeEvery('SIT_USER', sitUser)
@@ -125,6 +148,8 @@ function* subscribe(socket) {
   yield takeEvery('BET', bet(socket))
   yield takeEvery('BET_SUCCESS', betSuccess(socket))
   yield takeEvery('SHOWDOWN_SUCCESS', showdownSuccess(socket))
+  yield takeEvery('PLAYER_TIMEOUT_ON', playerTimeout(socket))
+  // yield takeEvery('PLAYER_TIMEOUT_OFF', function* () {yield cancel(playerTimeout)})
 }
 
 function* initialize() {

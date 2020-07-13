@@ -9,6 +9,7 @@ function Player({i, player, round, showWinningCards}) {
   const buttonPlayerId = safe(null)(() => round.players[round.button])
   const bet = safe({})(() => round.bets.filter(b => b.playerId === player.id)[0])
   const cards = safe([])(() => player.cards)
+  const timeout = safe(0)(() => player.timeout)
 
   return (
     <li className={`player player__${i}`}>
@@ -23,10 +24,17 @@ function Player({i, player, round, showWinningCards}) {
           )}
         </ul>
       </Maybe>
-      <div className="player-name-wrapper">
-        <label className="player-name">{player.username}</label>
-        <label className="player-stack">${player.stack}</label>
-      </div>
+      {timeout > 0?
+        <div className="player-name-wrapper">
+          <label className="player-name">waiting</label>
+          <label className="player-stack">{timeout}</label>
+        </div>
+        :
+        <div className="player-name-wrapper">
+          <label className="player-name">{player.username}</label>
+          <label className="player-stack">${player.stack}</label>
+        </div>
+      }
       <Maybe cond={() => buttonPlayerId === player.id}>
         <label className={`dealer-button dealer-button__${i}`}>D</label>
       </Maybe>

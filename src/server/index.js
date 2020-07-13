@@ -135,6 +135,8 @@ io.on('connection', socket => {
       })
 
       if (players.length === 2) {
+        const timeoutLength = 5000
+
         timeout = setTimeout(() => {
           update(s => {
             const [_1, _2, {round, table}] = ([
@@ -149,7 +151,9 @@ io.on('connection', socket => {
 
             io.sockets.send('END_ROUND_SUCCESS', {payload: {table, round, user,}})
           })
-        }, 5000)
+        }, timeoutLength)
+
+        io.sockets.send('PLAYER_TIMEOUT_ON', {payload: {playerId: uid, timeoutLength}})
       } else {
         update(s => {
           s.table.players = s.table.players.filter(p => p.id !== uid)
@@ -314,6 +318,8 @@ app.put('/api/v1/table/initialize/', (req, res) => {
 
   if (sessionUser) {
     clearTimeout(timeout)
+    io.sockets.send('PLAYER_TIMEOUT_OFF', {payload: {playerId: maybeUser}})
+
     store.set(req.session.id, {...req.session, user: sessionUser},
       err => err && console.error(err))
 

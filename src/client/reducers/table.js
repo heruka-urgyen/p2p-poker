@@ -28,6 +28,12 @@ const tableReducer = createReducer(null, {
   END_ROUND_SUCCESS: (_, {payload: {table}}) => {
     return table
   },
+  UPDATE_PLAYER_TIMEOUT: (table, {payload: {playerId, value}}) => {
+    const player = table.players.find(p => p.id === playerId)
+    if (player) {
+      player.timeout = value
+    }
+  },
 })
 
 export const sitUser = createAction('SIT_USER')
