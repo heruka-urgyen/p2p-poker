@@ -8,8 +8,8 @@ import chip from 'client/images/poker-chip.svg'
 
 const showCard = c => c.rank + c.suit
 const showWinningCards = round => card => {
-  const isWinner =
-    round.winners.filter(w => w.cards.map(showCard).indexOf(showCard(card)) > -1).length > 0
+  const isWinner = round.winners.filter
+    (w => w.hand.value.cards.map(showCard).indexOf(showCard(card)) > -1).length > 0
   const isShowdown = round.street === 'SHOWDOWN'
 
   return (isShowdown? 'showdown' : '') + (isWinner? ' winner' : '')
