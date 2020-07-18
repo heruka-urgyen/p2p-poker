@@ -6,6 +6,12 @@ import Controls from 'client/components/Controls'
 import Login from 'client/components/Login'
 import {Maybe, safe} from 'client/util'
 
+import {
+  BrowserRouter as Router,
+  Route,
+  Redirect,
+} from 'react-router-dom'
+
 const getMinBet = ({round, user, stack}) => {
   if (round.status !== 'IN_PROGRESS') {
     return null
@@ -31,25 +37,32 @@ function App() {
     || safe(true)(() => round.players[round.nextPlayer] !== user.id)
 
   return (
-    <div className="app">
-      <Maybe cond={user.type === 'guest'}>
-        <Login table={table} />
-      </Maybe>
+    <Router>
+      <div className="app">
+        <Maybe cond={user.type === 'guest'}>
+          <Login table={table} />
+        </Maybe>
 
-      <div className="main-wrapper">
-        <main>
-          <Table user={user} table={table} round={round} />
-          <Maybe cond={minBet != null}>
-            <Controls
-              round={round}
-              player={user}
-              stack={stack}
-              minBet={minBet}
-              isDisabled={controlsDisabled} />
-          </Maybe>
-        </main>
+        <Maybe cond={user.type === 'player'}>
+          {() => <Route exact path="/">
+            <Redirect to={user.id} />
+          </Route>}
+        </Maybe>
+        <div className="main-wrapper">
+          <main>
+            <Table user={user} table={table} round={round} />
+            <Maybe cond={minBet != null}>
+              <Controls
+                round={round}
+                player={user}
+                stack={stack}
+                minBet={minBet}
+                isDisabled={controlsDisabled} />
+            </Maybe>
+          </main>
+        </div>
       </div>
-    </div>
+    </Router>
   )
 }
 
