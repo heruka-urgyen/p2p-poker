@@ -1,5 +1,6 @@
 import React, {useState} from 'react'
 import {useDispatch} from 'react-redux'
+import {useLocation} from 'react-router-dom'
 
 import {sitUser} from 'client/reducers/table'
 
@@ -9,6 +10,7 @@ const handleSubmitForm = dispatch => formValues => e => {
 }
 
 function Login({table}) {
+  const {pathname} = useLocation()
   const dispatch = useDispatch()
   const [formValues, updateName] = useState({username: ""})
   const {maxPlayers, players} = table
@@ -19,7 +21,10 @@ function Login({table}) {
   return (
     <div>
       <div className="login-overlay" />
-      <form className="login-form" onSubmit={handleSubmitForm(dispatch)(formValues)}>
+      <form
+        className="login-form"
+        onSubmit={handleSubmitForm(dispatch)({...formValues, pathname})}>
+
         <h1>
           {tableIsFull? "Table is full" : `${players.length} / ${maxPlayers} players`}
         </h1>

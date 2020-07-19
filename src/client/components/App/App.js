@@ -21,12 +21,10 @@ function App() {
   return (
     <div className="app">
       <Either cond={user.type === 'guest'}>
-
         <Login table={table} />
 
         <div className="main-wrapper">
           <Either cond={pathname !== '/'}>
-
             <Main user={user} table={table} round={round} />
 
             <Switch>

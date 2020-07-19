@@ -1,16 +1,19 @@
-import {apply, race, call, put, take, takeEvery, select, delay} from 'redux-saga/effects'
+import {channel} from 'redux-saga'
+import {fork, apply, race, call, put, take, takeEvery, select, delay} from 'redux-saga/effects'
 import * as api from 'client/api'
 
-import {connectToWebsocket, connectP2P} from './websocket'
+import {connectToWebsocket, createPeer, connectP2P} from './websocket'
 
 import {safe} from 'client/util'
 
 const getInitialState = function* (action) {
   try {
     const {payload} = yield call(api.put('table/initialize'), action.payload)
-
     yield put({type: 'INITIALIZE_SUCCESS', payload})
-    yield* call(connectP2P, payload.user.id)
+
+    if (payload.user.id) {
+      yield* call(createPeer, payload.user.id)
+    }
     yield* connectToWebsocket()
   } catch ({message}) {
     yield put({type: 'INITIALIZE_FAILURE', payload: {message}})
@@ -24,7 +27,12 @@ function* sitUser(action) {
     sessionStorage.setItem('currentUser', payload.user.id)
 
     yield put({type: 'SIT_USER_SUCCESS', payload})
-    yield* call(connectP2P, payload.user.id)
+    yield fork(createPeer, payload.user.id)
+    if (action.payload.pathname !== '/') {
+      const sendToPeers = yield call(channel)
+      yield fork(connectP2P, [sendToPeers, payload.user.id, action.payload.pathname.slice(1)])
+      // yield put(sendToPeers, {type: 'SIT_USER_SUCCESS', payload})
+    }
   } catch ({message}) {
     yield put({type: 'SIT_USER_FAILURE', payload: {message}})
   }

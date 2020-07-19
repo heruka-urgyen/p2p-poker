@@ -1,4 +1,4 @@
-import {fork, take, put, call} from 'redux-saga/effects'
+import {apply, fork, take, put, call} from 'redux-saga/effects'
 import {eventChannel} from 'redux-saga'
 import {subscribe} from './index.js'
 
@@ -8,6 +8,7 @@ import Peer from 'peerjs'
 const createWebSocketConnection = () => io('http://localhost:3001')
 
 const P2PSERVER = {host: 'localhost', port: '9000', path: '/poker'}
+let peer
 
 function createSocketChannel(socket) {
   return eventChannel(emit => {
@@ -34,16 +35,41 @@ function createP2PConnectionChannel(peer) {
 
 function createP2PChannel(connection) {
   return eventChannel(emit => {
-    connection.on('data', data => emit(data))
+    connection.on('data', data => {emit(data)})
 
     return () => {
     }
   })
 }
 
-export function* connectP2P(id) {
-  const peer = yield call(() => new Peer(id, P2PSERVER))
+function connectionOnOpen(connection) {
+  return eventChannel(emit => {
+    connection.on('open', () => {emit(connection.send)})
 
+    return () => {
+    }
+  })
+}
+
+
+export function* connectP2P([sendToPeers, id, pathname]) {
+  const connection = yield peer.connect(pathname)
+  // const send = yield call(connectionOnOpen, connection)
+  yield take(yield call(connectionOnOpen, connection))
+
+console.log(sendToPeers)
+  while (true) {
+    try {
+      const action = yield take(sendToPeers)
+      yield apply(connection, connection.send, [action])
+    } catch(err) {
+      console.error('p2p error:', err)
+    }
+  }
+}
+
+export function* createPeer(id) {
+  peer = yield call(() => new Peer(id, P2PSERVER))
   const connectionChannel = yield call(createP2PConnectionChannel, peer)
   const connection = yield take(connectionChannel)
   const p2pChannel = yield call(createP2PChannel, connection)
