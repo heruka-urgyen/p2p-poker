@@ -157,7 +157,7 @@ io.on('connection', socket => {
       } else {
         update(s => {
           s.table.players = s.table.players.filter(p => p.id !== uid)
-          io.sockets.send('UPDATE_TABLE_PLAYERS', {payload: {players: s.table.players}})
+          // io.sockets.send('UPDATE_TABLE_PLAYERS', {payload: {players: s.table.players}})
         })
       }
 

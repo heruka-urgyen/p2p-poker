@@ -52,7 +52,7 @@ function connectionOnOpen(connection) {
 }
 
 
-export function* connectP2P([sendToPeers, id, pathname]) {
+export function* connectP2P([sendToPeers, pathname]) {
   const connection = yield peer.connect(pathname)
   yield take(yield call(connectionOnOpen, connection))
 

@@ -1,5 +1,5 @@
-import React from 'react'
-import {useSelector} from 'react-redux'
+import React, {useEffect} from 'react'
+import {useSelector, useDispatch} from 'react-redux'
 
 import Main from './Main'
 import Login from 'client/components/Login'
@@ -14,6 +14,10 @@ import {
 
 function App() {
   const {pathname} = useLocation()
+  const dispatch = useDispatch()
+  useEffect(() =>
+    {dispatch({type: 'INITIALIZE', payload: {pathname}}, [])},
+  [dispatch])
 
   const [user, table, round] = useSelector(s => [s.user, s.table, s.round])
 

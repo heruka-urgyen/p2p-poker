@@ -12,6 +12,9 @@ const tableReducer = createReducer(defaultState, {
   SIT_USER_SUCCESS: (table, {payload: {user}}) => {
     table.players.push(user)
   },
+  GET_TABLE_SUCCESS: (_, {payload: {table}}) => {
+    return table
+  },
   UPDATE_TABLE_PLAYERS: (table, {payload: {players}}) => {
     table.players = players
   },

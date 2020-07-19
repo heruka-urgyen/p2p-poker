@@ -15,8 +15,16 @@ import {connectToWebsocket, createPeer, connectP2P} from './websocket'
 import {safe, getFromStorage, setInStorage} from 'client/util'
 import {v4} from 'uuid'
 
-const getInitialState = function* (action) {
+const getInitialState = sendToPeers => function* (action) {
   try {
+    if (action.payload.pathname !== '/') {
+      const id = v4()
+      yield fork(createPeer, id)
+      yield fork(connectP2P, [sendToPeers, action.payload.pathname.slice(1)])
+      yield put(sendToPeers, {type: 'GET_TABLE', payload: {userId: id}})
+      yield put({type: 'SIT_USER_SUCCESS', payload: {user: {type: 'guest', id}}})
+    }
+
     const state = yield call(getFromStorage)
     yield put({type: 'INITIALIZE_SUCCESS', payload: state})
     if (state.user && state.user.id) {
@@ -28,18 +36,26 @@ const getInitialState = function* (action) {
   }
 }
 
-function* sitUser(action) {
-  try {
-    const user = {type: 'player', id: v4(), stack: 100, username: action.payload.username}
-    yield setInStorage('user')(user)
+const getTable = sendToPeers => function* (action) {
+  const id = action.payload.userId
+  yield fork(connectP2P, [sendToPeers, id])
+  const table = yield select(state => state.table)
 
+  yield put(sendToPeers, {type: 'GET_TABLE_SUCCESS', payload: {table}})
+}
+
+const sitUser = sendToPeers => function* (action) {
+  try {
+    const u = yield select(s => s.user)
+    const user =
+      {type: 'player', id: u.id || v4(), stack: 100, username: action.payload.username}
+    yield setInStorage('user')(user)
     yield put({type: 'SIT_USER_SUCCESS', payload: {user}})
+
+    const table = yield select(s => s.table)
+    yield setInStorage('table')({...table, players: table.players.concat(user)})
+
     yield fork(createPeer, user.id)
-    if (action.payload.pathname !== '/') {
-      const sendToPeers = yield call(channel)
-      yield fork(connectP2P, [sendToPeers, user.id, action.payload.pathname.slice(1)])
-      // yield put(sendToPeers, {type: 'SIT_USER_SUCCESS', payload})
-    }
   } catch ({message}) {
     yield put({type: 'SIT_USER_FAILURE', payload: {message}})
   }
@@ -147,12 +163,15 @@ const playerTimeout = socket => function* (action) {
 }
 
 function* subscribeToHttp() {
-  yield takeEvery('INITIALIZE', getInitialState)
-  yield takeEvery('SIT_USER', sitUser)
+  const sendToPeers = yield call(channel)
+
+  yield takeEvery('INITIALIZE', getInitialState(sendToPeers))
+  yield takeEvery('SIT_USER', sitUser(sendToPeers))
+  yield takeEvery('GET_TABLE', getTable(sendToPeers))
 }
 
 function* subscribe(socket) {
-  yield takeEvery('UPDATE_TABLE_PLAYERS', maybeNextRound(socket))
+  // yield takeEvery('UPDATE_TABLE_PLAYERS', maybeNextRound(socket))
   yield takeEvery('NEXT_ROUND', nextRound(socket))
   yield takeEvery('NEXT_ROUND_SUCCESS', nextRoundSuccess(socket))
   yield takeEvery('POST_BLINDS', postBlinds(socket))
@@ -176,7 +195,7 @@ function* initialize() {
 
 function* mainSaga() {
   yield* subscribeToHttp()
-  yield* initialize()
+  // yield* initialize()
 }
 
 export {subscribe}
