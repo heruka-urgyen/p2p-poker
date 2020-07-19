@@ -4,12 +4,13 @@ import {useSelector} from 'react-redux'
 import Table from 'client/components/Table'
 import Controls from 'client/components/Controls'
 import Login from 'client/components/Login'
-import {Maybe, safe} from 'client/util'
+import {Either, Maybe, safe} from 'client/util'
 
 import {
   BrowserRouter as Router,
   Route,
   Redirect,
+  Switch,
 } from 'react-router-dom'
 
 const getMinBet = ({round, user, stack}) => {
@@ -37,32 +38,31 @@ function App() {
     || safe(true)(() => round.players[round.nextPlayer] !== user.id)
 
   return (
-    <Router>
-      <div className="app">
-        <Maybe cond={user.type === 'guest'}>
-          <Login table={table} />
-        </Maybe>
-
-        <Maybe cond={user.type === 'player'}>
-          {() => <Route exact path="/">
-            <Redirect to={user.id} />
-          </Route>}
-        </Maybe>
-        <div className="main-wrapper">
-          <main>
-            <Table user={user} table={table} round={round} />
-            <Maybe cond={minBet != null}>
-              <Controls
-                round={round}
-                player={user}
-                stack={stack}
-                minBet={minBet}
-                isDisabled={controlsDisabled} />
-            </Maybe>
-          </main>
-        </div>
-      </div>
-    </Router>
+    <div className="app">
+      <Either cond={user.type === 'guest'}>
+        <Login table={table} />
+        <Router>
+          <Redirect to={`/${user.id || ''}`} />
+          <Switch>
+            <Route path={`/${user.id}`}>
+              <div className="main-wrapper">
+                <main>
+                  <Table user={user} table={table} round={round} />
+                  <Maybe cond={minBet != null}>
+                    <Controls
+                      round={round}
+                      player={user}
+                      stack={stack}
+                      minBet={minBet}
+                      isDisabled={controlsDisabled} />
+                  </Maybe>
+                </main>
+              </div>
+            </Route>
+          </Switch>
+        </Router>
+      </Either>
+    </div>
   )
 }
 
