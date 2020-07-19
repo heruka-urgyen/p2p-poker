@@ -12,16 +12,14 @@ import {
 } from 'redux-saga/effects'
 
 import {connectToWebsocket, createPeer, connectP2P} from './websocket'
-import {safe} from 'client/util'
+import {safe, getFromStorage, setInStorage} from 'client/util'
 import {v4} from 'uuid'
 
 const getInitialState = function* (action) {
   try {
-    const s = sessionStorage.getItem('state') || {user: {type: 'guest'}}
-    const state = typeof s === 'string'? JSON.parse(s) : s
+    const state = yield call(getFromStorage)
     yield put({type: 'INITIALIZE_SUCCESS', payload: state})
-
-    if (state.user.id) {
+    if (state.user && state.user.id) {
       yield fork(createPeer, state.user.id)
     }
     yield* connectToWebsocket()
@@ -33,11 +31,7 @@ const getInitialState = function* (action) {
 function* sitUser(action) {
   try {
     const user = {type: 'player', id: v4(), stack: 100, username: action.payload}
-    const s = JSON.parse(sessionStorage.getItem('state')) || {}
-    const state = typeof s === 'string'? JSON.parse(s) : s
-
-    state.user = user
-    sessionStorage.setItem('state', JSON.stringify(state))
+    yield setInStorage('user')(user)
 
     yield put({type: 'SIT_USER_SUCCESS', payload: {user}})
     yield fork(createPeer, user.id)

@@ -54,10 +54,8 @@ function connectionOnOpen(connection) {
 
 export function* connectP2P([sendToPeers, id, pathname]) {
   const connection = yield peer.connect(pathname)
-  // const send = yield call(connectionOnOpen, connection)
   yield take(yield call(connectionOnOpen, connection))
 
-console.log(sendToPeers)
   while (true) {
     try {
       const action = yield take(sendToPeers)
