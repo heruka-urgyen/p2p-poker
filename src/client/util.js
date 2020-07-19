@@ -26,3 +26,6 @@ export const Maybe = ({cond, children}) => {
   return cond? children : null
 }
 
+export const Either = ({cond, children}) =>
+  Maybe({cond, children: children[0]}) || safe(children[1])(children[1])
+
