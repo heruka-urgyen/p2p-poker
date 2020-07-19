@@ -1,7 +1,7 @@
 import {apply, race, call, put, take, takeEvery, select, delay} from 'redux-saga/effects'
 import * as api from 'client/api'
 
-import {connectToWebsocket} from './websocket'
+import {connectToWebsocket, connectP2P} from './websocket'
 
 import {safe} from 'client/util'
 
@@ -10,6 +10,7 @@ const getInitialState = function* (action) {
     const {payload} = yield call(api.put('table/initialize'), action.payload)
 
     yield put({type: 'INITIALIZE_SUCCESS', payload})
+    yield* call(connectP2P, payload.user.id)
     yield* connectToWebsocket()
   } catch ({message}) {
     yield put({type: 'INITIALIZE_FAILURE', payload: {message}})
@@ -23,6 +24,7 @@ function* sitUser(action) {
     sessionStorage.setItem('currentUser', payload.user.id)
 
     yield put({type: 'SIT_USER_SUCCESS', payload})
+    yield* call(connectP2P, payload.user.id)
   } catch ({message}) {
     yield put({type: 'SIT_USER_FAILURE', payload: {message}})
   }
