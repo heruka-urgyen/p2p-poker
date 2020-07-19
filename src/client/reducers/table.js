@@ -9,6 +9,9 @@ const tableReducer = createReducer(defaultState, {
   INITIALIZE_SUCCESS: (state, {payload: {table}}) => {
     return table || state
   },
+  SIT_USER_SUCCESS: (table, {payload: {user}}) => {
+    table.players.push(user)
+  },
   UPDATE_TABLE_PLAYERS: (table, {payload: {players}}) => {
     table.players = players
   },

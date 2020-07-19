@@ -30,7 +30,7 @@ const getInitialState = function* (action) {
 
 function* sitUser(action) {
   try {
-    const user = {type: 'player', id: v4(), stack: 100, username: action.payload}
+    const user = {type: 'player', id: v4(), stack: 100, username: action.payload.username}
     yield setInStorage('user')(user)
 
     yield put({type: 'SIT_USER_SUCCESS', payload: {user}})
