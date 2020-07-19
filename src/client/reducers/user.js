@@ -1,8 +1,9 @@
 import {createReducer} from '@reduxjs/toolkit'
 
-const userReducer = createReducer(null, {
-  INITIALIZE_SUCCESS: (_, {payload: {user}}) => {
-    return user
+const defaultState = {type: 'guest'}
+const userReducer = createReducer(defaultState, {
+  INITIALIZE_SUCCESS: (state, {payload: {user}}) => {
+    return user || state
   },
   SIT_USER_SUCCESS: (_, {payload: {user}}) => {
     return user

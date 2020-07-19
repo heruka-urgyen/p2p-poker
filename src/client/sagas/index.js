@@ -1,36 +1,49 @@
 import {channel} from 'redux-saga'
-import {fork, apply, race, call, put, take, takeEvery, select, delay} from 'redux-saga/effects'
-import * as api from 'client/api'
+import {
+  fork,
+  apply,
+  race,
+  call,
+  put,
+  take,
+  takeEvery,
+  select,
+  delay,
+} from 'redux-saga/effects'
 
 import {connectToWebsocket, createPeer, connectP2P} from './websocket'
-
 import {safe} from 'client/util'
+import {v4} from 'uuid'
 
 const getInitialState = function* (action) {
   try {
-    const {payload} = yield call(api.put('table/initialize'), action.payload)
-    yield put({type: 'INITIALIZE_SUCCESS', payload})
+    const s = sessionStorage.getItem('state') || {user: {type: 'guest'}}
+    const state = typeof s === 'string'? JSON.parse(s) : s
+    yield put({type: 'INITIALIZE_SUCCESS', payload: state})
 
-    if (payload.user.id) {
-      yield* call(createPeer, payload.user.id)
+    if (state.user.id) {
+      yield fork(createPeer, state.user.id)
     }
     yield* connectToWebsocket()
-  } catch ({message}) {
-    yield put({type: 'INITIALIZE_FAILURE', payload: {message}})
+  } catch (e) {
+    yield put({type: 'INITIALIZE_FAILURE', payload: e})
   }
 }
 
 function* sitUser(action) {
   try {
-    const {payload} = yield call(api.post('table/sitUser'), action.payload)
+    const user = {type: 'player', id: v4(), stack: 100, username: action.payload}
+    const s = JSON.parse(sessionStorage.getItem('state')) || {}
+    const state = typeof s === 'string'? JSON.parse(s) : s
 
-    sessionStorage.setItem('currentUser', payload.user.id)
+    state.user = user
+    sessionStorage.setItem('state', JSON.stringify(state))
 
-    yield put({type: 'SIT_USER_SUCCESS', payload})
-    yield fork(createPeer, payload.user.id)
+    yield put({type: 'SIT_USER_SUCCESS', payload: {user}})
+    yield fork(createPeer, user.id)
     if (action.payload.pathname !== '/') {
       const sendToPeers = yield call(channel)
-      yield fork(connectP2P, [sendToPeers, payload.user.id, action.payload.pathname.slice(1)])
+      yield fork(connectP2P, [sendToPeers, user.id, action.payload.pathname.slice(1)])
       // yield put(sendToPeers, {type: 'SIT_USER_SUCCESS', payload})
     }
   } catch ({message}) {

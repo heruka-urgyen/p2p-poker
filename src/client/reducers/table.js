@@ -1,8 +1,13 @@
 import {createReducer, createAction} from '@reduxjs/toolkit'
 
-const tableReducer = createReducer(null, {
-  INITIALIZE_SUCCESS: (_, {payload: {table}}) => {
-    return table
+const defaultState = {
+  id: 1,
+  maxPlayers: 2,
+  players: [],
+}
+const tableReducer = createReducer(defaultState, {
+  INITIALIZE_SUCCESS: (state, {payload: {table}}) => {
+    return table || state
   },
   UPDATE_TABLE_PLAYERS: (table, {payload: {players}}) => {
     table.players = players

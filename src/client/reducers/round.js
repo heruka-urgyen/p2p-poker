@@ -1,8 +1,12 @@
 import {createReducer, createAction} from '@reduxjs/toolkit'
 
-const roundReducer = createReducer(null, {
-  INITIALIZE_SUCCESS: (_, {payload: {round}}) => {
-    return round
+const defaultState = {
+  id: 0,
+  status: 'FINISHED',
+}
+const roundReducer = createReducer(defaultState, {
+  INITIALIZE_SUCCESS: (state, {payload: {round}}) => {
+    return round || state
   },
   NEXT_ROUND_SUCCESS: (_, {payload: {round}}) => {
     return round

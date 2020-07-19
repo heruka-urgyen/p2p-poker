@@ -16,7 +16,6 @@ function App() {
   const {pathname} = useLocation()
 
   const [user, table, round] = useSelector(s => [s.user, s.table, s.round])
-  if (!(user)) {return null}
 
   return (
     <div className="app">
