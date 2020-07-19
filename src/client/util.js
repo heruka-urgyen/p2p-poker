@@ -9,21 +9,12 @@ export const safe = def => f => {
 
 export const Maybe = ({cond, children}) => {
   const a = typeof cond === 'function'
-  const b = typeof children === 'function'
 
-  if (a && b) {
-    return safe(false)(cond)? children() : null
+  if (a) {
+    return safe(false)(cond)? safe(children)(children) : null
   }
 
-  if (a && !b) {
-    return safe(false)(cond)? children : null
-  }
-
-  if (!a && b) {
-    return cond? children() : null
-  }
-
-  return cond? children : null
+  return cond? safe(children)(children) : null
 }
 
 export const Either = ({cond, children}) =>
