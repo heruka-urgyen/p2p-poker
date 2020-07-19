@@ -17,19 +17,20 @@ import {v4} from 'uuid'
 
 const getInitialState = sendToPeers => function* (action) {
   try {
-    if (action.payload.pathname !== '/') {
+    const user = yield select(s => s.user)
+
+    if (action.payload.pathname !== '/' && user.type === 'guest') {
       const id = v4()
+      sessionStorage.setItem('_id', id)
       yield fork(createPeer, id)
       yield fork(connectP2P, [sendToPeers, action.payload.pathname.slice(1)])
       yield put(sendToPeers, {type: 'GET_TABLE', payload: {userId: id}})
-      yield put({type: 'SIT_USER_SUCCESS', payload: {user: {type: 'guest', id}}})
     }
 
-    const state = yield call(getFromStorage)
-    yield put({type: 'INITIALIZE_SUCCESS', payload: state})
-    if (state.user && state.user.id) {
-      yield fork(createPeer, state.user.id)
+    if (user.type !== 'guest') {
+      yield fork(createPeer, user.id)
     }
+
     yield* connectToWebsocket()
   } catch (e) {
     yield put({type: 'INITIALIZE_FAILURE', payload: e})
@@ -46,15 +47,15 @@ const getTable = sendToPeers => function* (action) {
 
 const sitUser = sendToPeers => function* (action) {
   try {
-    const u = yield select(s => s.user)
-    const user =
-      {type: 'player', id: u.id || v4(), stack: 100, username: action.payload.username}
-    yield setInStorage('user')(user)
+    const uid = sessionStorage.getItem('_id')
+    const user = {
+      type: 'player',
+      id: uid || v4(),
+      stack: 100,
+      username: action.payload.username,
+    }
+
     yield put({type: 'SIT_USER_SUCCESS', payload: {user}})
-
-    const table = yield select(s => s.table)
-    yield setInStorage('table')({...table, players: table.players.concat(user)})
-
     yield fork(createPeer, user.id)
   } catch ({message}) {
     yield put({type: 'SIT_USER_FAILURE', payload: {message}})
