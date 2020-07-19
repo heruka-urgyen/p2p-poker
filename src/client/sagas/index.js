@@ -12,7 +12,7 @@ import {
 } from 'redux-saga/effects'
 
 import {connectToWebsocket, createPeer, connectP2P} from './websocket'
-import {safe, getFromStorage, setInStorage} from 'client/util'
+import {safe} from 'client/util'
 import {v4} from 'uuid'
 
 const getInitialState = sendToPeers => function* (action) {
