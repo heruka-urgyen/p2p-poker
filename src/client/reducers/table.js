@@ -15,6 +15,9 @@ const tableReducer = createReducer(defaultState, {
   GET_TABLE_SUCCESS: (_, {payload: {table}}) => {
     return table
   },
+  PEER_JOINED_SUCCESS: (_, {payload: {table}}) => {
+    return table
+  },
   UPDATE_TABLE_PLAYERS: (table, {payload: {players}}) => {
     table.players = players
   },

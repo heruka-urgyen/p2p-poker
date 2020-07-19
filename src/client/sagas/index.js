@@ -29,6 +29,7 @@ const getInitialState = sendToPeers => function* (action) {
 
     if (user.type !== 'guest') {
       yield fork(createPeer, user.id)
+      yield call(maybeNextRound(sendToPeers))
     }
 
     yield* connectToWebsocket()
@@ -55,14 +56,18 @@ const sitUser = sendToPeers => function* (action) {
       username: action.payload.username,
     }
 
+    sessionStorage.removeItem('_id')
+
     yield put({type: 'SIT_USER_SUCCESS', payload: {user}})
-    yield fork(createPeer, user.id)
+
+    const table = yield select(s => s.table)
+    yield put(sendToPeers, {type: 'PEER_JOINED_SUCCESS', payload: {table}})
   } catch ({message}) {
     yield put({type: 'SIT_USER_FAILURE', payload: {message}})
   }
 }
 
-const maybeNextRound = socket => function* (action) {
+const maybeNextRound = sendToPeers => function* (action) {
   const round = yield select(state => state.round)
   const table = yield select(state => state.table)
 
@@ -71,8 +76,9 @@ const maybeNextRound = socket => function* (action) {
   }
 }
 
-const nextRound = socket => function* (action) {
-  yield apply(socket, socket.emit, ['NEXT_ROUND'])
+const nextRound = sendToPeers => function* (action) {
+  // yield put(sendToPeers, {type: 'NEXT_ROUND'})
+  // yield apply(socket, socket.emit, ['NEXT_ROUND'])
 }
 
 const nextRoundSuccess = socket => function* (action) {
@@ -169,11 +175,11 @@ function* subscribeToHttp() {
   yield takeEvery('INITIALIZE', getInitialState(sendToPeers))
   yield takeEvery('SIT_USER', sitUser(sendToPeers))
   yield takeEvery('GET_TABLE', getTable(sendToPeers))
+  yield takeEvery('SIT_USER_SUCCESS', maybeNextRound(sendToPeers))
+  yield takeEvery('NEXT_ROUND', nextRound(sendToPeers))
 }
 
 function* subscribe(socket) {
-  // yield takeEvery('UPDATE_TABLE_PLAYERS', maybeNextRound(socket))
-  yield takeEvery('NEXT_ROUND', nextRound(socket))
   yield takeEvery('NEXT_ROUND_SUCCESS', nextRoundSuccess(socket))
   yield takeEvery('POST_BLINDS', postBlinds(socket))
   yield takeEvery('POST_BLINDS_SUCCESS', postBlindsSuccess(socket))
