@@ -191,10 +191,10 @@ function* subscribe(socket) {
   // yield takeEvery('PLAYER_TIMEOUT_OFF', function* () {yield cancel(playerTimeout)})
 }
 
-function* initialize() {
-  const maybeUser = yield call(sessionStorage.getItem.bind(sessionStorage), 'currentUser')
-  yield put({type: 'INITIALIZE', payload: {maybeUser}})
-}
+// function* initialize() {
+//   const maybeUser = yield call(sessionStorage.getItem.bind(sessionStorage), 'currentUser')
+//   yield put({type: 'INITIALIZE', payload: {maybeUser}})
+// }
 
 function* mainSaga() {
   yield* subscribeToHttp()

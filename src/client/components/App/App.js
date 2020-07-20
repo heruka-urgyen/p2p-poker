@@ -17,7 +17,7 @@ function App() {
   const dispatch = useDispatch()
   useEffect(() =>
     {dispatch({type: 'INITIALIZE', payload: {pathname}}, [])},
-  [dispatch])
+  [dispatch, pathname])
 
   const [user, table, round] = useSelector(s => [s.user, s.table, s.round])
 

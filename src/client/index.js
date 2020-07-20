@@ -25,7 +25,6 @@ import './index.css'
 import App from 'client/components/App'
 
 const sagaMiddleware = createSagaMiddleware()
-const middleware = [...getDefaultMiddleware(), sagaMiddleware]
 
 const persistConfig = {
   key: 'root',
