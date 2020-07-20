@@ -18,17 +18,16 @@ import {v4} from 'uuid'
 const getInitialState = sendToPeers => function* (action) {
   try {
     const user = yield select(s => s.user)
+    const id = v4()
+    sessionStorage.setItem('_id', id)
+    yield fork(createPeer, id)
 
     if (action.payload.pathname !== '/' && user.type === 'guest') {
-      const id = v4()
-      sessionStorage.setItem('_id', id)
-      yield fork(createPeer, id)
       yield fork(connectP2P, [sendToPeers, action.payload.pathname.slice(1)])
       yield put(sendToPeers, {type: 'GET_TABLE', payload: {userId: id}})
     }
 
     if (user.type !== 'guest') {
-      yield fork(createPeer, user.id)
       yield call(maybeNextRound(sendToPeers))
     }
 
