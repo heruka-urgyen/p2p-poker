@@ -27,10 +27,6 @@ const getInitialState = sendToPeers => function* (action) {
       yield put(sendToPeers, {type: 'GET_TABLE', payload: {userId: id}})
     }
 
-    if (user.type !== 'guest') {
-      yield call(maybeNextRound(sendToPeers))
-    }
-
     yield* connectToWebsocket()
   } catch (e) {
     yield put({type: 'INITIALIZE_FAILURE', payload: e})
@@ -175,6 +171,7 @@ function* subscribeToHttp() {
   yield takeEvery('SIT_USER', sitUser(sendToPeers))
   yield takeEvery('GET_TABLE', getTable(sendToPeers))
   yield takeEvery('SIT_USER_SUCCESS', maybeNextRound(sendToPeers))
+  yield takeEvery('PEER_JOINED_SUCCESS', maybeNextRound(sendToPeers))
   yield takeEvery('NEXT_ROUND', nextRound(sendToPeers))
 }
 
