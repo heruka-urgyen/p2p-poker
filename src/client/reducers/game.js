@@ -10,8 +10,8 @@ const defaltTable = {
 }
 
 let _game = newGame(defaltTable)
-const update = f => {
-  _game = _game.update(f)
+const update = (...fs) => {
+  _game = fs.reduce((s, f) => s.update(f), _game)
   return toObject(_game.get())
 }
 
