@@ -28,7 +28,6 @@ const getInitialState = sendToPeers => function* (action) {
     }
 
     yield fork(createPeer, [id, sendToPeers])
-    yield delay(1000)
 
     if (pathname !== '/' && user.type === 'guest') {
       yield put(
