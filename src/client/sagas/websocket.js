@@ -54,10 +54,15 @@ export function* connectP2P([peer, sendToPeers]) {
   while (true) {
     try {
       const {to, action} = yield take(sendToPeers)
-      const connection = yield apply(peer, peer.connect, [to])
-      const c = yield take(yield call(connectionOnOpen, connection))
 
-      yield apply(c, c.send, [action])
+      if (peer._id === to) {
+        yield put(action)
+      } else {
+        const connection = yield apply(peer, peer.connect, [to])
+        const c = yield take(yield call(connectionOnOpen, connection))
+
+        yield apply(c, c.send, [action])
+      }
     } catch(err) {
       console.error('p2p error:', err)
     }
