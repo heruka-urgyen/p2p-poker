@@ -1,6 +1,8 @@
 import {createReducer, createAction} from '@reduxjs/toolkit'
 import {newGame, seededDeck} from '@heruka_urgyen/poker-solver'
 
+const toObject = o => JSON.parse(JSON.stringify(o))
+
 const defaltTable = {
   id: "1",
   maxPlayers: 2,
@@ -10,14 +12,12 @@ const defaltTable = {
 let _game = newGame(defaltTable)
 const update = f => {
   _game = _game.update(f)
-  return _game.get()
+  return toObject(_game.get())
 }
 
 const defaultState = {
   table: defaltTable,
 }
-
-const toObject = o => JSON.parse(JSON.stringify(o))
 
 const gameReducer = createReducer(defaultState, {
   NEW_GAME: (_) => {
