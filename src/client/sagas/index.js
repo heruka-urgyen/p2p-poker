@@ -11,20 +11,25 @@ import {
   delay,
 } from 'redux-saga/effects'
 
-import {connectToWebsocket, createPeer, connectP2P} from './websocket'
+import {connectToWebsocket, createPeer} from './websocket'
 import {safe} from 'client/util'
 import {v4} from 'uuid'
 
 const getInitialState = sendToPeers => function* (action) {
   try {
     const user = yield select(s => s.user)
-    const id = v4()
+    const id = user.id || v4()
     sessionStorage.setItem('_id', id)
-    yield fork(createPeer, id)
+
+    yield fork(createPeer, [id, sendToPeers])
+    yield delay(1000)
 
     if (action.payload.pathname !== '/' && user.type === 'guest') {
-      yield fork(connectP2P, [sendToPeers, action.payload.pathname.slice(1)])
-      yield put(sendToPeers, {type: 'GET_TABLE', payload: {userId: id}})
+      yield put(
+        sendToPeers,
+        {
+          to: action.payload.pathname.slice(1),
+          action: {type: 'GET_TABLE', payload: {userId: id}}})
     }
 
     yield* connectToWebsocket()
@@ -35,10 +40,11 @@ const getInitialState = sendToPeers => function* (action) {
 
 const getTable = sendToPeers => function* (action) {
   const id = action.payload.userId
-  yield fork(connectP2P, [sendToPeers, id])
   const table = yield select(state => state.table)
 
-  yield put(sendToPeers, {type: 'GET_TABLE_SUCCESS', payload: {table}})
+  yield put(
+    sendToPeers,
+    {to: id, action: {type: 'GET_TABLE_SUCCESS', payload: {table}}})
 }
 
 const sitUser = sendToPeers => function* (action) {
@@ -54,9 +60,13 @@ const sitUser = sendToPeers => function* (action) {
     sessionStorage.removeItem('_id')
 
     yield put({type: 'SIT_USER_SUCCESS', payload: {user}})
-
     const table = yield select(s => s.table)
-    yield put(sendToPeers, {type: 'PEER_JOINED_SUCCESS', payload: {table}})
+
+    yield put(
+      sendToPeers,
+      {
+        to: action.payload.pathname.slice(1),
+        action: {type: 'PEER_JOINED_SUCCESS', payload: {table}}})
   } catch ({message}) {
     yield put({type: 'SIT_USER_FAILURE', payload: {message}})
   }

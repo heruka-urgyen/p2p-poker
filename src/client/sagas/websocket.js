@@ -8,7 +8,7 @@ import Peer from 'peerjs'
 const createWebSocketConnection = () => io('http://localhost:3001')
 
 const P2PSERVER = {host: 'localhost', port: '9000', path: '/poker'}
-let peer
+const peers = {}
 
 function createSocketChannel(socket) {
   return eventChannel(emit => {
@@ -24,53 +24,51 @@ function createSocketChannel(socket) {
   })
 }
 
-function createP2PConnectionChannel(peer) {
+function createP2PChannel(peer) {
   return eventChannel(emit => {
-    peer.on('connection', connection => emit(connection))
+    peer.on('connection', connection => {
+      connection.on('open', () => {
+        connection.on('data', data => {
+          emit(data)
+        })
+      })
 
-    return () => {
-    }
-  })
-}
+    })
 
-function createP2PChannel(connection) {
-  return eventChannel(emit => {
-    connection.on('data', data => {emit(data)})
-
-    return () => {
-    }
+    return () => {}
   })
 }
 
 function connectionOnOpen(connection) {
   return eventChannel(emit => {
-    connection.on('open', () => {emit(connection.send)})
+    connection.on('open', () => {
+      emit(connection)
+    })
 
     return () => {
     }
   })
 }
 
-
-export function* connectP2P([sendToPeers, pathname]) {
-  const connection = yield peer.connect(pathname)
-  yield take(yield call(connectionOnOpen, connection))
-
+export function* connectP2P([peer, sendToPeers]) {
   while (true) {
     try {
-      const action = yield take(sendToPeers)
-      yield apply(connection, connection.send, [action])
+      const {to, action} = yield take(sendToPeers)
+      const connection = yield apply(peer, peer.connect, [to])
+      const c = yield take(yield call(connectionOnOpen, connection))
+
+      yield apply(c, c.send, [action])
     } catch(err) {
       console.error('p2p error:', err)
     }
   }
 }
 
-export function* createPeer(id) {
-  peer = yield call(() => new Peer(id, P2PSERVER))
-  const connectionChannel = yield call(createP2PConnectionChannel, peer)
-  const connection = yield take(connectionChannel)
-  const p2pChannel = yield call(createP2PChannel, connection)
+export function* createPeer([id, sendToPeers]) {
+  const peer = yield call(() => new Peer(id, P2PSERVER))
+  peers[id] = peer
+  const p2pChannel = yield call(createP2PChannel, peer)
+  yield fork(connectP2P, [peer, sendToPeers])
 
   while (true) {
     try {
