@@ -69,7 +69,7 @@ const sitUser = sendToPeers => function* (action) {
       yield put(
         sendToPeers, {
           to: roomId,
-          action: {type: 'PEER_JOINED_SUCCESS', payload: {table}}})
+          action: {type: 'PEER_JOINED_SUCCESS', payload: {player: user}}})
     }
   } catch (e) {
     console.log(e)

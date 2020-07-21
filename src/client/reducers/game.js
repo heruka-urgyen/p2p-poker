@@ -26,8 +26,13 @@ const gameReducer = createReducer(defaultState, {
     s.table = table
     s.round = round
   },
-  REQUEST_ROOM_SUCCESS: (s, {payload: {table}}) => {
+  REQUEST_ROOM_SUCCESS: (s, {payload}) => {
+    const {table, round} = payload.table.players.map(p => {
+      return update(actions => actions.sitPlayer(p))
+    })[payload.table.players.length - 1]
+
     s.table = table
+    s.round = round
   },
   SIT_USER_SUCCESS: (s, {payload: {user}}) => {
     const {table, round} = update(actions => actions.sitPlayer(user))
@@ -36,8 +41,11 @@ const gameReducer = createReducer(defaultState, {
     s.round = round
     s.user = user
   },
-  PEER_JOINED_SUCCESS: (s, {payload: {table}}) => {
+  PEER_JOINED_SUCCESS: (s, {payload: {player}}) => {
+    const {round, table} = update(actions => actions.sitPlayer(player))
+
     s.table = table
+    s.round = round
   },
 })
 
