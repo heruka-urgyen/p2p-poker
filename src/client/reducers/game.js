@@ -25,13 +25,9 @@ const gameReducer = createReducer(defaultState, {
   },
   REQUEST_ROOM_SUCCESS: (_, {payload: {table: {players}}}) => {
     return players.reduce((f, p) => f(p), p => update(actions => actions.sitPlayer(p)))
-    // return players.map(p => update(actions => actions.sitPlayer(p)))[players.length - 1]
   },
   SIT_USER_SUCCESS: (_, {payload: {user}}) => {
     return update(actions => actions.sitPlayer(user))
-  },
-  PEER_JOINED_SUCCESS: (_, {payload: {player}}) => {
-    return update(actions => actions.sitPlayer(player))
   },
 })
 

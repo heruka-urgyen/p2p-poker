@@ -48,28 +48,26 @@ const requestRoom = sendToPeers => function* (action) {
     {to: userId, action: {type: 'REQUEST_ROOM_SUCCESS', payload: {table}}})
 }
 
-const sitUser = sendToPeers => function* (action) {
+const sitUser = sendToPeers => function* ({payload}) {
   try {
-    const {pathname} = action.payload
+    const {pathname} = payload
     const roomId = pathname.slice(1)
     const uid = sessionStorage.getItem('_id')
     const user = {
       type: 'player',
       id: uid || v4(),
       stack: 100,
-      username: action.payload.username,
+      username: payload.username,
     }
 
     sessionStorage.removeItem('_id')
 
-    yield put({type: 'SIT_USER_SUCCESS', payload: {user}})
+    const action = {type: 'SIT_USER_SUCCESS', payload: {user}}
+    yield put(action)
     const table = yield select(s => s.game.table)
 
     if (pathname !== '/') {
-      yield put(
-        sendToPeers, {
-          to: roomId,
-          action: {type: 'PEER_JOINED_SUCCESS', payload: {player: user}}})
+      yield put(sendToPeers, {to: roomId, action})
     }
   } catch (e) {
     console.log(e)
@@ -186,7 +184,6 @@ function* subscribeToHttp() {
   yield takeEvery('SIT_USER', sitUser(sendToPeers))
   yield takeEvery('REQUEST_ROOM', requestRoom(sendToPeers))
   yield takeEvery('SIT_USER_SUCCESS', maybeNextRound(sendToPeers))
-  yield takeEvery('PEER_JOINED_SUCCESS', maybeNextRound(sendToPeers))
   yield takeEvery('NEXT_ROUND', nextRound(sendToPeers))
 }
 
