@@ -14,38 +14,24 @@ const update = f => {
 }
 
 const defaultState = {
-  user: {type: 'guest'},
   table: defaltTable,
 }
 
 const toObject = o => JSON.parse(JSON.stringify(o))
 
 const gameReducer = createReducer(defaultState, {
-  NEW_GAME: (s, _) => {
-    const {table, round} = _game.get()
-    s.table = table
-    s.round = round
+  NEW_GAME: (_) => {
+    return _game.get()
   },
-  REQUEST_ROOM_SUCCESS: (s, {payload}) => {
-    const {table, round} = payload.table.players.map(p => {
-      return update(actions => actions.sitPlayer(p))
-    })[payload.table.players.length - 1]
-
-    s.table = table
-    s.round = round
+  REQUEST_ROOM_SUCCESS: (_, {payload: {table: {players}}}) => {
+    return players.reduce((f, p) => f(p), p => update(actions => actions.sitPlayer(p)))
+    // return players.map(p => update(actions => actions.sitPlayer(p)))[players.length - 1]
   },
-  SIT_USER_SUCCESS: (s, {payload: {user}}) => {
-    const {table, round} = update(actions => actions.sitPlayer(user))
-
-    s.table = table
-    s.round = round
-    s.user = user
+  SIT_USER_SUCCESS: (_, {payload: {user}}) => {
+    return update(actions => actions.sitPlayer(user))
   },
-  PEER_JOINED_SUCCESS: (s, {payload: {player}}) => {
-    const {round, table} = update(actions => actions.sitPlayer(player))
-
-    s.table = table
-    s.round = round
+  PEER_JOINED_SUCCESS: (_, {payload: {player}}) => {
+    return update(actions => actions.sitPlayer(player))
   },
 })
 

@@ -19,7 +19,7 @@ const getInitialState = sendToPeers => function* (action) {
   try {
     const {pathname} = action.payload
     const roomId = pathname.slice(1)
-    const user = yield select(s => s.game.user)
+    const user = yield select(s => s.user)
     const id = user.id || v4()
     sessionStorage.setItem('_id', id)
 
@@ -128,7 +128,7 @@ const bet = socket => function* (action) {
 }
 
 const betSuccess = socket => function* (action) {
-  const user = yield select(state => state.game.user)
+  const user = yield select(state => state.user)
   const {round} = action.payload
 
   if (round.street === 'FLOP' && round.communityCards.length === 0) {
