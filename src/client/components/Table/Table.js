@@ -32,6 +32,7 @@ function Table({user, table, round}) {
               key={1}
               i={1}
               player={player}
+              isCurrentUser={true}
               round={round}
               showWinningCards={showWinningCards} />)}
         </Maybe>
@@ -43,6 +44,7 @@ function Table({user, table, round}) {
                 key={i + 2}
                 i={i + 2}
                 player={player}
+                isCurrentUser={false}
                 round={round}
                 showWinningCards={showWinningCards} />
           )}
