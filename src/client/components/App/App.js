@@ -12,12 +12,12 @@ import {
   useLocation,
 } from 'react-router-dom'
 
+const useMountEffect = f => useEffect(f, [])
+
 function App() {
   const {pathname} = useLocation()
   const dispatch = useDispatch()
-  useEffect(() =>
-    {dispatch({type: 'INITIALIZE', payload: {pathname}}, [])},
-  [dispatch, pathname])
+  useMountEffect(() => {dispatch({type: 'INITIALIZE', payload: {pathname}}, [])})
 
   const [user, table, round] = useSelector(s => [s.user, s.table, s.round])
 
