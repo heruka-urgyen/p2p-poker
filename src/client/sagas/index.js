@@ -23,6 +23,7 @@ const getInitialState = sendToPeers => function* (action) {
     const id = user.id || v4()
     sessionStorage.setItem('_id', id)
 
+    yield put({type: 'NEW_GAME'})
     yield fork(createPeer, [id, sendToPeers])
     yield delay(1000)
 
@@ -70,8 +71,9 @@ const sitUser = sendToPeers => function* (action) {
           to: roomId,
           action: {type: 'PEER_JOINED_SUCCESS', payload: {table}}})
     }
-  } catch ({message}) {
-    yield put({type: 'SIT_USER_FAILURE', payload: {message}})
+  } catch (e) {
+    console.log(e)
+    yield put({type: 'SIT_USER_FAILURE', payload: {message: e.message}})
   }
 }
 
