@@ -34,7 +34,7 @@ const getInitialState = sendToPeers => function* (action) {
           action: {type: 'REQUEST_ROOM', payload: {userId: id}}})
     }
 
-    yield* connectToWebsocket()
+    // yield* connectToWebsocket()
   } catch (e) {
     yield put({type: 'INITIALIZE_FAILURE', payload: e})
   }
@@ -76,17 +76,18 @@ const sitUser = sendToPeers => function* ({payload}) {
 }
 
 const maybeNextRound = sendToPeers => function* (action) {
+  const user = yield select(state => state.user)
   const round = yield select(state => state.game.round)
   const table = yield select(state => state.game.table)
+  const roundFinished = safe(false)(() => round.status === 'FINISHED')
+  const enoughPlayers = table.players.length > 1
+  const userOnButton = user.id === table.players[round.button || 0].id
 
-  if (safe(false)(() => round.status === 'FINISHED') && table.players.length > 1) {
-    yield put({type: 'NEXT_ROUND'})
+  if (roundFinished && enoughPlayers && userOnButton) {
+    const seed = v4()
+    yield* table.players.map(({id}) =>
+      put(sendToPeers, {to: id, action: {type: 'NEXT_ROUND', payload: {seed}}}))
   }
-}
-
-const nextRound = sendToPeers => function* (action) {
-  // yield put(sendToPeers, {type: 'NEXT_ROUND'})
-  // yield apply(socket, socket.emit, ['NEXT_ROUND'])
 }
 
 const nextRoundSuccess = socket => function* (action) {
@@ -184,7 +185,6 @@ function* subscribeToHttp() {
   yield takeEvery('SIT_USER', sitUser(sendToPeers))
   yield takeEvery('REQUEST_ROOM', requestRoom(sendToPeers))
   yield takeEvery('SIT_USER_SUCCESS', maybeNextRound(sendToPeers))
-  yield takeEvery('NEXT_ROUND', nextRound(sendToPeers))
 }
 
 function* subscribe(socket) {

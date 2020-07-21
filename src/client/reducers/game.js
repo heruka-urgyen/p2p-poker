@@ -1,5 +1,5 @@
 import {createReducer, createAction} from '@reduxjs/toolkit'
-import {newGame} from '@heruka_urgyen/poker-solver'
+import {newGame, seededDeck} from '@heruka_urgyen/poker-solver'
 
 const defaltTable = {
   id: "1",
@@ -28,6 +28,9 @@ const gameReducer = createReducer(defaultState, {
   },
   SIT_USER_SUCCESS: (_, {payload: {user}}) => {
     return update(actions => actions.sitPlayer(user))
+  },
+  NEXT_ROUND: (_, {payload: {seed}}) => {
+    return update(actions => actions.newRound(seededDeck(seed)))
   },
 })
 
