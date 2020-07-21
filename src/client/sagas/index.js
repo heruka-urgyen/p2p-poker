@@ -23,7 +23,10 @@ const getInitialState = sendToPeers => function* (action) {
     const id = user.id || v4()
     sessionStorage.setItem('_id', id)
 
-    yield put({type: 'NEW_GAME'})
+    if (user.type === 'guest') {
+      yield put({type: 'NEW_GAME'})
+    }
+
     yield fork(createPeer, [id, sendToPeers])
     yield delay(1000)
 
