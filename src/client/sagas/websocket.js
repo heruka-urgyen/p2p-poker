@@ -7,7 +7,7 @@ import Peer from 'peerjs'
 
 const createWebSocketConnection = () => io('http://localhost:3001')
 
-const P2PSERVER = {host: 'localhost', port: '9000', path: '/poker'}
+const P2PSERVER = {host: 'localhost', port: '9000', path: '/poker', debug: 1}
 const peers = {}
 
 function createSocketChannel(socket) {

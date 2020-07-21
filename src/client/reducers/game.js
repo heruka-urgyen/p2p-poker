@@ -27,7 +27,7 @@ const gameReducer = createReducer(defaultState, {
       game.user = user
     }
   },
-  REQUEST_TABLE_SUCCESS: (game, {payload: {table}}) => {
+  REQUEST_ROOM_SUCCESS: (game, {payload: {table}}) => {
     game.table = table
   },
   SIT_USER_SUCCESS: (game, {payload: {user}}) => {

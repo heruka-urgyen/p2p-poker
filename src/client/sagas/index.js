@@ -17,6 +17,8 @@ import {v4} from 'uuid'
 
 const getInitialState = sendToPeers => function* (action) {
   try {
+    const {pathname} = action.payload
+    const roomId = pathname.slice(1)
     const user = yield select(s => s.game.user)
     const id = user.id || v4()
     sessionStorage.setItem('_id', id)
@@ -24,12 +26,11 @@ const getInitialState = sendToPeers => function* (action) {
     yield fork(createPeer, [id, sendToPeers])
     yield delay(1000)
 
-    if (action.payload.pathname !== '/' && user.type === 'guest') {
+    if (pathname !== '/' && user.type === 'guest') {
       yield put(
-        sendToPeers,
-        {
-          to: action.payload.pathname.slice(1),
-          action: {type: 'REQUEST_TABLE', payload: {userId: id}}})
+        sendToPeers, {
+          to: roomId,
+          action: {type: 'REQUEST_ROOM', payload: {userId: id}}})
     }
 
     yield* connectToWebsocket()
@@ -38,17 +39,18 @@ const getInitialState = sendToPeers => function* (action) {
   }
 }
 
-const getTable = sendToPeers => function* (action) {
-  const id = action.payload.userId
+const requestRoom = sendToPeers => function* (action) {
+  const {userId} = action.payload
   const table = yield select(state => state.game.table)
-
   yield put(
     sendToPeers,
-    {to: id, action: {type: 'REQUEST_TABLE_SUCCESS', payload: {table}}})
+    {to: userId, action: {type: 'REQUEST_ROOM_SUCCESS', payload: {table}}})
 }
 
 const sitUser = sendToPeers => function* (action) {
   try {
+    const {pathname} = action.payload
+    const roomId = pathname.slice(1)
     const uid = sessionStorage.getItem('_id')
     const user = {
       type: 'player',
@@ -62,11 +64,12 @@ const sitUser = sendToPeers => function* (action) {
     yield put({type: 'SIT_USER_SUCCESS', payload: {user}})
     const table = yield select(s => s.game.table)
 
-    yield put(
-      sendToPeers,
-      {
-        to: action.payload.pathname.slice(1),
-        action: {type: 'PEER_JOINED_SUCCESS', payload: {table}}})
+    if (pathname !== '/') {
+      yield put(
+        sendToPeers, {
+          to: roomId,
+          action: {type: 'PEER_JOINED_SUCCESS', payload: {table}}})
+    }
   } catch ({message}) {
     yield put({type: 'SIT_USER_FAILURE', payload: {message}})
   }
@@ -179,7 +182,7 @@ function* subscribeToHttp() {
 
   yield takeEvery('INITIALIZE', getInitialState(sendToPeers))
   yield takeEvery('SIT_USER', sitUser(sendToPeers))
-  yield takeEvery('REQUEST_TABLE', getTable(sendToPeers))
+  yield takeEvery('REQUEST_ROOM', requestRoom(sendToPeers))
   yield takeEvery('SIT_USER_SUCCESS', maybeNextRound(sendToPeers))
   yield takeEvery('PEER_JOINED_SUCCESS', maybeNextRound(sendToPeers))
   yield takeEvery('NEXT_ROUND', nextRound(sendToPeers))
