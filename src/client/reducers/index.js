@@ -1,7 +1,8 @@
 import {combineReducers} from 'redux'
 
-import user from './user'
-import table from './table'
-import round from './round'
+import game from './game'
+// import user from './user'
+// import table from './table'
+// import round from './round'
 
-export default combineReducers({user, table, round})
+export default combineReducers({game})

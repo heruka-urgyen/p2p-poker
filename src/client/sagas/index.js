@@ -17,7 +17,7 @@ import {v4} from 'uuid'
 
 const getInitialState = sendToPeers => function* (action) {
   try {
-    const user = yield select(s => s.user)
+    const user = yield select(s => s.game.user)
     const id = user.id || v4()
     sessionStorage.setItem('_id', id)
 
@@ -29,7 +29,7 @@ const getInitialState = sendToPeers => function* (action) {
         sendToPeers,
         {
           to: action.payload.pathname.slice(1),
-          action: {type: 'GET_TABLE', payload: {userId: id}}})
+          action: {type: 'REQUEST_TABLE', payload: {userId: id}}})
     }
 
     yield* connectToWebsocket()
@@ -40,11 +40,11 @@ const getInitialState = sendToPeers => function* (action) {
 
 const getTable = sendToPeers => function* (action) {
   const id = action.payload.userId
-  const table = yield select(state => state.table)
+  const table = yield select(state => state.game.table)
 
   yield put(
     sendToPeers,
-    {to: id, action: {type: 'GET_TABLE_SUCCESS', payload: {table}}})
+    {to: id, action: {type: 'REQUEST_TABLE_SUCCESS', payload: {table}}})
 }
 
 const sitUser = sendToPeers => function* (action) {
@@ -60,7 +60,7 @@ const sitUser = sendToPeers => function* (action) {
     sessionStorage.removeItem('_id')
 
     yield put({type: 'SIT_USER_SUCCESS', payload: {user}})
-    const table = yield select(s => s.table)
+    const table = yield select(s => s.game.table)
 
     yield put(
       sendToPeers,
@@ -73,8 +73,8 @@ const sitUser = sendToPeers => function* (action) {
 }
 
 const maybeNextRound = sendToPeers => function* (action) {
-  const round = yield select(state => state.round)
-  const table = yield select(state => state.table)
+  const round = yield select(state => state.game.round)
+  const table = yield select(state => state.game.table)
 
   if (safe(false)(() => round.status === 'FINISHED') && table.players.length > 1) {
     yield put({type: 'NEXT_ROUND'})
@@ -107,7 +107,7 @@ const fold = socket => function* (action) {
 }
 
 const foldSuccess = socket => function* (action) {
-  const round = yield select(state => state.round)
+  const round = yield select(state => state.game.round)
 
   if (round.players.length === 1) {
     yield put({type: 'END_ROUND', payload: {winners: [{playerId: round.players[0]}]}})
@@ -123,7 +123,7 @@ const bet = socket => function* (action) {
 }
 
 const betSuccess = socket => function* (action) {
-  const user = yield select(state => state.user)
+  const user = yield select(state => state.game.user)
   const {round} = action.payload
 
   if (round.street === 'FLOP' && round.communityCards.length === 0) {
@@ -145,7 +145,7 @@ const betSuccess = socket => function* (action) {
 }
 
 const showdownSuccess = socket => function* (action) {
-  const round = yield select(state => state.round)
+  const round = yield select(state => state.game.round)
 
   yield delay(3000)
   yield put({type: 'END_ROUND', payload: {winners: round.winners}})
@@ -179,7 +179,7 @@ function* subscribeToHttp() {
 
   yield takeEvery('INITIALIZE', getInitialState(sendToPeers))
   yield takeEvery('SIT_USER', sitUser(sendToPeers))
-  yield takeEvery('GET_TABLE', getTable(sendToPeers))
+  yield takeEvery('REQUEST_TABLE', getTable(sendToPeers))
   yield takeEvery('SIT_USER_SUCCESS', maybeNextRound(sendToPeers))
   yield takeEvery('PEER_JOINED_SUCCESS', maybeNextRound(sendToPeers))
   yield takeEvery('NEXT_ROUND', nextRound(sendToPeers))

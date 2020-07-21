@@ -19,7 +19,7 @@ function App() {
   const dispatch = useDispatch()
   useMountEffect(() => {dispatch({type: 'INITIALIZE', payload: {pathname}}, [])})
 
-  const [user, table, round] = useSelector(s => [s.user, s.table, s.round])
+  const [user, table, round] = useSelector(s => [s.game.user, s.game.table, s.game.round])
 
   return (
     <div className="app">
