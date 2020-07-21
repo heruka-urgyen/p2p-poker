@@ -30,7 +30,11 @@ const gameReducer = createReducer(defaultState, {
     return update(actions => actions.sitPlayer(user))
   },
   NEXT_ROUND: (_, {payload: {seed}}) => {
-    return update(actions => actions.newRound(seededDeck(seed)))
+    return update(
+      actions => actions.newRound(seededDeck(seed)),
+      actions => actions.postBlinds,
+      actions => actions.deal,
+    )
   },
 })
 
