@@ -147,8 +147,16 @@ const maybeDeal = sendToPeers => function* (action) {
   const allIn = round.status === ROUND_STATUS[2]
   const streetFinished = round.streetStatus === STREET_STATUS[1]
 
-  if (!isShowdown && (allIn || streetFinished)) {
-    yield call(broadcast(sendToPeers), {type: 'DEAL'})
+  if (!isShowdown) {
+    if (streetFinished || allIn) {
+      yield call(broadcast(sendToPeers), {type: 'DEAL'})
+    }
+
+    if (allIn) {
+      yield call(maybeEndRound(sendToPeers))
+      yield delay(500)
+      yield call(maybeDeal(sendToPeers))
+    }
   }
 }
 
