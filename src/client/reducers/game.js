@@ -1,5 +1,5 @@
 import {createReducer, createAction} from '@reduxjs/toolkit'
-import {newGame, seededDeck} from '@heruka_urgyen/poker-solver'
+import {newGame, loadGame, seededDeck} from '@heruka_urgyen/poker-solver'
 
 const toObject = o => JSON.parse(JSON.stringify(o))
 
@@ -22,6 +22,10 @@ const defaultState = {
 const gameReducer = createReducer(defaultState, {
   NEW_GAME: (_) => {
     return _game.get()
+  },
+  LOAD_GAME: (s) => {
+    _game = loadGame(toObject(s))
+    return s
   },
   REQUEST_ROOM_SUCCESS: (_, {payload: {table: {players}}}) => {
     return players.reduce((f, p) => f(p), p => update(actions => actions.sitPlayer(p)))

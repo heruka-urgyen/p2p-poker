@@ -27,6 +27,8 @@ const getInitialState = sendToPeers => function* (action) {
 
     if (user.type === 'guest') {
       yield put({type: 'NEW_GAME'})
+    } else {
+      yield put({type: 'LOAD_GAME'})
     }
 
     yield fork(createPeer, [id, sendToPeers])
