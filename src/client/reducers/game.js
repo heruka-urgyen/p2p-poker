@@ -36,6 +36,9 @@ const gameReducer = createReducer(defaultState, {
       actions => actions.deal,
     )
   },
+  DEAL: (_) => {
+    return update(actions => actions.deal)
+  },
   FOLD: (_) => {
     return update(actions => actions.fold)
   },
