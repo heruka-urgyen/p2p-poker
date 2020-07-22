@@ -3,14 +3,14 @@ import Card from '@heruka_urgyen/react-playing-cards'
 import {STREETS} from '@heruka_urgyen/poker-solver'
 
 import Player from './Player'
-import {Maybe} from 'client/util'
+import {Maybe, safe} from 'client/util'
 
 import chip from 'client/images/poker-chip.svg'
 
 const showCard = c => c.rank + c.suit
 const showWinningCards = round => card => {
-  const isWinner = round.winners.filter
-    (w => w.hand.value.cards.map(showCard).indexOf(showCard(card)) > -1).length > 0
+  const isWinner = safe(false)(() => round.winners.filter
+    (w => w.hand.value.cards.map(showCard).indexOf(showCard(card)) > -1).length > 0)
   const isShowdown = round.street === STREETS[4]
 
   return (isShowdown? 'showdown' : '') + (isWinner? ' winner' : '')
