@@ -39,7 +39,7 @@ const getInitialState = sendToPeers => function* (action) {
           action: {type: 'REQUEST_ROOM', payload: {userId: id}}})
     }
 
-
+    yield call(maybeNextRound(sendToPeers))
     // yield* connectToWebsocket()
   } catch (e) {
     yield put({type: 'INITIALIZE_FAILURE', payload: e})
