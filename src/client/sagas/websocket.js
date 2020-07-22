@@ -27,12 +27,9 @@ function createSocketChannel(socket) {
 function createP2PChannel(peer) {
   return eventChannel(emit => {
     peer.on('connection', connection => {
-      connection.on('open', () => {
-        connection.on('data', data => {
-          emit(data)
-        })
+      connection.on('data', data => {
+        emit(data)
       })
-
     })
 
     return () => {}

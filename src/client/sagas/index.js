@@ -30,6 +30,7 @@ const getInitialState = sendToPeers => function* (action) {
     }
 
     yield fork(createPeer, [id, sendToPeers])
+    yield delay(500)
 
     if (pathname !== '/' && user.type === 'guest') {
       yield put(
@@ -37,6 +38,7 @@ const getInitialState = sendToPeers => function* (action) {
           to: roomId,
           action: {type: 'REQUEST_ROOM', payload: {userId: id}}})
     }
+
 
     // yield* connectToWebsocket()
   } catch (e) {
