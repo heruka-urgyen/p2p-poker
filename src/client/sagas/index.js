@@ -68,7 +68,6 @@ const sitUser = sendToPeers => function* ({payload}) {
 
     const action = {type: 'SIT_USER_SUCCESS', payload: {user}}
     yield put(action)
-    const table = yield select(s => s.game.table)
 
     if (pathname !== '/') {
       yield put(sendToPeers, {to: roomId, action})
@@ -124,37 +123,42 @@ const foldSuccess = sendToPeers => function* (action) {
 }
 
 const maybeEndRound = sendToPeers => function* (action) {
-  const players = yield select(state => state.game.round.players)
+  const round = yield select(state => state.game.round)
+  const isShowdown = round.street === STREETS[4]
+  const allIn = round.status === ROUND_STATUS[2]
+  const isRiver = round.street === STREETS[3]
+  const streetFinished = round.streetStatus === STREET_STATUS[1]
+  const canEndRound =
+    round.players.length === 1 || isShowdown || (allIn && isRiver && streetFinished)
 
-  if (players.length === 1) {
+  if (canEndRound) {
+    yield call(broadcast(sendToPeers), {type: 'GET_WINNERS'})
+    yield delay(3000)
     yield call(broadcast(sendToPeers), {type: 'END_ROUND'})
+    yield call(broadcast(sendToPeers), {type: 'END_ROUND_SUCCESS'})
   }
 }
 
-const endRound = socket => function* (action) {
-  yield apply(socket, socket.emit, ['END_ROUND', action])
-}
-
-const bet = sendToPeers => function* ({payload}) {
-  yield call(broadcast(sendToPeers), {type: 'BET', payload})
-  yield delay(500)
-  yield put({type: 'BET_SUCCESS'})
-}
-
-const betSuccess = sendToPeers => function* (action) {
+const maybeDeal = sendToPeers => function* (action) {
   const round = yield select(state => state.game.round)
-  const allIn = round.status === ROUND_STATUS[2]
-  const isRiver = round.street === STREETS[3]
   const isShowdown = round.street === STREETS[4]
+  const allIn = round.status === ROUND_STATUS[2]
   const streetFinished = round.streetStatus === STREET_STATUS[1]
 
   if (!isShowdown && (allIn || streetFinished)) {
     yield call(broadcast(sendToPeers), {type: 'DEAL'})
   }
+}
 
-  if (isShowdown || (allIn && isRiver && streetFinished)) {
-    yield call(broadcast(sendToPeers), {type: 'END_ROUND'})
-  }
+const bet = sendToPeers => function* ({payload}) {
+  yield call(broadcast(sendToPeers), {type: 'BET', payload})
+  yield delay(100)
+  yield put({type: 'BET_SUCCESS'})
+}
+
+const betSuccess = sendToPeers => function* (action) {
+  yield call(maybeDeal(sendToPeers))
+  yield call(maybeEndRound(sendToPeers))
 }
 
 const showdownSuccess = socket => function* (action) {
@@ -194,6 +198,7 @@ function* subscribeToHttp() {
   yield takeEvery('SIT_USER', sitUser(sendToPeers))
   yield takeEvery('REQUEST_ROOM', requestRoom(sendToPeers))
   yield takeEvery('SIT_USER_SUCCESS', maybeNextRound(sendToPeers))
+  yield takeEvery('END_ROUND_SUCCESS', maybeNextRound(sendToPeers))
   yield takeEvery('ATTEMPT_FOLD', fold(sendToPeers))
   yield takeEvery('FOLD_SUCCESS', foldSuccess(sendToPeers))
   yield takeEvery('ATTEMPT_BET', bet(sendToPeers))
@@ -205,8 +210,7 @@ function* subscribe(socket) {
   yield takeEvery('POST_BLINDS', postBlinds(socket))
   yield takeEvery('POST_BLINDS_SUCCESS', postBlindsSuccess(socket))
   yield takeEvery('DEAL_CARDS', dealCards(socket))
-  yield takeEvery('END_ROUND', endRound(socket))
-  yield takeEvery('END_ROUND_SUCCESS', maybeNextRound(socket))
+  // yield takeEvery('END_ROUND', endRound(socket))
   yield takeEvery('SHOWDOWN_SUCCESS', showdownSuccess(socket))
   yield takeEvery('PLAYER_TIMEOUT_ON', playerTimeout(socket))
   // yield takeEvery('PLAYER_TIMEOUT_OFF', function* () {yield cancel(playerTimeout)})
