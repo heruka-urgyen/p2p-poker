@@ -131,30 +131,13 @@ const endRound = socket => function* (action) {
   yield apply(socket, socket.emit, ['END_ROUND', action])
 }
 
-const bet = socket => function* (action) {
-  yield apply(socket, socket.emit, ['BET', action])
+const bet = sendToPeers => function* ({payload}) {
+  const peers = yield select(state => state.game.table.players)
+  yield* peers.map(({id}) => put(sendToPeers, {to: id, action: {type: 'BET', payload}}))
+  yield put({type: 'BET_SUCCESS'})
 }
 
-const betSuccess = socket => function* (action) {
-  const user = yield select(state => state.user)
-  const {round} = action.payload
-
-  if (round.street === 'FLOP' && round.communityCards.length === 0) {
-    yield put({type: 'DEAL_CARDS'})
-  }
-
-  if (round.street === 'TURN' && round.communityCards.length === 3) {
-    yield put({type: 'DEAL_CARDS'})
-  }
-
-  if (round.street === 'RIVER' && round.communityCards.length === 4) {
-    yield put({type: 'DEAL_CARDS'})
-  }
-
-  if (round.status === 'ALL_IN' && round.players.indexOf(user.id) === round.nextPlayer) {
-    yield delay(500)
-    yield put({type: 'BET', payload: {player: user, amount: 0}})
-  }
+const betSuccess = sendToPeers => function* (action) {
 }
 
 const showdownSuccess = socket => function* (action) {
@@ -196,6 +179,8 @@ function* subscribeToHttp() {
   yield takeEvery('SIT_USER_SUCCESS', maybeNextRound(sendToPeers))
   yield takeEvery('ATTEMPT_FOLD', fold(sendToPeers))
   yield takeEvery('FOLD_SUCCESS', foldSuccess(sendToPeers))
+  yield takeEvery('ATTEMPT_BET', bet(sendToPeers))
+  yield takeEvery('BET_SUCCESS', betSuccess(sendToPeers))
 }
 
 function* subscribe(socket) {
@@ -205,8 +190,6 @@ function* subscribe(socket) {
   yield takeEvery('DEAL_CARDS', dealCards(socket))
   yield takeEvery('END_ROUND', endRound(socket))
   yield takeEvery('END_ROUND_SUCCESS', maybeNextRound(socket))
-  yield takeEvery('BET', bet(socket))
-  yield takeEvery('BET_SUCCESS', betSuccess(socket))
   yield takeEvery('SHOWDOWN_SUCCESS', showdownSuccess(socket))
   yield takeEvery('PLAYER_TIMEOUT_ON', playerTimeout(socket))
   // yield takeEvery('PLAYER_TIMEOUT_OFF', function* () {yield cancel(playerTimeout)})
