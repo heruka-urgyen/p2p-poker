@@ -1,5 +1,5 @@
 import {createReducer, createAction} from '@reduxjs/toolkit'
-import {newGame, loadGame, seededDeck} from '@heruka_urgyen/poker-solver'
+import {newGame, loadGame, seededDeck, ROUND_STATUS} from '@heruka_urgyen/poker-solver'
 
 const toObject = o => JSON.parse(JSON.stringify(o))
 
@@ -49,10 +49,16 @@ const gameReducer = createReducer(defaultState, {
   BET: (_, {payload: {amount}}) => {
     return update(actions => actions.bet(amount))
   },
-  GET_WINNERS: (_) => {
+  GET_WINNERS: (s) => {
+    if (s.round.winners.length > 0) {
+      return s
+    }
     return update(actions => actions.getWinners)
   },
-  END_ROUND: (_) => {
+  END_ROUND: (s) => {
+    if (s.round.status === ROUND_STATUS[1]) {
+      return s
+    }
     return update(actions => actions.endRound)
   },
 })
