@@ -17,6 +17,7 @@ function Login({table}) {
 
   const tableIsFull = players.length === maxPlayers
   const submitIsDisabled = formValues.username.length === 0 || tableIsFull
+  const submitLabel = pathname === '/'? 'Create table' : 'Sit at this table'
 
   return (
     <div>
@@ -37,7 +38,7 @@ function Login({table}) {
           className="login-form__submit"
           disabled={submitIsDisabled}
           type="submit"
-          value="Sit at this table" />
+          value={submitLabel} />
       </form>
     </div>
   )
