@@ -22,7 +22,7 @@ function Main({user, table, round}) {
   const minBet = getMinBet({round, user, stack})
   const controlsDisabled = round.status === 'FINISHED'
     || round.street === 'SHOWDOWN'
-    || safe(true)(() => round.players[round.nextPlayer] !== user.id)
+    || safe(true)(() => round.nextPlayer !== user.id)
 
   return (
     <main>
