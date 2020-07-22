@@ -45,8 +45,11 @@ const gameReducer = createReducer(defaultState, {
   BET: (_, {payload: {amount}}) => {
     return update(actions => actions.bet(amount))
   },
+  GET_WINNERS: (_) => {
+    return update(actions => actions.getWinners)
+  },
   END_ROUND: (_) => {
-    return update(actions => actions.getWinners, actions => actions.endRound)
+    return update(actions => actions.endRound)
   },
 })
 
