@@ -144,11 +144,16 @@ const bet = sendToPeers => function* ({payload}) {
 const betSuccess = sendToPeers => function* (action) {
   const round = yield select(state => state.game.round)
   const allIn = round.status === ROUND_STATUS[2]
+  const isRiver = round.street === STREETS[3]
   const isShowdown = round.street === STREETS[4]
   const streetFinished = round.streetStatus === STREET_STATUS[1]
 
   if (!isShowdown && (allIn || streetFinished)) {
     yield call(broadcast(sendToPeers), {type: 'DEAL'})
+  }
+
+  if (isShowdown || (allIn && isRiver && streetFinished)) {
+    yield call(broadcast(sendToPeers), {type: 'END_ROUND'})
   }
 }
 
