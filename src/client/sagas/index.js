@@ -116,6 +116,7 @@ const dealCards = socket => function* (action) {
 
 const fold = sendToPeers => function* (action) {
   yield call(broadcast(sendToPeers), {type: 'FOLD'})
+  yield delay(500)
   yield put({type: 'FOLD_SUCCESS'})
 }
 
