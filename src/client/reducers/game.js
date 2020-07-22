@@ -39,6 +39,9 @@ const gameReducer = createReducer(defaultState, {
   FOLD: (_) => {
     return update(actions => actions.fold)
   },
+  END_ROUND: (_) => {
+    return update(actions => actions.getWinners, actions => actions.endRound)
+  },
 })
 
 export const sitUser = createAction('SIT_USER')
