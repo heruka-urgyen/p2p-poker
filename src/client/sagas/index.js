@@ -1,5 +1,6 @@
 import {channel} from 'redux-saga'
 import {
+  all,
   fork,
   apply,
   race,
@@ -78,6 +79,11 @@ const sitUser = sendToPeers => function* ({payload}) {
   }
 }
 
+const broadcast = sendToPeers => function* (action) {
+  const peers = yield select(state => state.game.table.players)
+  yield all(peers.map(({id}) => put(sendToPeers, {to: id, action})))
+}
+
 const maybeNextRound = sendToPeers => function* (action) {
   const user = yield select(state => state.user)
   const round = yield select(state => state.game.round)
@@ -88,8 +94,7 @@ const maybeNextRound = sendToPeers => function* (action) {
 
   if (roundFinished && enoughPlayers && userOnButton) {
     const seed = v4()
-    yield* table.players.map(({id}) =>
-      put(sendToPeers, {to: id, action: {type: 'NEXT_ROUND', payload: {seed}}}))
+    yield call(broadcast(sendToPeers), {type: 'NEXT_ROUND', payload: {seed}})
   }
 }
 
@@ -110,8 +115,7 @@ const dealCards = socket => function* (action) {
 }
 
 const fold = sendToPeers => function* (action) {
-  const players = yield select(state => state.game.table.players)
-  yield* players.map(({id}) => put(sendToPeers, {to: id, action: {type: 'FOLD'}}))
+  yield call(broadcast(sendToPeers), {type: 'FOLD'})
   yield put({type: 'FOLD_SUCCESS'})
 }
 
@@ -121,10 +125,9 @@ const foldSuccess = sendToPeers => function* (action) {
 
 const maybeEndRound = sendToPeers => function* (action) {
   const players = yield select(state => state.game.round.players)
-  const peers = yield select(state => state.game.table.players)
 
   if (players.length === 1) {
-    yield* peers.map(({id}) => put(sendToPeers, {to: id, action: {type: 'END_ROUND'}}))
+    yield call(broadcast(sendToPeers), {type: 'END_ROUND'})
   }
 }
 
@@ -133,23 +136,20 @@ const endRound = socket => function* (action) {
 }
 
 const bet = sendToPeers => function* ({payload}) {
-  const peers = yield select(state => state.game.table.players)
-  yield* peers.map(({id}) => put(sendToPeers, {to: id, action: {type: 'BET', payload}}))
+  yield call(broadcast(sendToPeers), {type: 'BET', payload})
   yield delay(500)
   yield put({type: 'BET_SUCCESS'})
 }
 
 const betSuccess = sendToPeers => function* (action) {
-  const peers = yield select(state => state.game.table.players)
   const round = yield select(state => state.game.round)
   const allIn = round.status === ROUND_STATUS[2]
   const isShowdown = round.street === STREETS[4]
   const streetFinished = round.streetStatus === STREET_STATUS[1]
 
   if (!isShowdown && (allIn || streetFinished)) {
-    yield* peers.map(({id}) => put(sendToPeers, {to: id, action: {type: 'DEAL'}}))
+    yield call(broadcast(sendToPeers), {type: 'DEAL'})
   }
-
 }
 
 const showdownSuccess = socket => function* (action) {
