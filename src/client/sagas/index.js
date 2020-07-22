@@ -89,12 +89,15 @@ const maybeNextRound = sendToPeers => function* (action) {
   const table = yield select(state => state.game.table)
   const roundFinished = safe(false)(() => round.status === 'FINISHED')
   const enoughPlayers = table.players.length > 1
-  const button = isNaN(round.button)? 0 : (round.button + 1) % round.players.length
-  const userOnButton = user.id === table.players[button].id
 
-  if (roundFinished && enoughPlayers && userOnButton) {
-    const seed = v4()
-    yield call(broadcast(sendToPeers), {type: 'NEXT_ROUND', payload: {seed}})
+  if (roundFinished && enoughPlayers) {
+    const button = isNaN(round.button)? 0 : (round.button + 1) % round.players.length
+    const userOnButton = user.id === table.players[button].id
+
+    if (userOnButton) {
+      const seed = v4()
+      yield call(broadcast(sendToPeers), {type: 'NEXT_ROUND', payload: {seed}})
+    }
   }
 }
 
