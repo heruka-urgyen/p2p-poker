@@ -1,5 +1,6 @@
 import React from 'react'
 import Card from '@heruka_urgyen/react-playing-cards'
+import {STREETS} from '@heruka_urgyen/poker-solver'
 
 import Player from './Player'
 import {Maybe} from 'client/util'
@@ -10,7 +11,7 @@ const showCard = c => c.rank + c.suit
 const showWinningCards = round => card => {
   const isWinner = round.winners.filter
     (w => w.hand.value.cards.map(showCard).indexOf(showCard(card)) > -1).length > 0
-  const isShowdown = round.street === 'SHOWDOWN'
+  const isShowdown = round.street === STREETS[4]
 
   return (isShowdown? 'showdown' : '') + (isWinner? ' winner' : '')
 }
@@ -34,7 +35,7 @@ function Table({user, table, round}) {
               player={player}
               isCurrentUser={true}
               round={round}
-              showWinningCards={showWinningCards} />)}
+              showWinningCards={showWinningCards(round)} />)}
         </Maybe>
         <Maybe cond={table.players.length > 0}>
           {() => table.players
@@ -46,7 +47,7 @@ function Table({user, table, round}) {
                 player={player}
                 isCurrentUser={false}
                 round={round}
-                showWinningCards={showWinningCards} />
+                showWinningCards={showWinningCards(round)} />
           )}
         </Maybe>
       </ul>
