@@ -10,6 +10,7 @@ import {
   select,
   delay,
 } from 'redux-saga/effects'
+import {ROUND_STATUS, STREETS, STREET_STATUS} from '@heruka_urgyen/poker-solver'
 
 import {connectToWebsocket, createPeer} from './websocket'
 import {safe} from 'client/util'
@@ -134,10 +135,21 @@ const endRound = socket => function* (action) {
 const bet = sendToPeers => function* ({payload}) {
   const peers = yield select(state => state.game.table.players)
   yield* peers.map(({id}) => put(sendToPeers, {to: id, action: {type: 'BET', payload}}))
+  yield delay(500)
   yield put({type: 'BET_SUCCESS'})
 }
 
 const betSuccess = sendToPeers => function* (action) {
+  const peers = yield select(state => state.game.table.players)
+  const round = yield select(state => state.game.round)
+  const allIn = round.status === ROUND_STATUS[2]
+  const isShowdown = round.street === STREETS[4]
+  const streetFinished = round.streetStatus === STREET_STATUS[1]
+
+  if (!isShowdown && (allIn || streetFinished)) {
+    yield* peers.map(({id}) => put(sendToPeers, {to: id, action: {type: 'DEAL'}}))
+  }
+
 }
 
 const showdownSuccess = socket => function* (action) {
