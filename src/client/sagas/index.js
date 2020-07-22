@@ -115,11 +115,16 @@ const fold = sendToPeers => function* (action) {
 }
 
 const foldSuccess = sendToPeers => function* (action) {
-  // const round = yield select(state => state.game.round)
-  //
-  // if (round.players.length === 1) {
-  //   yield put({type: 'END_ROUND', payload: {winners: [{playerId: round.players[0]}]}})
-  // }
+  yield call(maybeEndRound(sendToPeers), action)
+}
+
+const maybeEndRound = sendToPeers => function* (action) {
+  const players = yield select(state => state.game.round.players)
+  const peers = yield select(state => state.game.table.players)
+
+  if (players.length === 1) {
+    yield* peers.map(({id}) => put(sendToPeers, {to: id, action: {type: 'END_ROUND'}}))
+  }
 }
 
 const endRound = socket => function* (action) {
