@@ -36,10 +36,13 @@ const gameReducer = createReducer(defaultState, {
       actions => actions.deal,
     )
   },
+  FOLD: (_) => {
+    return update(actions => actions.fold)
+  },
 })
 
 export const sitUser = createAction('SIT_USER')
-export const fold = createAction('FOLD')
+export const fold = createAction('ATTEMPT_FOLD')
 export const bet = createAction('BET')
 
 export default gameReducer

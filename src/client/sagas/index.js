@@ -108,16 +108,18 @@ const dealCards = socket => function* (action) {
   yield apply(socket, socket.emit, ['DEAL_CARDS'])
 }
 
-const fold = socket => function* (action) {
-  yield apply(socket, socket.emit, ['FOLD', action])
+const fold = sendToPeers => function* (action) {
+  const players = yield select(state => state.game.table.players)
+  yield* players.map(({id}) => put(sendToPeers, {to: id, action: {type: 'FOLD'}}))
+  yield put({type: 'FOLD_SUCCESS'})
 }
 
-const foldSuccess = socket => function* (action) {
-  const round = yield select(state => state.game.round)
-
-  if (round.players.length === 1) {
-    yield put({type: 'END_ROUND', payload: {winners: [{playerId: round.players[0]}]}})
-  }
+const foldSuccess = sendToPeers => function* (action) {
+  // const round = yield select(state => state.game.round)
+  //
+  // if (round.players.length === 1) {
+  //   yield put({type: 'END_ROUND', payload: {winners: [{playerId: round.players[0]}]}})
+  // }
 }
 
 const endRound = socket => function* (action) {
@@ -187,6 +189,8 @@ function* subscribeToHttp() {
   yield takeEvery('SIT_USER', sitUser(sendToPeers))
   yield takeEvery('REQUEST_ROOM', requestRoom(sendToPeers))
   yield takeEvery('SIT_USER_SUCCESS', maybeNextRound(sendToPeers))
+  yield takeEvery('ATTEMPT_FOLD', fold(sendToPeers))
+  yield takeEvery('FOLD_SUCCESS', foldSuccess(sendToPeers))
 }
 
 function* subscribe(socket) {
@@ -194,8 +198,6 @@ function* subscribe(socket) {
   yield takeEvery('POST_BLINDS', postBlinds(socket))
   yield takeEvery('POST_BLINDS_SUCCESS', postBlindsSuccess(socket))
   yield takeEvery('DEAL_CARDS', dealCards(socket))
-  yield takeEvery('FOLD', fold(socket))
-  yield takeEvery('FOLD_SUCCESS', foldSuccess(socket))
   yield takeEvery('END_ROUND', endRound(socket))
   yield takeEvery('END_ROUND_SUCCESS', maybeNextRound(socket))
   yield takeEvery('BET', bet(socket))

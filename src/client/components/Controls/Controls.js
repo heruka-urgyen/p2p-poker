@@ -2,7 +2,7 @@ import React, {useState} from 'react'
 import {useDispatch} from 'react-redux'
 import Draggable from 'react-draggable'
 
-import {fold, bet} from 'client/reducers/round'
+import {fold, bet} from 'client/reducers/game'
 
 function Controls({round, player, stack, minBet, isDisabled}) {
   const dispatch = useDispatch()
