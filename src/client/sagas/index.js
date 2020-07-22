@@ -144,8 +144,11 @@ const maybeEndRound = sendToPeers => function* (action) {
     yield call(broadcast(sendToPeers), {type: 'GET_WINNERS'})
     yield delay(3000)
     yield call(broadcast(sendToPeers), {type: 'END_ROUND'})
-    yield call(broadcast(sendToPeers), {type: 'END_ROUND_SUCCESS'})
   }
+}
+const endRound = sendToPeers => function* (action) {
+  const players = yield select(s => s.game.table.players)
+  yield put({type: 'END_ROUND_SUCCESS', payload: {players}})
 }
 
 const maybeDeal = sendToPeers => function* (action) {
@@ -220,6 +223,7 @@ function* subscribeToHttp() {
   yield takeEvery('FOLD_SUCCESS', foldSuccess(sendToPeers))
   yield takeEvery('ATTEMPT_BET', bet(sendToPeers))
   yield takeEvery('BET_SUCCESS', betSuccess(sendToPeers))
+  yield takeEvery('END_ROUND', endRound(sendToPeers))
 }
 
 function* subscribe(socket) {
@@ -227,7 +231,6 @@ function* subscribe(socket) {
   yield takeEvery('POST_BLINDS', postBlinds(socket))
   yield takeEvery('POST_BLINDS_SUCCESS', postBlindsSuccess(socket))
   yield takeEvery('DEAL_CARDS', dealCards(socket))
-  // yield takeEvery('END_ROUND', endRound(socket))
   yield takeEvery('SHOWDOWN_SUCCESS', showdownSuccess(socket))
   yield takeEvery('PLAYER_TIMEOUT_ON', playerTimeout(socket))
   // yield takeEvery('PLAYER_TIMEOUT_OFF', function* () {yield cancel(playerTimeout)})

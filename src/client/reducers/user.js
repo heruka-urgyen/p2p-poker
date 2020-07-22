@@ -6,6 +6,12 @@ const userReducer = createReducer(defaultState, {
     if (s.type !== 'guest') {return s}
     return user
   },
+  END_ROUND_SUCCESS: (s, {payload: {players}}) => {
+    if (!players.find(p => p.id === s.id)) {
+      return defaultState
+    }
+    return s
+  },
 })
 
 export default userReducer
