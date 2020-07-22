@@ -17,6 +17,7 @@ import {
 } from 'redux-persist'
 import storage from 'redux-persist/lib/storage/session'
 import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2'
+import {createLogger} from 'redux-logger'
 
 import saga from './sagas'
 import reducer from './reducers'
@@ -33,6 +34,10 @@ const persistConfig = {
   stateReconciler: autoMergeLevel2,
 }
 
+const logger = createLogger({
+  collapsed: true,
+})
+
 const persistedReducer = persistReducer(persistConfig, reducer)
 const store = configureStore({
   reducer: persistedReducer,
@@ -40,7 +45,7 @@ const store = configureStore({
     serializableCheck: {
       ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER]
     }
-  }), sagaMiddleware],
+  }), sagaMiddleware, logger],
 })
 
 sagaMiddleware.run(saga)
