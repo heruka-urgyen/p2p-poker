@@ -7,7 +7,7 @@ const userReducer = createReducer(defaultState, {
     return user
   },
   END_ROUND_SUCCESS: (s, {payload: {players}}) => {
-    if (!players.find(p => p.id === s.id)) {
+    if (players.length === 1) {
       return defaultState
     }
     return s

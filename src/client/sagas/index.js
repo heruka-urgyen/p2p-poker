@@ -149,6 +149,10 @@ const maybeEndRound = sendToPeers => function* (action) {
 const endRound = sendToPeers => function* (action) {
   const players = yield select(s => s.game.table.players)
   yield put({type: 'END_ROUND_SUCCESS', payload: {players}})
+
+  if (players.length === 1) {
+    yield call(() => window.location.href = '/')
+  }
 }
 
 const maybeDeal = sendToPeers => function* (action) {
