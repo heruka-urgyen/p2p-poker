@@ -39,6 +39,9 @@ const gameReducer = createReducer(defaultState, {
   FOLD: (_) => {
     return update(actions => actions.fold)
   },
+  BET: (_, {payload: {amount}}) => {
+    return update(actions => actions.bet(amount))
+  },
   END_ROUND: (_) => {
     return update(actions => actions.getWinners, actions => actions.endRound)
   },
@@ -46,6 +49,6 @@ const gameReducer = createReducer(defaultState, {
 
 export const sitUser = createAction('SIT_USER')
 export const fold = createAction('ATTEMPT_FOLD')
-export const bet = createAction('BET')
+export const bet = createAction('ATTEMPT_BET')
 
 export default gameReducer
