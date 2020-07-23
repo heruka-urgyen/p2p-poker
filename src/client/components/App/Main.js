@@ -6,7 +6,7 @@ import {Maybe, safe} from 'client/util'
 
 const getMinBet = ({round, user, stack}) => {
   if (round.status !== 'IN_PROGRESS') {
-    return null
+    return 0
   }
 
   if (round.bets.length === 0) {
@@ -27,7 +27,7 @@ function Main({user, table, round}) {
   return (
     <main>
       <Table user={user} table={table} round={round} />
-      <Maybe cond={minBet != null}>
+      <Maybe cond={table.players.length > 1}>
         <Controls
           round={round}
           player={user}
