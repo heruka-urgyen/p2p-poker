@@ -3,17 +3,38 @@
   width: 100%;
 }
 
-.table-waiting {
+.empty-table {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
   height: 100%;
-  width: 100%;
+  margin: 0 auto;
+  width: 50%;
   z-index: 5;
 
-  font-size: 100px;
   color: white;
   text-align: center;
+}
+
+.empty-table__header {
+  flex: 1;
+  font-size: 80px;
+}
+
+.empty-table__description {
+  flex: 1;
+  font-size: 40px;
+}
+
+.empty-table__url {
+  flex: 2;
+  font-size: 40px;
+}
+
+.empty-table__url-input {
+  font-size: 30px;
+  line-height: 40px;
+  height: 40px;
+  width: 100%;
 }
 
 .players {

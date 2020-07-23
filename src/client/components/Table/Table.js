@@ -3,6 +3,7 @@ import Card from '@heruka_urgyen/react-playing-cards'
 import {STREETS} from '@heruka_urgyen/poker-solver'
 
 import Player from './Player'
+import EmptyTable from './EmptyTable'
 import {Maybe, safe} from 'client/util'
 
 import chip from 'client/images/poker-chip.svg'
@@ -22,9 +23,7 @@ function Table({user, table, round}) {
   return (
     <div className="table">
       <Maybe cond={table.players.length < 2}>
-        <div className="table-waiting">
-          Waiting for players...
-        </div>
+        <EmptyTable />
       </Maybe>
       <ul className="players">
         <Maybe cond={user.type !== 'guest' && !!player}>
