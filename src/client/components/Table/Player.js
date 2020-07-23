@@ -1,5 +1,6 @@
 import React from 'react'
 import Card from '@heruka_urgyen/react-playing-cards'
+import {STREETS} from '@heruka_urgyen/poker-solver'
 
 import {Maybe, safe} from 'client/util'
 
@@ -8,8 +9,10 @@ import chip from 'client/images/poker-chip.svg'
 function Player({i, player, isCurrentUser, round, showWinningCards}) {
   const buttonPlayerId = safe(null)(() => round.players[round.button])
   const bet = safe({})(() => round.bets.filter(b => b.playerId === player.id)[0])
+  const isShowdown = round.street === STREETS[4]
+
   const cards = safe([])(() => round.cards.filter(c => c.fst === player.id).map(c => {
-    if (isCurrentUser) {return c.snd}
+    if (isCurrentUser || isShowdown) {return c.snd}
     return [{type: 'hidden'}, {type: 'hidden'}]
   })[0])
   const timeout = safe(0)(() => player.timeout)
