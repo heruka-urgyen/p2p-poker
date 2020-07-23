@@ -33,6 +33,7 @@ function Login({table}) {
           className="login-form__username"
           placeholder="your name"
           type="text"
+          autoFocus
           onChange={e => updateName({username: e.target.value})} />
         <input
           className="login-form__submit"
