@@ -25,6 +25,7 @@ const getInitialState = sendToPeers => function* (action) {
     const id = user.id || v4()
     sessionStorage.setItem('_id', id)
 
+    yield put({type: 'ROOM_LOADING'})
     if (user.type === 'guest') {
       yield put({type: 'NEW_GAME'})
     } else {
@@ -32,13 +33,31 @@ const getInitialState = sendToPeers => function* (action) {
     }
 
     yield fork(createPeer, [id, sendToPeers])
-    yield delay(500)
+
+    if (pathname === '/') {
+      yield put({type: 'ROOM_LOADED'})
+    }
 
     if (pathname !== '/' && user.type === 'guest') {
-      yield put(
-        sendToPeers, {
-          to: roomId,
-          action: {type: 'REQUEST_ROOM', payload: {userId: id}}})
+      yield call(function* retryRequestRoom() {
+        yield put(
+          sendToPeers, {
+            to: roomId,
+            action: {type: 'REQUEST_ROOM', payload: {userId: id}}})
+
+        const {task, retry} = yield race({
+          task: take('REQUEST_ROOM_SUCCESS'),
+          retry: delay(500)
+        })
+
+        if (retry) {
+          yield call(retryRequestRoom)
+        }
+
+        if (task) {
+          yield put({type: 'ROOM_LOADED'})
+        }
+      })
     }
 
     yield call(maybeNextRound(sendToPeers))
@@ -141,9 +160,14 @@ const maybeEndRound = sendToPeers => function* (action) {
     round.players.length === 1 || isShowdown || (allIn && isRiver && streetFinished)
 
   if (canEndRound) {
-    yield call(broadcast(sendToPeers), {type: 'GET_WINNERS'})
-    yield delay(2500)
-    yield call(broadcast(sendToPeers), {type: 'END_ROUND'})
+    if (round.players.length === 1) {
+      yield put({type: 'GET_WINNERS'})
+      yield put({type: 'END_ROUND'})
+    } else {
+      yield call(broadcast(sendToPeers), {type: 'GET_WINNERS'})
+      yield delay(2500)
+      yield call(broadcast(sendToPeers), {type: 'END_ROUND'})
+    }
   }
 }
 const endRound = sendToPeers => function* (action) {
@@ -219,6 +243,18 @@ const playerTimeout = socket => function* (action) {
   }
 }
 
+const peerDisconnected = sendToPeers => function* () {
+  const user = yield select(s => s.user)
+  const players = yield select(s => s.game.round.players)
+  const id = players.find(id => id !== user.id)
+
+  yield put({type: 'LEAVE_GAME', payload: {id}})
+  yield delay(100)
+  yield call(maybeEndRound(sendToPeers))
+  yield delay(1000)
+  yield put({type: 'CLEAR_ERROR'})
+}
+
 function* subscribeToHttp() {
   const sendToPeers = yield call(channel)
 
@@ -232,6 +268,7 @@ function* subscribeToHttp() {
   yield takeEvery('ATTEMPT_BET', bet(sendToPeers))
   yield takeEvery('BET_SUCCESS', betSuccess(sendToPeers))
   yield takeEvery('END_ROUND', endRound(sendToPeers))
+  yield takeEvery('PEER_DISCONNECTED', peerDisconnected(sendToPeers))
 }
 
 function* subscribe(socket) {

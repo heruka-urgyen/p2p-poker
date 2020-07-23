@@ -9,7 +9,7 @@ const handleSubmitForm = dispatch => formValues => e => {
   dispatch(sitUser(formValues))
 }
 
-function Login({table}) {
+function Login({table, loading}) {
   const {pathname} = useLocation()
   const dispatch = useDispatch()
   const [formValues, updateName] = useState({username: ""})
@@ -18,6 +18,11 @@ function Login({table}) {
   const tableIsFull = players.length === maxPlayers
   const submitIsDisabled = formValues.username.length === 0 || tableIsFull
   const submitLabel = pathname === '/'? 'Create table' : 'Sit at this table'
+  const header = loading?
+    'Loading...' :
+    tableIsFull?
+      'Table is full' :
+      `${players.length} / ${maxPlayers} players`
 
   return (
     <div>
@@ -26,13 +31,12 @@ function Login({table}) {
         className="login-form"
         onSubmit={handleSubmitForm(dispatch)({...formValues, pathname})}>
 
-        <h1>
-          {tableIsFull? "Table is full" : `${players.length} / ${maxPlayers} players`}
-        </h1>
+        <h1>{header}</h1>
         <input
           className="login-form__username"
           placeholder="your name"
           type="text"
+          disabled={loading}
           autoFocus
           onChange={e => updateName({username: e.target.value})} />
         <input
