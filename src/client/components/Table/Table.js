@@ -12,9 +12,9 @@ const showCard = c => c.rank + c.suit
 const showWinningCards = round => card => {
   const isWinner = safe(false)(() => round.winners.filter
     (w => w.hand.value.cards.map(showCard).indexOf(showCard(card)) > -1).length > 0)
-  const isShowdown = round.street === STREETS[4]
+  const hasWinners = round.winners.length > 0
 
-  return (isShowdown? 'showdown' : '') + (isWinner? ' winner' : '')
+  return (hasWinners? 'showdown' : '') + (isWinner? ' winner' : '')
 }
 
 function Table({user, table, round}) {
