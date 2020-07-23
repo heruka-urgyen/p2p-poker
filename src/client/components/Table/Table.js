@@ -1,6 +1,6 @@
 import React from 'react'
 import Card from '@heruka_urgyen/react-playing-cards'
-import {STREETS} from '@heruka_urgyen/poker-solver'
+import {showCard} from '@heruka_urgyen/poker-solver'
 
 import Player from './Player'
 import EmptyTable from './EmptyTable'
@@ -8,7 +8,6 @@ import {Maybe, safe} from 'client/util'
 
 import chip from 'client/images/poker-chip.svg'
 
-const showCard = c => c.rank + c.suit
 const showWinningCards = round => card => {
   const isWinner = safe(false)(() => round.winners.filter
     (w => w.hand.value.cards.map(showCard).indexOf(showCard(card)) > -1).length > 0)
