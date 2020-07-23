@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@heruka_urgyen/poker-solver": "3.2.2",
-    "@heruka_urgyen/react-playing-cards": "^0.2.0",
+    "@heruka_urgyen/react-playing-cards": "^0.3.0",
     "@reduxjs/toolkit": "^1.4.0",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
