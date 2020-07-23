@@ -21,7 +21,7 @@ function Player({i, player, isCurrentUser, round, showWinningCards}) {
           {cards.map((c, i) =>
             <li
               key={`card__${i + 1}`}
-              className={`card card__${i + 1} ${showWinningCards(c)}`}>
+              className={`card__${i + 1} ${showWinningCards(c)}`}>
               <Card card={c.rank + c.suit} back={c.type === 'hidden'} />
             </li>
           )}

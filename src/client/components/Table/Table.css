@@ -182,6 +182,10 @@
   filter: invert(45%) sepia(100%) saturate(0%);
 }
 
+.card__back.showdown {
+  filter: none;
+}
+
 .card.winner {
   filter: none;
   z-index: 2;
