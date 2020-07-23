@@ -88,12 +88,12 @@ const broadcast = sendToPeers => function* (action) {
 }
 
 const maybeNextRound = sendToPeers => function* (action) {
+  yield delay(100)
   const user = yield select(state => state.user)
   const round = yield select(state => state.game.round)
   const table = yield select(state => state.game.table)
   const roundFinished = safe(false)(() => round.status === 'FINISHED')
   const enoughPlayers = table.players.length > 1
-
   if (roundFinished && enoughPlayers) {
     const button = isNaN(round.button)? 0 : (round.button + 1) % round.players.length
     const userOnButton = user.id === table.players[button].id
@@ -148,11 +148,14 @@ const maybeEndRound = sendToPeers => function* (action) {
 }
 const endRound = sendToPeers => function* (action) {
   const players = yield select(s => s.game.table.players)
-  yield delay(500)
   yield put({type: 'END_ROUND_SUCCESS', payload: {players}})
 
   if (players.length === 1) {
-    yield call(() => window.location.href = '/')
+    yield delay(100)
+    const user = yield select(s => s.user)
+    if (user.id !== players[0].id) {
+      yield call(() => window.location.href = players[0].id)
+    }
   }
 }
 
