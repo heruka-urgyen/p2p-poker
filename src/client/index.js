@@ -53,11 +53,9 @@ sagaMiddleware.run(saga)
 ReactDOM.render(
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistStore(store)}>
-      <React.StrictMode>
-        <Router>
-          <App />
-        </Router>
-      </React.StrictMode>
+      <Router>
+        <App />
+      </Router>
     </PersistGate>
   </Provider>,
   document.getElementById('root')
