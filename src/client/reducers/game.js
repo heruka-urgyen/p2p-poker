@@ -3,24 +3,25 @@ import {newGame, loadGame, seededDeck, ROUND_STATUS} from '@heruka_urgyen/poker-
 
 const toObject = o => JSON.parse(JSON.stringify(o))
 
-const defaltTable = {
+const defaultTable = {
   id: "1",
   maxPlayers: 2,
   players: [],
 }
 
-let _game = newGame(defaltTable)
+let _game
 const update = (...fs) => {
   _game = fs.reduce((s, f) => s.update(f), _game)
   return toObject(_game.get())
 }
 
 const defaultState = {
-  table: defaltTable,
+  table: defaultTable,
 }
 
 const gameReducer = createReducer(defaultState, {
   NEW_GAME: (_) => {
+    _game = newGame(defaultTable)
     return _game.get()
   },
   LOAD_GAME: (s) => {
