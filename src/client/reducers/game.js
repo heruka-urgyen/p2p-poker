@@ -31,8 +31,9 @@ const gameReducer = createReducer(defaultState, {
   LEAVE_GAME: (s, {payload: {id}}) => {
     return update(actions => actions.leave(id))
   },
-  REQUEST_ROOM_SUCCESS: (_, {payload: {table: {players}}}) => {
-    return players.reduce((f, p) => f(p), p => update(actions => actions.sitPlayer(p)))
+  REQUEST_ROOM_SUCCESS: (_, {payload: {game}}) => {
+    _game =  loadGame(game)
+    return toObject(_game.get())
   },
   SIT_USER_SUCCESS: (_, {payload: {user}}) => {
     return update(actions => actions.sitPlayer(user))

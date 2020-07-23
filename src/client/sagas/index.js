@@ -50,10 +50,10 @@ const getInitialState = sendToPeers => function* (action) {
 
 const requestRoom = sendToPeers => function* (action) {
   const {userId} = action.payload
-  const table = yield select(state => state.game.table)
+  const game = yield select(state => state.game)
   yield put(
     sendToPeers,
-    {to: userId, action: {type: 'REQUEST_ROOM_SUCCESS', payload: {table}}})
+    {to: userId, action: {type: 'REQUEST_ROOM_SUCCESS', payload: {game}}})
 }
 
 const sitUser = sendToPeers => function* ({payload}) {
