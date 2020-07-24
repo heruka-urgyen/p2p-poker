@@ -3,6 +3,7 @@ import React from 'react'
 import Table from 'client/components/Table'
 import Controls from 'client/components/Controls'
 import {Maybe, safe} from 'client/util'
+import {ROUND_STATUS, STREETS} from '@heruka_urgyen/poker-solver'
 
 const getMinBet = ({round, user, stack}) => {
   if (round.status !== 'IN_PROGRESS') {
@@ -20,8 +21,9 @@ const getMinBet = ({round, user, stack}) => {
 function Main({user, table, round}) {
   const stack = safe(0)(() => table.players.find(p => p.id === user.id).stack)
   const minBet = getMinBet({round, user, stack})
-  const controlsDisabled = round.status === 'FINISHED'
-    || round.street === 'SHOWDOWN'
+  const controlsDisabled = round.status === ROUND_STATUS[1]
+    || round.status === ROUND_STATUS[2]
+    || round.street === STREETS[4]
     || safe(true)(() => round.nextPlayer !== user.id)
 
   return (
