@@ -16,10 +16,11 @@ import {ROUND_STATUS, STREETS, STREET_STATUS} from '@heruka_urgyen/poker-solver'
 import {connectToWebsocket, createPeer} from './websocket'
 import {safe} from 'client/util'
 import {v4} from 'uuid'
+import history from '../history'
 
 const getInitialState = sendToPeers => function* (action) {
   try {
-    const {pathname} = action.payload
+    const {pathname} = history.location
     const roomId = pathname.slice(1)
     const user = yield select(s => s.user)
     const id = user.id || v4()
@@ -103,11 +104,6 @@ const sitUser = sendToPeers => function* ({payload}) {
 }
 
 const sitUserSuccess = sendToPeers => function* ({payload: {user}}) {
-  const currentUser = yield select(s => s.user)
-
-  if (currentUser.id !== user.id) {
-    yield call(requestRoom(sendToPeers), {payload: {userId: user.id}})
-  }
   yield call(maybeNextRound(sendToPeers))
 }
 
@@ -188,9 +184,14 @@ const endRound = sendToPeers => function* (action) {
   yield put({type: 'END_ROUND_SUCCESS', payload: {players}})
 
   if (players.length === 1) {
-    yield delay(100)
-    if (window.location.pathname.slice(1) !== players[0].id) {
-      yield call(() => window.location.href = players[0].id)
+    if (history.location.pathname.slice(1) !== players[0].id) {
+      yield call(() => history.replace(`/${players[0].id}`))
+    }
+
+    const user = yield select(s => s.user)
+
+    if (user.type === 'guest') {
+      yield put({type: 'INITIALIZE'})
     }
   }
 }
