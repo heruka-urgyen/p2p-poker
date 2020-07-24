@@ -189,8 +189,7 @@ const endRound = sendToPeers => function* (action) {
 
   if (players.length === 1) {
     yield delay(100)
-    const user = yield select(s => s.user)
-    if (user.id !== players[0].id) {
+    if (window.location.pathname.slice(1) !== players[0].id) {
       yield call(() => window.location.href = players[0].id)
     }
   }
