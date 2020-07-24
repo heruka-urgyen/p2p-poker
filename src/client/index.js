@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import {Provider} from 'react-redux'
 import {configureStore, getDefaultMiddleware} from '@reduxjs/toolkit'
 import createSagaMiddleware from 'redux-saga'
-import {BrowserRouter as Router} from 'react-router-dom'
+import {Router} from 'react-router-dom'
 import {PersistGate} from 'redux-persist/integration/react'
 import {
   persistStore,
@@ -19,6 +19,7 @@ import storage from 'redux-persist/lib/storage/session'
 import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2'
 import {createLogger} from 'redux-logger'
 
+import history from './history'
 import saga from './sagas'
 import reducer from './reducers'
 
@@ -53,7 +54,7 @@ sagaMiddleware.run(saga)
 ReactDOM.render(
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistStore(store)}>
-      <Router>
+      <Router history={history}>
         <App />
       </Router>
     </PersistGate>
