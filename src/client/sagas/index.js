@@ -167,8 +167,10 @@ const maybeEndRound = sendToPeers => function* (action) {
   const allIn = round.status === ROUND_STATUS[2]
   const isRiver = round.street === STREETS[3]
   const streetFinished = round.streetStatus === STREET_STATUS[1]
-  const canEndRound =
-    round.players.length === 1 || isShowdown || (allIn && isRiver && streetFinished)
+  const canEndRound = round.status !== ROUND_STATUS[1]
+    && (round.players.length === 1
+    || isShowdown
+    || (allIn && isRiver && streetFinished))
 
   if (canEndRound) {
     if (table.players.length === 1) {
@@ -196,9 +198,10 @@ const endRound = sendToPeers => function* (action) {
 
 const maybeDeal = sendToPeers => function* (action) {
   const round = yield select(state => state.game.round)
-  const isShowdown = round.street === STREETS[4]
-  const allIn = round.status === ROUND_STATUS[2]
   const streetFinished = round.streetStatus === STREET_STATUS[1]
+  const isShowdown = round.street === STREETS[4]
+    || (round.street === STREETS[3] && streetFinished)
+  const allIn = round.status === ROUND_STATUS[2]
 
   if (!isShowdown) {
     if (streetFinished || allIn) {
