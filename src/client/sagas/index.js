@@ -26,6 +26,7 @@ const getInitialState = sendToPeers => function* (action) {
     sessionStorage.setItem('_id', id)
 
     yield put({type: 'ROOM_LOADING'})
+
     if (user.type === 'guest') {
       yield put({type: 'NEW_GAME'})
     } else {
@@ -47,7 +48,7 @@ const getInitialState = sendToPeers => function* (action) {
 
         const {task, retry} = yield race({
           task: take('REQUEST_ROOM_SUCCESS'),
-          retry: delay(500)
+          retry: delay(1000),
         })
 
         if (retry) {
@@ -99,6 +100,15 @@ const sitUser = sendToPeers => function* ({payload}) {
     console.log(e)
     yield put({type: 'SIT_USER_FAILURE', payload: {message: e.message}})
   }
+}
+
+const sitUserSuccess = sendToPeers => function* ({payload: {user}}) {
+  const currentUser = yield select(s => s.user)
+
+  if (currentUser.id !== user.id) {
+    yield call(requestRoom(sendToPeers), {payload: {userId: user.id}})
+  }
+  yield call(maybeNextRound(sendToPeers))
 }
 
 const broadcast = sendToPeers => function* (action) {
@@ -262,7 +272,7 @@ function* subscribeToHttp() {
   yield takeEvery('INITIALIZE', getInitialState(sendToPeers))
   yield takeEvery('SIT_USER', sitUser(sendToPeers))
   yield takeEvery('REQUEST_ROOM', requestRoom(sendToPeers))
-  yield takeEvery('SIT_USER_SUCCESS', maybeNextRound(sendToPeers))
+  yield takeEvery('SIT_USER_SUCCESS', sitUserSuccess(sendToPeers))
   yield takeEvery('END_ROUND_SUCCESS', maybeNextRound(sendToPeers))
   yield takeEvery('ATTEMPT_FOLD', fold(sendToPeers))
   yield takeEvery('FOLD_SUCCESS', foldSuccess(sendToPeers))
