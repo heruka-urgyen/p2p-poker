@@ -41,7 +41,7 @@ function Controls({round, player, stack, minBet, isDisabled}) {
             min={minBet}
             max={stack}
             value={betAmount || minBet}
-            onChange={e => updateBet(e.target.value)}
+            onChange={e => updateBet(Math.min(e.target.value, stack))}
             disabled={isDisabled}
           />
         </div>
@@ -61,7 +61,8 @@ function Controls({round, player, stack, minBet, isDisabled}) {
           <button
             className="controls__button"
             disabled={isDisabled || minBet > parseInt(betAmount)}
-            onClick={_ => dispatch(bet({player, amount: parseInt(betAmount)}))}
+            onClick={_ =>
+              dispatch(bet({player, amount: Math.min(parseInt(betAmount), stack)}))}
           >Bet</button>
         </div>
       </div>
