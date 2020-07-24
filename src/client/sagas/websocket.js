@@ -92,12 +92,7 @@ function* timer([sendToPeers, id, length]) {
       yield call(broadcastTimer, seconds)
 
       if (seconds === 0) {
-        yield all(players.map(id => put(
-          sendToPeers,
-          {
-            to: id,
-            action: {type: 'FOLD'}
-          })))
+        yield put({type: 'ATTEMPT_FOLD'})
       }
     }
   } catch (e) {

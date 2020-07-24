@@ -151,6 +151,7 @@ const foldSuccess = sendToPeers => function* (action) {
 }
 
 const maybeEndRound = sendToPeers => function* (action) {
+  const table = yield select(state => state.game.table)
   const round = yield select(state => state.game.round)
   const isShowdown = round.street === STREETS[4]
   const allIn = round.status === ROUND_STATUS[2]
@@ -160,12 +161,12 @@ const maybeEndRound = sendToPeers => function* (action) {
     round.players.length === 1 || isShowdown || (allIn && isRiver && streetFinished)
 
   if (canEndRound) {
-    if (round.players.length === 1) {
+    if (table.players.length === 1) {
       yield put({type: 'GET_WINNERS'})
       yield put({type: 'END_ROUND'})
     } else {
       yield call(broadcast(sendToPeers), {type: 'GET_WINNERS'})
-      yield delay(2500)
+      if (isShowdown) {yield delay(2500)}
       yield call(broadcast(sendToPeers), {type: 'END_ROUND'})
     }
   }
