@@ -72,9 +72,15 @@ const getInitialState = sendToPeers => function* () {
 const requestRoom = sendToPeers => function* (action) {
   const {userId} = action.payload
   const game = yield select(state => state.game)
-  yield put(
-    sendToPeers,
-    {to: userId, action: {type: 'REQUEST_ROOM_SUCCESS', payload: {game}}})
+
+  if (game.round.status !== ROUND_STATUS[1]) {
+    yield delay(500)
+    yield call(requestRoom(sendToPeers), action)
+  } else {
+    yield put(
+      sendToPeers,
+      {to: userId, action: {type: 'REQUEST_ROOM_SUCCESS', payload: {game}}})
+  }
 }
 
 const sitUser = sendToPeers => function* ({payload}) {
