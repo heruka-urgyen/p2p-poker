@@ -18,7 +18,7 @@ import {safe} from 'client/util'
 import {v4} from 'uuid'
 import history from '../history'
 
-const getInitialState = sendToPeers => function* (action) {
+const getInitialState = sendToPeers => function* () {
   try {
     const {pathname} = history.location
     const roomId = pathname.slice(1)
@@ -302,7 +302,7 @@ function* subscribe(socket) {
 
 function* mainSaga() {
   yield* subscribeToHttp()
-  // yield* initialize()
+  yield put({type: 'INITIALIZE'})
 }
 
 export {subscribe}
