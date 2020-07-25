@@ -1,4 +1,4 @@
-import {flush, delay, all, select, cancel, apply, fork, take, put, call} from 'redux-saga/effects'
+import {cancelled, flush, delay, all, select, cancel, apply, fork, take, put, call} from 'redux-saga/effects'
 import {END, eventChannel} from 'redux-saga'
 import {subscribe} from './index.js'
 
@@ -9,10 +9,11 @@ import Peer from 'peerjs'
 
 const createWebSocketConnection = () => io('http://localhost:3001')
 
-const P2PSERVER = {host: 'localhost', port: '9000', path: '/poker', debug: 1}
+const P2PSERVER = {host: 'localhost', port: '9000', path: '/poker', debug: 2}
 const peers = {}
 let turnTimerTask
 const TURN_LENGTH = 30
+let sendToPeersTask
 
 function createSocketChannel(socket) {
   return eventChannel(emit => {
@@ -29,28 +30,37 @@ function createSocketChannel(socket) {
 }
 
 function createP2PChannel(peer) {
+  const handleError = emit => () => {
+    emit({type: 'PEER_DISCONNECTED', payload: {message: 'Peer disconnected'}})
+  }
+
+  const handleConnection = emit => connection => {
+    connection.on('data', data => {
+      emit(data)
+    })
+  }
+
   return eventChannel(emit => {
-    peer.on('error', () => {
-      emit({type: 'PEER_DISCONNECTED', payload: {message: 'Peer disconnected'}})
-    })
+    peer.on('error', handleError(emit))
+    peer.on('connection', handleConnection(emit))
 
-    peer.on('connection', connection => {
-      connection.on('data', data => {
-        emit(data)
-      })
-    })
-
-    return () => {}
+    return () => {
+      peer.off('error', handleError(emit))
+      peer.off('connection', handleConnection(emit))
+    }
   })
 }
 
 function connectionOnOpen(connection) {
+  const handleConnectionOpen = emit => () => {
+    emit(connection)
+  }
+
   return eventChannel(emit => {
-    connection.on('open', () => {
-      emit(connection)
-    })
+    connection.on('open', handleConnectionOpen(emit))
 
     return () => {
+      connection.off('open', handleConnectionOpen(emit))
     }
   })
 }
@@ -99,6 +109,9 @@ function* timer([sendToPeers, id, length]) {
     console.error('timer error', e)
   } finally {
     yield put({type: 'UPDATE_TURN_TIMER', payload: {username, seconds: 0}})
+    if (yield cancelled()) {
+      ch.close()
+    }
   }
 }
 
@@ -110,6 +123,10 @@ export function* connectP2P([peer, sendToPeers]) {
       if (peer._id === to) {
         yield put(action)
       } else {
+        if (safe(false)(() => peer.connections[to].length > 2)) {
+          peer.connections[to][0].close()
+        }
+
         const connection = yield apply(peer, peer.connect, [to])
         const c = yield take(yield call(connectionOnOpen, connection))
 
@@ -138,7 +155,15 @@ export function* createPeer([id, sendToPeers]) {
   const peer = yield call(() => new Peer(id, P2PSERVER))
   peers[id] = peer
   const p2pChannel = yield call(createP2PChannel, peer)
-  let sendToPeersTask = yield fork(connectP2P, [peer, sendToPeers])
+
+  if (sendToPeersTask) {
+    yield cancel(sendToPeersTask)
+  }
+
+  sendToPeersTask = yield fork(connectP2P, [peer, sendToPeers])
+
+  yield call(() =>
+    Object.keys(peers).filter(pid => pid !== id).forEach(pid => {peers[pid].destroy()}))
 
   while (true) {
     try {
@@ -158,6 +183,10 @@ export function* createPeer([id, sendToPeers]) {
       yield put(action)
     } catch(err) {
       console.error('p2p error:', err)
+    } finally {
+      if (yield cancelled()) {
+        p2pChannel.close()
+      }
     }
   }
 }

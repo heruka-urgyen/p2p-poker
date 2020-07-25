@@ -1,5 +1,6 @@
 import {channel} from 'redux-saga'
 import {
+  cancel,
   all,
   fork,
   apply,
@@ -18,6 +19,7 @@ import {safe} from 'client/util'
 import {v4} from 'uuid'
 import history from '../history'
 
+let peerTask
 const getInitialState = sendToPeers => function* () {
   try {
     const {pathname} = history.location
@@ -34,7 +36,11 @@ const getInitialState = sendToPeers => function* () {
       yield put({type: 'LOAD_GAME'})
     }
 
-    yield fork(createPeer, [id, sendToPeers])
+    if (peerTask) {
+      cancel(peerTask)
+    }
+
+    peerTask = yield fork(createPeer, [id, sendToPeers])
 
     if (pathname === '/') {
       yield put({type: 'ROOM_LOADED'})
