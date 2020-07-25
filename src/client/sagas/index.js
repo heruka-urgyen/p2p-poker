@@ -2,24 +2,29 @@ import {channel} from 'redux-saga'
 import {
   cancel,
   all,
-  fork,
-  apply,
-  race,
   call,
+  delay,
+  fork,
   put,
+  race,
+  select,
   take,
   takeEvery,
-  select,
-  delay,
 } from 'redux-saga/effects'
 import {ROUND_STATUS, STREETS, STREET_STATUS} from '@heruka_urgyen/poker-solver'
-
-import {connectToWebsocket, createPeer} from './websocket'
-import {safe} from 'client/util'
 import {v4} from 'uuid'
-import history from '../history'
+
+import {createPeer} from './websocket'
+import {safe} from 'client/util'
+import history from 'client/history'
 
 let peerTask
+
+const broadcast = sendToPeers => function* (action) {
+  const peers = yield select(state => state.game.table.players)
+  yield all(peers.map(({id}) => put(sendToPeers, {to: id, action})))
+}
+
 const getInitialState = sendToPeers => function* () {
   try {
     const {pathname} = history.location
@@ -69,7 +74,6 @@ const getInitialState = sendToPeers => function* () {
     }
 
     yield call(maybeNextRound(sendToPeers))
-    // yield* connectToWebsocket()
   } catch (e) {
     yield put({type: 'INITIALIZE_FAILURE', payload: e})
   }
@@ -119,11 +123,6 @@ const sitUserSuccess = sendToPeers => function* ({payload: {user}}) {
   yield call(maybeNextRound(sendToPeers))
 }
 
-const broadcast = sendToPeers => function* (action) {
-  const peers = yield select(state => state.game.table.players)
-  yield all(peers.map(({id}) => put(sendToPeers, {to: id, action})))
-}
-
 const maybeNextRound = sendToPeers => function* (action) {
   yield delay(100)
   const user = yield select(state => state.user)
@@ -140,22 +139,6 @@ const maybeNextRound = sendToPeers => function* (action) {
       yield call(broadcast(sendToPeers), {type: 'NEXT_ROUND', payload: {seed}})
     }
   }
-}
-
-const nextRoundSuccess = socket => function* (action) {
-  yield put({type: 'POST_BLINDS'})
-}
-
-const postBlinds = socket => function* (action) {
-  yield apply(socket, socket.emit, ['POST_BLINDS'])
-}
-
-const postBlindsSuccess = socket => function* (action) {
-  yield put({type: 'DEAL_CARDS'})
-}
-
-const dealCards = socket => function* (action) {
-  yield apply(socket, socket.emit, ['DEAL_CARDS'])
 }
 
 const fold = sendToPeers => function* (action) {
@@ -191,6 +174,7 @@ const maybeEndRound = sendToPeers => function* (action) {
     }
   }
 }
+
 const endRound = sendToPeers => function* (action) {
   const players = yield select(s => s.game.table.players)
   yield put({type: 'END_ROUND_SUCCESS', payload: {players}})
@@ -239,36 +223,6 @@ const betSuccess = sendToPeers => function* (action) {
   yield call(maybeEndRound(sendToPeers))
 }
 
-const showdownSuccess = socket => function* (action) {
-  const round = yield select(state => state.game.round)
-
-  yield delay(3000)
-  yield put({type: 'END_ROUND', payload: {winners: round.winners}})
-}
-
-const playerTimeout = socket => function* (action) {
-  const {playerId, timeoutLength} = action.payload
-  let run = true
-
-  while (run) {
-    yield race({
-      task: call(update),
-      cancel: take('PLAYER_TIMEOUT_OFF')
-    })
-
-
-    yield put({type: 'UPDATE_PLAYER_TIMEOUT', payload: {playerId, value: 0}})
-    run = false
-  }
-
-  function* update() {
-    for (let i = timeoutLength / 1000; i > 0; i = i - 1) {
-      yield put({type: 'UPDATE_PLAYER_TIMEOUT', payload: {playerId, value: i}})
-      yield delay(1000)
-    }
-  }
-}
-
 const peerDisconnected = sendToPeers => function* () {
   const user = yield select(s => s.user)
   const players = yield select(s => s.game.round.players)
@@ -281,7 +235,7 @@ const peerDisconnected = sendToPeers => function* () {
   yield put({type: 'CLEAR_ERROR'})
 }
 
-function* subscribeToHttp() {
+function* subscribe() {
   const sendToPeers = yield call(channel)
 
   yield takeEvery('INITIALIZE', getInitialState(sendToPeers))
@@ -297,23 +251,8 @@ function* subscribeToHttp() {
   yield takeEvery('PEER_DISCONNECTED', peerDisconnected(sendToPeers))
 }
 
-function* subscribe(socket) {
-  yield takeEvery('NEXT_ROUND_SUCCESS', nextRoundSuccess(socket))
-  yield takeEvery('POST_BLINDS', postBlinds(socket))
-  yield takeEvery('POST_BLINDS_SUCCESS', postBlindsSuccess(socket))
-  yield takeEvery('DEAL_CARDS', dealCards(socket))
-  yield takeEvery('SHOWDOWN_SUCCESS', showdownSuccess(socket))
-  yield takeEvery('PLAYER_TIMEOUT_ON', playerTimeout(socket))
-  // yield takeEvery('PLAYER_TIMEOUT_OFF', function* () {yield cancel(playerTimeout)})
-}
-
-// function* initialize() {
-//   const maybeUser = yield call(sessionStorage.getItem.bind(sessionStorage), 'currentUser')
-//   yield put({type: 'INITIALIZE', payload: {maybeUser}})
-// }
-
 function* mainSaga() {
-  yield* subscribeToHttp()
+  yield* subscribe()
   yield put({type: 'INITIALIZE'})
 }
 

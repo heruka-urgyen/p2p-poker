@@ -10,7 +10,7 @@ function Controls({round, player, stack, minBet, isDisabled}) {
   const [betAmount, updateBet] = useState(minBet)
 
   return (
-    <Draggable>
+    <Draggable cancel=".bet-size__slider, .bet-size__input, .controls__button">
       <div className="controls">
         <div className="controls__adjust-bet">
           <button

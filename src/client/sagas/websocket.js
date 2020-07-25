@@ -1,33 +1,27 @@
-import {cancelled, flush, delay, all, select, cancel, apply, fork, take, put, call} from 'redux-saga/effects'
+import {
+  all,
+  apply,
+  call,
+  cancel,
+  cancelled,
+  delay,
+  flush,
+  fork,
+  put,
+  select,
+  take,
+} from 'redux-saga/effects'
 import {END, eventChannel} from 'redux-saga'
-import {subscribe} from './index.js'
+import Peer from 'peerjs'
 
 import {safe} from 'client/util'
 
-import io from 'socket.io-client'
-import Peer from 'peerjs'
-
-const createWebSocketConnection = () => io('http://localhost:3001')
-
 const P2PSERVER = {host: 'localhost', port: '9000', path: '/poker', debug: 2}
 const peers = {}
-let turnTimerTask
 const TURN_LENGTH = 30
+
+let turnTimerTask
 let sendToPeersTask
-
-function createSocketChannel(socket) {
-  return eventChannel(emit => {
-    const handler = (type, {payload}) => {
-      emit({type, payload})
-    }
-
-    socket.on('message', handler)
-
-    return () => {
-      socket.off('message', handler)
-    }
-  })
-}
 
 function createP2PChannel(peer) {
   const handleError = emit => () => {
@@ -115,7 +109,7 @@ function* timer([sendToPeers, id, length]) {
   }
 }
 
-export function* connectP2P([peer, sendToPeers]) {
+function* connectP2P([peer, sendToPeers]) {
   while (true) {
     try {
       const {to, action} = yield take(sendToPeers)
@@ -187,22 +181,6 @@ export function* createPeer([id, sendToPeers]) {
       if (yield cancelled()) {
         p2pChannel.close()
       }
-    }
-  }
-}
-
-export function* connectToWebsocket() {
-  const socket = yield call(createWebSocketConnection)
-  const socketChannel = yield call(createSocketChannel, socket)
-
-  yield fork(subscribe, socket)
-
-  while (true) {
-    try {
-      const action = yield take(socketChannel)
-      yield put(action)
-    } catch(err) {
-      console.error('socket error:', err)
     }
   }
 }
