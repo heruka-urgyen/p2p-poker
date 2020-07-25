@@ -24,8 +24,11 @@ let turnTimerTask
 let sendToPeersTask
 
 function createP2PChannel(peer) {
-  const handleError = emit => () => {
-    emit({type: 'PEER_DISCONNECTED', payload: {message: 'Peer disconnected'}})
+  const handleError = emit => e => {
+    if (e.type === 'peer-unavailable') {
+      const id = e.message.match(/(\S+)$/)[0]
+      emit({type: 'PEER_DISCONNECTED', payload: {message: 'Peer disconnected', id}})
+    }
   }
 
   const handleConnection = emit => connection => {

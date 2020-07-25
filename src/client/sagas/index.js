@@ -223,11 +223,7 @@ const betSuccess = sendToPeers => function* (action) {
   yield call(maybeEndRound(sendToPeers))
 }
 
-const peerDisconnected = sendToPeers => function* () {
-  const user = yield select(s => s.user)
-  const players = yield select(s => s.game.round.players)
-  const id = players.find(id => id !== user.id)
-
+const peerDisconnected = sendToPeers => function* ({payload: {id}}) {
   yield put({type: 'LEAVE_GAME', payload: {id}})
   yield delay(100)
   yield call(maybeEndRound(sendToPeers))
