@@ -19,7 +19,7 @@ function Login({table, loading}) {
   const submitIsDisabled = formValues.username.length === 0 || tableIsFull
   const submitLabel = pathname === '/'? 'Create table' : 'Sit at this table'
   const header = loading?
-    'Loading...' :
+    'Connecting...' :
     tableIsFull?
       'Table is full' :
       `${players.length} / ${maxPlayers} players`
