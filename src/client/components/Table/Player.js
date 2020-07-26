@@ -21,7 +21,7 @@ function Player({i, player, isCurrentUser, round, showWinningCards}) {
 
   return (
     <li className={`player player__${i}`}>
-      <Maybe cond={cards.length > 0}>
+      <div className="player--cards-name">
         <ul className="hole-cards">
           {cards.map((c, i) =>
             <li
@@ -34,24 +34,30 @@ function Player({i, player, isCurrentUser, round, showWinningCards}) {
             </li>
           )}
         </ul>
-      </Maybe>
-      <div className="player-name-wrapper">
-        <label className="player-name">{player.username}</label>
-        <label className="player-stack">${player.stack}</label>
-      </div>
-      <Maybe cond={() => buttonPlayerId === player.id}>
-        <label className={`dealer-button dealer-button__${i}`}>D</label>
-      </Maybe>
-      <Maybe cond={!!bet.amount}>
-        <div className={`bet bet__${i}`}>
-          <div className="chips">
-            <img className={`chip chip__1`} src={chip} alt="chip" />
-            <img className={`chip chip__2`} src={chip} alt="chip" />
-            <img className={`chip chip__3`} src={chip} alt="chip" />
-          </div>
-          <label className="bet-amount">{bet.amount}</label>
+        <div className="player-name-wrapper">
+          <label className="player-name">{player.username}</label>
+          <label className="player-stack">${player.stack}</label>
         </div>
-      </Maybe>
+      </div>
+      <div className="player--button-bet">
+        <label
+          className={`
+            dealer-button
+            ${buttonPlayerId === player.id || 'dealer-button__hidden '}
+            dealer-button__${i}`}>
+          D
+        </label>
+        <Maybe cond={!!bet.amount}>
+          <div className={`bet bet__${i}`}>
+            <div className="chips">
+              <img className={`chip chip__1`} src={chip} alt="chip" />
+              <img className={`chip chip__2`} src={chip} alt="chip" />
+              <img className={`chip chip__3`} src={chip} alt="chip" />
+            </div>
+            <label className="bet-amount">{bet.amount}</label>
+          </div>
+        </Maybe>
+      </div>
     </li>
   )
 }

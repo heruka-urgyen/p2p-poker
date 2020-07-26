@@ -1,6 +1,8 @@
 .table {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   height: 100%;
-  width: 100%;
 }
 
 .empty-table {
@@ -38,6 +40,9 @@
 }
 
 .players {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   position: relative;
   height: 100%;
   margin: 0;
@@ -47,24 +52,30 @@
 }
 
 .player {
-  position: absolute;
   height: 250px;
   width: 300px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
 
   text-align: center;
 }
 
   .player__1 {
-    bottom: 20px;
-    left: calc(50% - 150px);
+    order: 2;
   }
 
   .player__2 {
-    top: 20px;
-    left: calc(50% - 150px);
+    order: 1;
+    flex-direction: row-reverse;
+  }
+
+  .player__2 .player--cards-name {
     flex-direction: column-reverse;
+  }
+
+  .player__2 .player--button-bet {
+    flex-direction: column;
+    padding: 0 20px 40px;
   }
 
 .player-name-wrapper {
@@ -90,8 +101,15 @@
   color: #fefefe;
 }
 
+.player--button-bet {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: space-between;
+  padding: 55px 20px 40px;
+}
+
 .dealer-button {
-  position: absolute;
   height: 20px;
   width: 20px;
 
@@ -107,29 +125,9 @@
   background: #E9EAEC;
 }
 
-  .dealer-button__1 {
-    right: -90px;
-    bottom: 20px;
-  }
-
-  .dealer-button__2 {
-    left: -90px;
-    top: 20px;
-  }
-
-.bet {
-  position: absolute;
+.dealer-button__hidden {
+  visibility: hidden;
 }
-
-  .bet__1 {
-    top: 60px;
-    right: -80px;
-  }
-
-  .bet__2 {
-    bottom: 0;
-    left: -80px;
-  }
 
 .bet-amount {
   display: block;
@@ -270,12 +268,8 @@
 
 @media all and (max-width: 1080px) {
   .player {
-    height: 180px;
+    height: 190px;
     width: 220px;
-  }
-
-  .dealer-button {
-    bottom: 0;
   }
 
   .card {
@@ -291,28 +285,62 @@
   .community-cards > * {
     margin: 440px 10px 0 10px;
   }
+
+  .player--button-bet {
+    padding-bottom: 30px;
+  }
+
+  .dealer-button {
+    height: 16px;
+    width: 16px;
+
+    padding: 14px;
+    line-height: 16px;
+
+    font-size: 20px;
+  }
 }
 
 @media all and (max-width: 960px) {
   .player {
-    height: 150px;
+    height: 160px;
     width: 180px;
   }
 
-  .dealer-button {
-    bottom: 0;
-    right: -70px;
-    position: absolute;
-    height: 20px;
-    width: 20px;
+  .player--button-bet {
+    padding-top: 45px;
+  }
 
-    padding: 10px;
-    border-radius: 80px;
-    line-height: 20px;
+  .player__2 .player--button-bet {
+    padding-bottom: 35px;
+  }
+
+  .dealer-button {
+    height: 16px;
+    width: 16px;
+
+    padding: 14px;
+    line-height: 16px;
 
     font-size: 20px;
-    font-weight: bold;
   }
+
+  .chip {
+    height: 40px;
+    width: 40px;
+  }
+
+    .chip__1 {
+      left: 3px;
+    }
+
+    .chip__2 {
+      left: 4px;
+    }
+
+    .chip__3 {
+      left: 5px;
+    }
 
   .card {
     height: 120px;
@@ -327,9 +355,44 @@
 
 @media all and (max-width: 860px) {
   .player {
-    height: 120px;
+    height: 130px;
     width: 140px;
   }
+
+  .player--button-bet {
+    padding: 45px 20px 10px;
+  }
+
+  .player__2 .player--button-bet {
+    padding: 0 20px 25px;
+  }
+
+  .dealer-button {
+    height: 10px;
+    width: 10px;
+
+    padding: 10px;
+    line-height: 10px;
+
+    font-size: 16px;
+  }
+
+  .chip {
+    height: 30px;
+    width: 30px;
+  }
+
+    .chip__1 {
+      left: 8px;
+    }
+
+    .chip__2 {
+      left: 9px;
+    }
+
+    .chip__3 {
+      left: 10px;
+    }
 
   .card {
     height: 90px;
@@ -340,24 +403,4 @@
     width: 62px;
   }
 
-  .dealer-button {
-    position: absolute;
-    height: 20px;
-    width: 20px;
-
-    padding: 10px;
-    border-radius: 80px;
-    line-height: 20px;
-
-    font-size: 20px;
-    font-weight: bold;
-  }
-
-  .bet__1 {
-    top: 50px;
-  }
-
-  .bet__2 {
-    bottom: -20px;
-  }
 }
