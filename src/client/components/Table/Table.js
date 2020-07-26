@@ -29,7 +29,7 @@ function Table({user, table, round}) {
         <EmptyTable />
       </Maybe>
       <ul className="players">
-        <Maybe cond={user.type !== 'guest' && !!player}>
+        <Maybe cond={user.type !== 'guest' && !!player && table.players.length > 1}>
           {(() =>
             <Player
               key={1}
@@ -39,7 +39,7 @@ function Table({user, table, round}) {
               round={round}
               showWinningCards={showWinningCards(round)} />)}
         </Maybe>
-        <Maybe cond={table.players.length > 0}>
+        <Maybe cond={table.players.length > 1}>
           {() => table.players
             .filter(p => p.id !== user.id)
             .map((player, i) =>
@@ -53,7 +53,10 @@ function Table({user, table, round}) {
           )}
         </Maybe>
       </ul>
-      <Maybe cond={safe(false)(() => round.status !== ROUND_STATUS[1])}>
+      <Maybe cond={
+        safe(false)(() => round.status !== ROUND_STATUS[1])
+        && table.players.length > 1
+      }>
         {() => <ul className="community-cards">
           {communityCards.map((c, i) =>
             <li
