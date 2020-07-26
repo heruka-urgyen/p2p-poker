@@ -91,8 +91,8 @@
 }
 
 .bet-size__input {
-  width: 44px;
-  height: 44px;
+  width: 54px;
+  height: 54px;
   font-size: 20px;
   line-height: 20px;
   text-align: center;
@@ -110,13 +110,12 @@
 /* hide spinner https://stackoverflow.com/questions/3790935/can-i-hide-the-html5-number-input-s-spin-box */
 .bet-size__input::-webkit-outer-spin-button,
 .bet-size__input::-webkit-inner-spin-button {
-    /* display: none; <- Crashes Chrome on hover */
-    -webkit-appearance: none;
-    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+  /* display: none; <- Crashes Chrome on hover */
+  -webkit-appearance: none;
+  margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
 }
 
 /* style range input https://stackoverflow.com/a/60560815 */
-
 .bet-size__slider {
   width: 230px;
   height: 5px;
@@ -135,7 +134,6 @@
 }
 
 /*Chrome thumb*/
-
 .bet-size__slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -148,9 +146,7 @@
   border: 1px solid #c5c5c5;
 }
 
-
 /*Mozilla thumb*/
-
 .bet-size__slider::-moz-range-thumb {
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -162,9 +158,7 @@
   border: 1px solid #c5c5c5;
 }
 
-
 /*IE & Edge input*/
-
 .bet-size__slider::-ms-track {
   width: 300px;
   height: 6px;
@@ -177,9 +171,7 @@
   color: transparent;
 }
 
-
 /*IE & Edge thumb*/
-
 .bet-size__slider::-ms-thumb {
   height: 14px;
   width: 14px;

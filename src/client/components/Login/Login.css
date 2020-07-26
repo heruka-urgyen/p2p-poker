@@ -15,7 +15,7 @@
   top: calc(50vh - 150px);
   left: calc(50vw - 200px);
 
-  height: 300px;
+  height: 320px;
   width: 400px;
   z-index: 4;
 
@@ -28,7 +28,7 @@
   display: block;
   margin: 60px auto 0;
   width: 90%;
-  height: 40px;
+  height: 60px;
   font-size: 26px;
   border: 5px solid #192A29;
   border-radius: 0;
