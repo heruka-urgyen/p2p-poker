@@ -176,7 +176,9 @@ const maybeEndRound = sendToPeers => function* (action) {
       yield put({type: 'END_ROUND'})
     } else {
       yield call(broadcast(sendToPeers), {type: 'GET_WINNERS'})
-      if (isShowdown) {yield delay(2500)}
+      if (isShowdown || (isRiver && round.streetStatus)) {
+        yield delay(2500)
+      }
       yield call(broadcast(sendToPeers), {type: 'END_ROUND'})
     }
   }
@@ -184,6 +186,7 @@ const maybeEndRound = sendToPeers => function* (action) {
 
 const endRound = sendToPeers => function* (action) {
   const players = yield select(s => s.game.table.players)
+  yield delay(100)
   yield put({type: 'END_ROUND_SUCCESS', payload: {players}})
 
   if (players.length === 1) {
