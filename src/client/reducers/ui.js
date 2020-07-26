@@ -3,13 +3,8 @@ import {createReducer} from '@reduxjs/toolkit'
 const defaultState = {
   loading: true,
   error: {message: ''},
-  timer: {username: '', seconds: 0, active: false},
 }
 const uiReducer = createReducer(defaultState, {
-  UPDATE_TURN_TIMER: (s, {payload: {username, seconds}}) => {
-    const active = seconds > 0
-    return {...s, timer: {username, seconds, active}}
-  },
  ROOM_LOADING: (s) => {
     return {...s, loading: true}
   },

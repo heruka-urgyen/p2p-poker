@@ -5,20 +5,14 @@
   height: 100vh;
 }
 
-.ui-error,
-.turn-timer {
+.ui-error {
   position: absolute;
   top: 10px;
   right: 10px;
   color: #fefefe;
 }
 
-.turn-timer__username {
-  color: #6495ed;
-}
-
-.ui-error__message,
-.turn-timer__value {
+.ui-error__message {
   color: #e12a2a;
 }
 

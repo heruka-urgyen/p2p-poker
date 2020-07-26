@@ -1,5 +1,4 @@
 import {
-  all,
   apply,
   call,
   cancel,
@@ -8,19 +7,16 @@ import {
   fork,
   put,
   race,
-  select,
   take,
 } from 'redux-saga/effects'
-import {END, eventChannel} from 'redux-saga'
+import {eventChannel} from 'redux-saga'
 import Peer from 'peerjs'
 
 import {safe} from 'client/util'
 
 const P2PSERVER = {host: 'localhost', port: '9000', path: '/poker', debug: 2}
 const peers = {}
-const TURN_LENGTH = 30
 
-let turnTimerTask
 let sendToPeersTask
 let dataTask
 let dataChannelTask
@@ -74,56 +70,6 @@ function connectionOnOpen(connection) {
   })
 }
 
-function countdown(seconds) {
-  let s = seconds
-
-  return eventChannel(emit => {
-    const timer = setInterval(() => {
-      s = s - 1
-      s >= 0? emit(s) : emit(END)
-    }, 1000)
-
-    return () => {
-      clearInterval(timer)
-    }
-  })
-}
-
-function* timer([sendToPeers, id, length]) {
-  const ch = yield call(countdown, length)
-  const table = yield select(s => s.game.table)
-  const {players, nextPlayer} = yield select(s => s.game.round)
-  const username = safe('')(() => table.players.find(p => p.id === nextPlayer).username)
-
-  function* broadcastTimer(seconds) {
-    yield put({type: 'UPDATE_TURN_TIMER', payload: {username, seconds}})
-    yield all(players.filter(pid => pid !== id).map(id => put(
-      sendToPeers,
-      {
-        to: id,
-        action: {type: 'UPDATE_TURN_TIMER', payload: {username, seconds}}
-      })))
-  }
-
-  try {
-    while (true) {
-      let seconds = yield take(ch)
-      yield call(broadcastTimer, seconds)
-
-      if (seconds === 0) {
-        yield put({type: 'ATTEMPT_FOLD'})
-      }
-    }
-  } catch (e) {
-    console.error('timer error', e)
-  } finally {
-    yield put({type: 'UPDATE_TURN_TIMER', payload: {username, seconds: 0}})
-    if (yield cancelled()) {
-      ch.close()
-    }
-  }
-}
-
 function* connectToDataChannel(c) {
   const ch = yield call(connectionOnData, c)
 
@@ -150,7 +96,7 @@ function* connectToDataChannel(c) {
 function* connectToPeer([peer, to]) {
   const connection = yield apply(peer, peer.connect, [to])
   const ch = yield call(connectionOnOpen, connection)
-  const {c, timeout} = yield race({
+  const {c} = yield race({
     c: take(ch),
     timeout: delay(500),
   })
@@ -189,19 +135,6 @@ function* connectP2P([peer, sendToPeers]) {
         }
 
         yield apply(c, c.send, [action])
-      }
-
-      if (action.type !== 'UPDATE_TURN_TIMER' && turnTimerTask) {
-        yield cancel(turnTimerTask)
-      }
-
-      const startTimer = action.type === 'NEXT_ROUND'
-        || action.type === 'DEAL'
-        || action.type === 'BET'
-        || action.type === 'FOLD'
-
-      if (startTimer) {
-        // turnTimerTask = yield fork(timer, [sendToPeers, peer._id, TURN_LENGTH])
       }
     } catch(err) {
       console.error('p2p error:', err)

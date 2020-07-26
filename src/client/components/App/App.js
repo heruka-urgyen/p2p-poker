@@ -27,13 +27,6 @@ function App() {
           <span className="ui-error__message">{ui.error.message}</span>
         </div>
       </Maybe>
-      <Maybe cond={!uiError && ui.timer.active}>
-        <div className="turn-timer">
-          <span className="turn-timer__username">{ui.timer.username}</span>
-          {` time to decision: `}
-          <span className="turn-timer__value">{ui.timer.seconds}</span>
-        </div>
-      </Maybe>
       <Either cond={user.type === 'guest'}>
         <Login table={table} loading={loading} />
 
