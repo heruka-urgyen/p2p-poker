@@ -11,7 +11,7 @@ import chip from 'client/images/poker-chip.svg'
 const showWinningCards = round => card => {
   const isWinner = safe(false)(() => round.winners.filter
     (w => w.hand.value.cards.map(c => showCard(c)).indexOf(showCard(card)) > -1).length > 0)
-  const hasWinners = round.winners.length > 0
+  const hasWinners = safe(false)(() => round.winners.length > 0)
 
   return (hasWinners? 'showdown' : '') + (isWinner? ' winner' : '')
 }
