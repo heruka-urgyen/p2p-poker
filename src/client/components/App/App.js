@@ -9,12 +9,9 @@ import {
   Route,
   Redirect,
   Switch,
-  useLocation,
 } from 'react-router-dom'
 
 function App() {
-  const {pathname} = useLocation()
-
   const [user, table, round, ui] =
     useSelector(s => [s.user, s.game.table, s.game.round, s.ui])
   const uiError = ui.error.message.length > 0
@@ -31,16 +28,12 @@ function App() {
         <Login table={table} loading={loading} />
 
         <div className="main-wrapper">
-          <Either cond={pathname !== '/'}>
-            <Main user={user} table={table} round={round} />
-
-            <Switch>
-              <Redirect to={`/${user.id || '/'}`} />
-              <Route path={`/${user.id}`}>
-                <Main user={user} table={table} round={round} />
-              </Route>
-            </Switch>
-          </Either>
+          <Switch>
+            <Route path={`/${ui.roomId}`}>
+              <Main user={user} table={table} round={round} />
+            </Route>
+            <Redirect to={`/${ui.roomId}`} />
+          </Switch>
         </div>
       </Either>
     </div>

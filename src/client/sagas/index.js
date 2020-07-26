@@ -29,12 +29,12 @@ const broadcast = sendToPeers => function* (action) {
 const getInitialState = sendToPeers => function* () {
   try {
     const {pathname} = history.location
-    const roomId = pathname.slice(1)
     const user = yield select(s => s.user)
     const id = user.id || v4()
+    const roomId = pathname.slice(1) || id
     sessionStorage.setItem('_id', id)
 
-    yield put({type: 'ROOM_LOADING'})
+    yield put({type: 'ROOM_LOADING', payload: {roomId}})
 
     if (user.type === 'guest') {
       yield put({type: 'NEW_GAME'})
@@ -55,7 +55,7 @@ const getInitialState = sendToPeers => function* () {
 
 
     if (pathname === '/') {
-      yield put({type: 'ROOM_LOADED'})
+      yield put({type: 'ROOM_LOADED', payload: {roomId}})
     }
 
     if (pathname !== '/' && user.type === 'guest') {
@@ -75,7 +75,7 @@ const getInitialState = sendToPeers => function* () {
         }
 
         if (task) {
-          yield put({type: 'ROOM_LOADED'})
+          yield put({type: 'ROOM_LOADED', payload: {roomId}})
         }
       })
     }
@@ -192,6 +192,7 @@ const endRound = sendToPeers => function* (action) {
 
   if (players.length === 1) {
     if (history.location.pathname.slice(1) !== players[0].id) {
+      yield put({type: 'ROOM_LOADED', payload: {roomId: players[0].id}})
       yield call(() => history.replace(`/${players[0].id}`))
     }
 
