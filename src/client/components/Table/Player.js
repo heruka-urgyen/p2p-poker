@@ -19,8 +19,6 @@ function Player({i, player, isCurrentUser, round, showWinningCards}) {
     return [{type: 'hidden'}, {type: 'hidden'}]
   })[0])
 
-  const timeout = safe(0)(() => player.timeout)
-
   return (
     <li className={`player player__${i}`}>
       <Maybe cond={cards.length > 0}>
@@ -37,17 +35,10 @@ function Player({i, player, isCurrentUser, round, showWinningCards}) {
           )}
         </ul>
       </Maybe>
-      {timeout > 0?
-        <div className="player-name-wrapper">
-          <label className="player-name">waiting</label>
-          <label className="player-stack">{timeout}</label>
-        </div>
-        :
-        <div className="player-name-wrapper">
-          <label className="player-name">{player.username}</label>
-          <label className="player-stack">${player.stack}</label>
-        </div>
-      }
+      <div className="player-name-wrapper">
+        <label className="player-name">{player.username}</label>
+        <label className="player-stack">${player.stack}</label>
+      </div>
       <Maybe cond={() => buttonPlayerId === player.id}>
         <label className={`dealer-button dealer-button__${i}`}>D</label>
       </Maybe>
