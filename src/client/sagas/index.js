@@ -14,11 +14,12 @@ import {
 import {ROUND_STATUS, STREETS, STREET_STATUS} from '@heruka_urgyen/poker-solver'
 import {v4} from 'uuid'
 
-import {createPeer} from './websocket'
+import {createPeer, windowClosed} from './peers'
 import {safe} from 'client/util'
 import history from 'client/history'
 
 let peerTask
+let closeWindowTask
 
 const broadcast = sendToPeers => function* (action) {
   const peers = yield select(state => state.game.table.players)
@@ -45,7 +46,13 @@ const getInitialState = sendToPeers => function* () {
       cancel(peerTask)
     }
 
+    if (closeWindowTask) {
+      cancel(closeWindowTask)
+    }
+
     peerTask = yield fork(createPeer, [id, sendToPeers])
+    closeWindowTask = yield fork(windowClosed, [roomId, id, sendToPeers])
+
 
     if (pathname === '/') {
       yield put({type: 'ROOM_LOADED'})
@@ -224,11 +231,14 @@ const betSuccess = sendToPeers => function* (action) {
 }
 
 const peerDisconnected = sendToPeers => function* ({payload: {id}}) {
-  yield put({type: 'LEAVE_GAME', payload: {id}})
-  yield delay(100)
-  yield call(maybeEndRound(sendToPeers))
-  yield delay(1000)
-  yield put({type: 'CLEAR_ERROR'})
+  const players = yield select(s => safe([])(() => s.game.round.players))
+
+  if (players.find(pid => pid === id)) {
+    yield put({type: 'LEAVE_GAME', payload: {id}})
+    yield call(maybeEndRound(sendToPeers))
+  }
+    yield put({type: 'CLEAR_ERROR'})
+    yield delay(1000)
 }
 
 function* subscribe() {
@@ -249,6 +259,7 @@ function* subscribe() {
 
 function* mainSaga() {
   yield* subscribe()
+  yield delay(100)
   yield put({type: 'INITIALIZE'})
 }
 
