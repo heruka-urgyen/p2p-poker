@@ -1,6 +1,5 @@
 .table {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   align-items: center;
   height: 100%;
 }
@@ -41,12 +40,16 @@
 
 .players {
   display: flex;
+  align-items: center;
   flex-direction: column;
   justify-content: space-between;
   position: relative;
   height: 100%;
   margin: 0;
   padding: 0;
+
+  grid-row: 1;
+  grid-column: 1;
 
   list-style: none;
 }
@@ -229,13 +232,10 @@
   }
 
 .community-cards {
-  list-style: none;
+  grid-row: 1;
+  grid-column: 1;
 
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  top: 0;
+  list-style: none;
 
   margin: 0;
   padding: 0;
@@ -243,7 +243,7 @@
 
 .community-cards > * {
   display: inline-block;
-  margin: 400px 10px 0 10px;
+  margin: 0 10px;
 }
 
 @media all and (max-width: 1180px) {
@@ -261,12 +261,9 @@
     width: 128px;
   }
 
-  .community-cards > * {
-    margin: 420px 10px 0 10px;
-  }
 }
 
-@media all and (max-width: 1080px) {
+@media all and (max-height: 750px), (max-width: 1080px) {
   .player {
     height: 190px;
     width: 220px;
@@ -280,10 +277,6 @@
     height: 150px;
     width: 108px;
     border-radius: 8px;
-  }
-
-  .community-cards > * {
-    margin: 440px 10px 0 10px;
   }
 
   .player--button-bet {
@@ -301,7 +294,7 @@
   }
 }
 
-@media all and (max-width: 960px) {
+@media all and (max-height: 600px), (max-width: 960px) {
   .player {
     height: 160px;
     width: 180px;
@@ -353,7 +346,7 @@
   }
 }
 
-@media all and (max-width: 860px) {
+@media all and (max-height: 500px), (max-width: 860px) {
   .player {
     height: 130px;
     width: 140px;
