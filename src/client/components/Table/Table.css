@@ -173,6 +173,13 @@
   display: flex;
 }
 
+.outline {
+  height: 204px;
+  width: 144px;
+  border: 3px solid #fefefe;
+  border-radius: 10px;
+}
+
 .card {
   height: 210px;
   left: 10px;
@@ -229,7 +236,7 @@
   position: absolute;
   bottom: 0;
   left: 0;
-  right: 320px;
+  right: 0;
   top: 0;
 
   margin: 0;
@@ -251,6 +258,11 @@
     height: 180px;
   }
 
+  .outline {
+    height: 180px;
+    width: 122px;
+  }
+
   .community-cards > * {
     margin: 420px 10px 0 10px;
   }
@@ -268,6 +280,12 @@
 
   .card {
     height: 150px;
+  }
+
+  .outline {
+    height: 144px;
+    width: 102px;
+    border-radius: 8px;
   }
 
   .community-cards > * {
@@ -299,6 +317,12 @@
   .card {
     height: 120px;
   }
+
+  .outline {
+    height: 114px;
+    width: 79px;
+    border-radius: 5px;
+  }
 }
 
 @media all and (max-width: 860px) {
@@ -309,6 +333,11 @@
 
   .card {
     height: 90px;
+  }
+
+  .outline {
+    height: 84px;
+    width: 56px;
   }
 
   .dealer-button {

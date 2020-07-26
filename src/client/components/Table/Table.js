@@ -1,10 +1,10 @@
 import React from 'react'
 import Card from '@heruka_urgyen/react-playing-cards'
-import {showCard} from '@heruka_urgyen/poker-solver'
+import {showCard, ROUND_STATUS} from '@heruka_urgyen/poker-solver'
 
 import Player from './Player'
 import EmptyTable from './EmptyTable'
-import {Maybe, safe} from 'client/util'
+import {Either, Maybe, safe} from 'client/util'
 
 import chip from 'client/images/poker-chip.svg'
 
@@ -18,6 +18,10 @@ const showWinningCards = round => card => {
 
 function Table({user, table, round}) {
   const player = table.players.find(p => p.id === user.id)
+
+  const outlines = Array.from(Array(5), _ => ({type: 'outline'}))
+  const communityCards = safe(outlines)(() =>
+    (round.communityCards || []).concat(outlines.slice(round.communityCards.length)))
 
   return (
     <div className="table">
@@ -49,14 +53,16 @@ function Table({user, table, round}) {
           )}
         </Maybe>
       </ul>
-      <Maybe cond={round.communityCards != null}>
+      <Maybe cond={safe(false)(() => round.status !== ROUND_STATUS[1])}>
         {() => <ul className="community-cards">
-          {round.communityCards.map((c, i) =>
+          {communityCards.map((c, i) =>
             <li
               key={`cc${i + 1}`}
               className={`card community-card__${i + 1} ${showWinningCards(round)(c)}`}>
-
+            <Either cond={c.type === 'outline'}>
+              <div className="outline" />
               <Card card={c.rank + c.suit} />
+            </Either>
             </li>
           )}
         </ul>}
