@@ -142,8 +142,9 @@ const maybeNextRound = sendToPeers => function* (action) {
     const userOnButton = user.id === table.players[button].id
 
     if (userOnButton) {
+      const id = v4()
       const seed = v4()
-      yield call(broadcast(sendToPeers), {type: 'NEXT_ROUND', payload: {seed}})
+      yield call(broadcast(sendToPeers), {type: 'NEXT_ROUND', payload: {id, seed}})
     }
   }
 }
