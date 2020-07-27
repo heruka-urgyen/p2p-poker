@@ -199,6 +199,7 @@ const endRound = sendToPeers => function* (action) {
     const user = yield select(s => s.user)
 
     if (user.type === 'guest') {
+      yield call(() => history.push('/'))
       yield put({type: 'INITIALIZE'})
     }
   }
@@ -240,10 +241,18 @@ const peerDisconnected = sendToPeers => function* ({payload: {id}}) {
 
   if (players.find(pid => pid === id)) {
     yield put({type: 'LEAVE_GAME', payload: {id}})
-    yield call(maybeEndRound(sendToPeers))
   }
-    yield put({type: 'CLEAR_ERROR'})
-    yield delay(1000)
+
+  yield delay(1000)
+  yield put({type: 'CLEAR_ERROR'})
+}
+
+const leaveGame = sendToPeers => function* ({payload: {id}}) {
+  yield call(broadcast(sendToPeers), {type: 'LEAVE_GAME', payload: {id}})
+}
+
+const leaveGameSuccess = sendToPeers => function* ({payload: {id}}) {
+  yield call(maybeEndRound(sendToPeers))
 }
 
 function* subscribe() {
@@ -260,6 +269,8 @@ function* subscribe() {
   yield takeEvery('BET_SUCCESS', betSuccess(sendToPeers))
   yield takeEvery('END_ROUND', endRound(sendToPeers))
   yield takeEvery('PEER_DISCONNECTED', peerDisconnected(sendToPeers))
+  yield takeEvery('ATTEMPT_LEAVE_GAME', leaveGame(sendToPeers))
+  yield takeEvery('LEAVE_GAME', leaveGameSuccess(sendToPeers))
 }
 
 function* mainSaga() {

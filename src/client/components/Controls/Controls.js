@@ -2,16 +2,25 @@ import React, {useState} from 'react'
 import {useDispatch} from 'react-redux'
 import Draggable from 'react-draggable'
 
-import {fold, bet} from 'client/reducers/game'
+import {fold, bet, leave} from 'client/reducers/game'
 
 function Controls({round, player, stack, minBet, isDisabled}) {
   const dispatch = useDispatch()
 
   const [betAmount, updateBet] = useState(minBet)
+  const cancelDrag = `
+    .bet-size__slider,
+    .bet-size__input,
+    .controls__button,
+    .controls__leave`
 
   return (
-    <Draggable cancel=".bet-size__slider, .bet-size__input, .controls__button">
+    <Draggable cancel={cancelDrag}>
       <div className="controls">
+        <div className="controls__leave" onClick={_ => dispatch(leave({id: player.id}))}>
+          <span className="controls__leave-door" />
+          <span className="controls__leave-arrow"></span>
+        </div>
         <div className="controls__adjust-bet">
           <button
             className="controls__button"

@@ -1,3 +1,52 @@
+.controls__leave {
+  position: absolute;
+  top: 30px;
+  left: 22px;
+  cursor: pointer;
+}
+
+.controls__leave-arrow {
+  position: absolute;
+  left: 14px;
+  top: 8px;
+  width: 22px;
+  height: 4px;
+  background-color: #192A29;
+
+  transition-property: left;
+  transition-duration: 0.4s;
+}
+
+.controls__leave:hover > .controls__leave-arrow {
+  left: 18px;
+}
+
+.controls__leave-arrow::before,
+.controls__leave-arrow::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 4px;
+  right: -2px;
+  background-color: #192A29;
+}
+
+.controls__leave-arrow::after {
+  top: -4px;
+  transform: rotate(45deg);
+}
+
+.controls__leave-arrow::before {
+  top: 4px;
+  transform: rotate(-45deg);
+}
+
+.controls__leave-door {
+  border: 5px solid #192A29;
+  border-right: 0;
+  padding: 4px 12px 4px 10px;
+}
+
 .controls {
   z-index: 1;
   position: absolute;

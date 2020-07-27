@@ -71,5 +71,6 @@ const gameReducer = createReducer(defaultState, {
 export const sitUser = createAction('SIT_USER')
 export const fold = createAction('ATTEMPT_FOLD')
 export const bet = createAction('ATTEMPT_BET')
+export const leave = createAction('ATTEMPT_LEAVE_GAME')
 
 export default gameReducer
