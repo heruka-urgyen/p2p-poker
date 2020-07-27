@@ -1,5 +1,5 @@
 {
-  "name": "poker",
+  "name": "p2p-poker",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
