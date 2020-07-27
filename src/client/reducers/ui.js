@@ -6,7 +6,10 @@ const defaultState = {
   error: {message: ''},
 }
 const uiReducer = createReducer(defaultState, {
- ROOM_LOADING: (s, {payload: {roomId}}) => {
+  INITIALIZE: s => {
+    return {...s, error: defaultState.error}
+  },
+  ROOM_LOADING: (s, {payload: {roomId}}) => {
     return {...s, roomId, loading: true}
   },
   ROOM_LOADED: (s, {payload: {roomId}}) => {
