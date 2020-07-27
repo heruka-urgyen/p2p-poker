@@ -201,8 +201,8 @@
 
 .pot {
   position: absolute;
-  left: calc(50% - 210px);
-  bottom: calc(50% - 200px);
+  left: calc(50% - 60px);
+  bottom: -70px;
 }
 
 .pot-amount {
@@ -231,10 +231,13 @@
     bottom: 11px;
   }
 
-.community-cards {
+.community-cards-pots {
   grid-row: 1;
   grid-column: 1;
 
+  position: relative;
+}
+.community-cards {
   list-style: none;
 
   margin: 0;
@@ -246,7 +249,7 @@
   margin: 0 10px;
 }
 
-@media all and (max-width: 1180px) {
+@media all and (max-height: 840px), (max-width: 1180px) {
   .player {
     height: 220px;
     width: 260px;
@@ -294,7 +297,7 @@
   }
 }
 
-@media all and (max-height: 600px), (max-width: 960px) {
+@media all and (max-height: 670px), (max-width: 960px) {
   .player {
     height: 160px;
     width: 180px;
@@ -316,6 +319,10 @@
     line-height: 16px;
 
     font-size: 20px;
+  }
+
+  .pot-amount {
+    left: 50px;
   }
 
   .chip {
@@ -346,7 +353,7 @@
   }
 }
 
-@media all and (max-height: 500px), (max-width: 860px) {
+@media all and (max-height: 580px), (max-width: 860px) {
   .player {
     height: 130px;
     width: 140px;
@@ -368,6 +375,15 @@
     line-height: 10px;
 
     font-size: 16px;
+  }
+
+  .pot {
+    bottom: -50px;
+  }
+
+  .pot-amount {
+    bottom: 15px;
+    left: 40px;
   }
 
   .chip {

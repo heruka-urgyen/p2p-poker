@@ -53,33 +53,35 @@ function Table({user, table, round}) {
           )}
         </Maybe>
       </ul>
-      <Maybe cond={
-        safe(false)(() => round.status !== ROUND_STATUS[1])
-        && table.players.length > 1
-      }>
-        {() => <ul className="community-cards">
-          {communityCards.map((c, i) =>
-            <li
-              key={`cc${i + 1}`}
-              className={`card community-card__${i + 1} ${showWinningCards(round)(c)}`}>
-            <Either cond={c.type === 'outline'}>
-              <div className="outline" />
-              <Card card={c.rank + c.suit} />
-            </Either>
-            </li>
+      <div className="community-cards-pots">
+        <Maybe cond={
+          safe(false)(() => round.status !== ROUND_STATUS[1])
+          && table.players.length > 1
+        }>
+          {() => <ul className="community-cards">
+            {communityCards.map((c, i) =>
+              <li
+                key={`cc${i + 1}`}
+                className={`card community-card__${i + 1} ${showWinningCards(round)(c)}`}>
+              <Either cond={c.type === 'outline'}>
+                <div className="outline" />
+                <Card card={c.rank + c.suit} />
+              </Either>
+              </li>
+            )}
+          </ul>}
+        </Maybe>
+        <Maybe cond={() => round.pots.pots}>
+          {() => round.pots.pots.map((pot, i) =>
+            <div className="pot" key={i}>
+              <img className={`chip chip__1`} src={chip} alt="chip" />
+              <img className={`chip chip__2`} src={chip} alt="chip" />
+              <img className={`chip chip__3`} src={chip} alt="chip" />
+              <label className="pot-amount">${pot.amount}</label>
+            </div>
           )}
-        </ul>}
-      </Maybe>
-      <Maybe cond={() => round.pots.pots}>
-        {() => round.pots.pots.map((pot, i) =>
-          <div className="pot" key={i}>
-            <img className={`chip chip__1`} src={chip} alt="chip" />
-            <img className={`chip chip__2`} src={chip} alt="chip" />
-            <img className={`chip chip__3`} src={chip} alt="chip" />
-            <label className="pot-amount">${pot.amount}</label>
-          </div>
-        )}
-      </Maybe>
+        </Maybe>
+      </div>
     </div>
   )
 }
