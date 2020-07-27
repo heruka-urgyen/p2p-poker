@@ -9,6 +9,7 @@ Peer-to-peer poker client written in react, redux, redux-saga, peerjs. Work in p
 
 ## todo
 - [x] update `/server` to be a peerjs server
-- [ ] remove unused dependencies
+- [x] remove unused dependencies
+- [x] add dev workflow
 - [ ] add build workflow
 - [ ] add deploy workflow
