@@ -1,3 +1,4 @@
 const {PeerServer} = require('peer')
+const {p2pServerConfig} = require('../config')
 
-const peerServer = PeerServer({ port: 9000, path: '/poker' })
+const peerServer = PeerServer(p2pServerConfig)

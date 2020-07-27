@@ -13,8 +13,8 @@ import {eventChannel} from 'redux-saga'
 import Peer from 'peerjs'
 
 import {safe} from 'client/util'
+import {p2pServerConfig} from 'config'
 
-const P2PSERVER = {host: 'localhost', port: '9000', path: '/poker', debug: 2}
 const peers = {}
 
 let sendToPeersTask
@@ -143,7 +143,7 @@ function* connectP2P([peer, sendToPeers]) {
 }
 
 export function* createPeer([id, sendToPeers]) {
-  const peer = yield call(() => new Peer(id, P2PSERVER))
+  const peer = yield call(() => new Peer(id, p2pServerConfig))
   peers[id] = peer
 
   if (sendToPeersTask) {
