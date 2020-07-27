@@ -17,12 +17,14 @@ function Login({table, loading}) {
 
   const tableIsFull = players.length === maxPlayers
   const submitIsDisabled = formValues.username.length === 0 || tableIsFull
-  const submitLabel = pathname === '/'? 'Create table' : 'Sit at this table'
+  const submitLabel = pathname === '/'? 'Start table' : 'Sit at this table'
   const header = loading?
     'Connecting...' :
-    tableIsFull?
-      'Table is full' :
-      `${players.length} / ${maxPlayers} players`
+    pathname === '/'?
+      'Start new table' :
+      tableIsFull?
+        'Table is full' :
+        `${players.length} / ${maxPlayers} players`
 
   return (
     <div>
