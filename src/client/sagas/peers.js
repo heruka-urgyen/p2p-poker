@@ -78,6 +78,7 @@ function* connectToDataChannel(c) {
       const action = yield take(ch)
 
       if (action.type === 'PEER_DISCONNECTED') {
+        yield put(action)
         c.close()
         ch.close()
       }
@@ -122,7 +123,6 @@ function* connectP2P([peer, sendToPeers]) {
         yield put(action)
       } else {
         const maybeC = safe({open: false})(() => peer.connections[to][0])
-
         if (maybeC.open) {
           c = maybeC
         } else {
