@@ -1,9 +1,10 @@
-import React from 'react'
+import React, {Suspense, lazy} from 'react'
 
-import Table from 'client/components/Table'
-import Controls from 'client/components/Controls'
 import {Maybe, safe} from 'client/util'
 import {ROUND_STATUS, STREETS} from '@heruka_urgyen/poker-solver'
+
+const Table = lazy(() => import('client/components/Table'))
+const Controls = lazy(() => import('client/components/Controls'))
 
 const getMinBet = ({round, user, stack}) => {
   if (round.status !== 'IN_PROGRESS') {
@@ -28,15 +29,17 @@ function Main({user, table, round}) {
 
   return (
     <main>
-      <Table user={user} table={table} round={round} />
-      <Maybe cond={table.players.length > 1}>
-        <Controls
-          round={round}
-          player={user}
-          stack={stack}
-          minBet={minBet}
-          isDisabled={controlsDisabled} />
-      </Maybe>
+      <Suspense fallback={null}>
+        <Table user={user} table={table} round={round} />
+        <Maybe cond={table.players.length > 1}>
+          <Controls
+            round={round}
+            player={user}
+            stack={stack}
+            minBet={minBet}
+            isDisabled={controlsDisabled} />
+        </Maybe>
+      </Suspense>
     </main>
   )
 }
