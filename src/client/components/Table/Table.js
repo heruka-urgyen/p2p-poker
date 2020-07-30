@@ -46,11 +46,9 @@ function Table({user, table, round}) {
           )}
         </ul>
         <div className="community-cards-pots">
-          <Maybe cond={safe(false)(() => round.status !== ROUND_STATUS[1])}>
-            <CommunityCards
-              communityCards={communityCards}
-              showWinningCards={showWinningCards(round)} />
-          </Maybe>
+          <CommunityCards
+            communityCards={communityCards}
+            showWinningCards={showWinningCards(round)} />
           <Maybe cond={() => round.pots.pots}>
             {() => round.pots.pots.map((pot, i) =>
               <div className="pot" key={i}>
