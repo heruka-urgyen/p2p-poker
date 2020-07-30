@@ -131,7 +131,7 @@ const sitUserSuccess = sendToPeers => function* ({payload: {user}}) {
 }
 
 const maybeNextRound = sendToPeers => function* (action) {
-  yield delay(100)
+  yield delay(500)
   const user = yield select(state => state.user)
   const round = yield select(state => state.game.round)
   const table = yield select(state => state.game.table)
@@ -187,7 +187,6 @@ const maybeEndRound = sendToPeers => function* (action) {
 
 const endRound = sendToPeers => function* (action) {
   const players = yield select(s => s.game.table.players)
-  yield delay(100)
   yield put({type: 'END_ROUND_SUCCESS', payload: {players}})
 
   if (players.length === 1) {
@@ -227,7 +226,7 @@ const maybeDeal = sendToPeers => function* (action) {
 
 const bet = sendToPeers => function* ({payload}) {
   yield call(broadcast(sendToPeers), {type: 'BET', payload})
-  yield delay(100)
+  yield delay(500)
   yield put({type: 'BET_SUCCESS'})
 }
 
