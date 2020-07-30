@@ -2,7 +2,7 @@ import React, {useState} from 'react'
 import {useDispatch} from 'react-redux'
 import {useLocation} from 'react-router-dom'
 
-import {sitUser} from 'client/reducers/table'
+import {sitUser} from 'client/reducers/game'
 
 const handleSubmitForm = dispatch => formValues => e => {
   e.preventDefault()
