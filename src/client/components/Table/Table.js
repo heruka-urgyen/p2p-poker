@@ -1,12 +1,13 @@
-import React from 'react'
+import React, {Suspense, lazy} from 'react'
 import Card from '@heruka_urgyen/react-playing-cards'
 import {showCard, ROUND_STATUS} from '@heruka_urgyen/poker-solver'
 
-import Player from './Player'
 import EmptyTable from './EmptyTable'
 import {Either, Maybe, safe} from 'client/util'
 
 import chip from 'client/images/poker-chip.svg'
+
+const Player = lazy(() => import('./Player'))
 
 const showWinningCards = round => card => {
   const isWinner = safe(false)(() => round.winners.filter
@@ -29,29 +30,31 @@ function Table({user, table, round}) {
         <EmptyTable />
       </Maybe>
       <ul className="players">
-        <Maybe cond={user.type !== 'guest' && !!player && table.players.length > 1}>
-          {(() =>
-            <Player
-              key={1}
-              i={1}
-              player={player}
-              isCurrentUser={true}
-              round={round}
-              showWinningCards={showWinningCards(round)} />)}
-        </Maybe>
-        <Maybe cond={table.players.length > 1}>
-          {() => table.players
-            .filter(p => p.id !== user.id)
-            .map((player, i) =>
+        <Suspense fallback={null}>
+          <Maybe cond={user.type !== 'guest' && !!player && table.players.length > 1}>
+            {(() =>
               <Player
-                key={i + 2}
-                i={i + 2}
+                key={1}
+                i={1}
                 player={player}
-                isCurrentUser={false}
+                isCurrentUser={true}
                 round={round}
-                showWinningCards={showWinningCards(round)} />
-          )}
-        </Maybe>
+                showWinningCards={showWinningCards(round)} />)}
+          </Maybe>
+          <Maybe cond={table.players.length > 1}>
+            {() => table.players
+              .filter(p => p.id !== user.id)
+              .map((player, i) =>
+                <Player
+                  key={i + 2}
+                  i={i + 2}
+                  player={player}
+                  isCurrentUser={false}
+                  round={round}
+                  showWinningCards={showWinningCards(round)} />
+            )}
+          </Maybe>
+        </Suspense>
       </ul>
       <div className="community-cards-pots">
         <Maybe cond={
