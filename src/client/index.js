@@ -17,7 +17,6 @@ import {
 } from 'redux-persist'
 import storage from 'redux-persist/lib/storage/session'
 import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2'
-import {createLogger} from 'redux-logger'
 
 import history from './history'
 import saga from './sagas'
@@ -26,38 +25,48 @@ import reducer from './reducers'
 import './index.css'
 import App from 'client/components/App'
 
-const sagaMiddleware = createSagaMiddleware()
+const render = async isProd => {
+  const sagaMiddleware = createSagaMiddleware()
 
-const persistConfig = {
-  key: 'root',
-  version: 1,
-  storage,
-  stateReconciler: autoMergeLevel2,
+  const persistConfig = {
+    key: 'root',
+    version: 1,
+    storage,
+    stateReconciler: autoMergeLevel2,
+  }
+
+  let middleware = [...getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER]
+      }
+    }),
+    sagaMiddleware
+  ]
+
+  if (!isProd) {
+    const logger = await import('redux-logger').then(l => l.createLogger({collapsed: true}))
+    middleware = [...middleware, logger]
+  }
+
+  const persistedReducer = persistReducer(persistConfig, reducer)
+  const store = configureStore({
+    reducer: persistedReducer,
+    middleware,
+  })
+
+  sagaMiddleware.run(saga)
+
+  ReactDOM.render(
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistStore(store)}>
+        <Router history={history}>
+          <App />
+        </Router>
+      </PersistGate>
+    </Provider>,
+    document.getElementById('root')
+  )
 }
 
-const logger = createLogger({
-  collapsed: true,
-})
+render(process.env.NODE_ENV === 'production')
 
-const persistedReducer = persistReducer(persistConfig, reducer)
-const store = configureStore({
-  reducer: persistedReducer,
-  middleware: [...getDefaultMiddleware({
-    serializableCheck: {
-      ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER]
-    }
-  }), sagaMiddleware, logger],
-})
-
-sagaMiddleware.run(saga)
-
-ReactDOM.render(
-  <Provider store={store}>
-    <PersistGate loading={null} persistor={persistStore(store)}>
-      <Router history={history}>
-        <App />
-      </Router>
-    </PersistGate>
-  </Provider>,
-  document.getElementById('root')
-)
