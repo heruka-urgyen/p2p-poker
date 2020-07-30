@@ -1,8 +1,6 @@
-import React from 'react'
+import React, {Suspense, lazy} from 'react'
 import {useSelector} from 'react-redux'
 
-import Main from './Main'
-import Login from 'client/components/Login'
 import {Maybe, Either} from 'client/util'
 
 import {
@@ -10,6 +8,9 @@ import {
   Redirect,
   Switch,
 } from 'react-router-dom'
+
+const Main = lazy(() => import('./Main'))
+const Login = lazy(() => import('client/components/Login'))
 
 function App() {
   const [user, table, round, ui] =
@@ -25,15 +26,19 @@ function App() {
         </div>
       </Maybe>
       <Either cond={user.type === 'guest'}>
-        <Login table={table} loading={loading} />
+        <Suspense fallback={null}>
+          <Login table={table} loading={loading} />
+        </Suspense>
 
         <div className="main-wrapper">
-          <Switch>
-            <Route path={`/${ui.roomId}`}>
-              <Main user={user} table={table} round={round} />
-            </Route>
-            <Redirect to={`/${ui.roomId}`} />
-          </Switch>
+          <Suspense fallback={null}>
+            <Switch>
+              <Route path={`/${ui.roomId}`}>
+                <Main user={user} table={table} round={round} />
+              </Route>
+              <Redirect to={`/${ui.roomId}`} />
+            </Switch>
+          </Suspense>
         </div>
       </Either>
     </div>
