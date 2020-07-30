@@ -1,10 +1,11 @@
-import React from 'react'
-import Card from '@heruka_urgyen/react-playing-cards'
+import React, {Suspense, lazy} from 'react'
 import {STREETS} from '@heruka_urgyen/poker-solver'
 
 import {Either, Maybe, safe} from 'client/util'
 
 import chip from 'client/images/poker-chip.svg'
+
+const Card = lazy(() => import('@heruka_urgyen/react-playing-cards'))
 
 function Player({i, player, isCurrentUser, round, showWinningCards}) {
   const buttonPlayerId = safe(null)(() => round.players[round.button])
@@ -29,7 +30,9 @@ function Player({i, player, isCurrentUser, round, showWinningCards}) {
               className={`card__${i + 1} ${showWinningCards(c)}`}>
               <Either cond={c.type === 'outline'}>
                 <div className="outline" />
-                <Card card={c.rank + c.suit} back={c.type === 'hidden'} />
+                <Suspense fallback={<div className="outline" />}>
+                  <Card card={c.rank + c.suit} back={c.type === 'hidden'} />
+                </Suspense>
               </Either>
             </li>
           )}

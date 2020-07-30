@@ -1,13 +1,13 @@
-import React, {Suspense, lazy} from 'react'
-import Card from '@heruka_urgyen/react-playing-cards'
+import React, {lazy} from 'react'
 import {showCard, ROUND_STATUS} from '@heruka_urgyen/poker-solver'
 
 import EmptyTable from './EmptyTable'
-import {Either, Maybe, safe} from 'client/util'
+import {Maybe, safe} from 'client/util'
 
 import chip from 'client/images/poker-chip.svg'
 
 const Player = lazy(() => import('./Player'))
+const CommunityCards = lazy(() => import('./CommunityCards'))
 
 const showWinningCards = round => card => {
   const isWinner = safe(false)(() => round.winners.filter
@@ -17,9 +17,19 @@ const showWinningCards = round => card => {
   return (hasWinners? 'showdown' : '') + (isWinner? ' winner' : '')
 }
 
-function Table({user, table, round}) {
-  const player = table.players.find(p => p.id === user.id)
+const getPlayerProps = ({player, user, round}) => {
+  const isCurrentUser = user.type !== 'guest' && player.id === user.id
 
+  return {
+    i: isCurrentUser? 1 : 2,
+    player,
+    isCurrentUser,
+    round,
+    showWinningCards: showWinningCards(round),
+  }
+}
+
+function Table({user, table, round}) {
   const outlines = Array.from(Array(5), _ => ({type: 'outline'}))
   const communityCards = safe(outlines)(() =>
     (round.communityCards || []).concat(outlines.slice(round.communityCards.length)))
@@ -29,62 +39,30 @@ function Table({user, table, round}) {
       <Maybe cond={table.players.length < 2}>
         <EmptyTable />
       </Maybe>
-      <ul className="players">
-        <Suspense fallback={null}>
-          <Maybe cond={user.type !== 'guest' && !!player && table.players.length > 1}>
-            {(() =>
-              <Player
-                key={1}
-                i={1}
-                player={player}
-                isCurrentUser={true}
-                round={round}
-                showWinningCards={showWinningCards(round)} />)}
-          </Maybe>
-          <Maybe cond={table.players.length > 1}>
-            {() => table.players
-              .filter(p => p.id !== user.id)
-              .map((player, i) =>
-                <Player
-                  key={i + 2}
-                  i={i + 2}
-                  player={player}
-                  isCurrentUser={false}
-                  round={round}
-                  showWinningCards={showWinningCards(round)} />
-            )}
-          </Maybe>
-        </Suspense>
-      </ul>
-      <div className="community-cards-pots">
-        <Maybe cond={
-          safe(false)(() => round.status !== ROUND_STATUS[1])
-          && table.players.length > 1
-        }>
-          {() => <ul className="community-cards">
-            {communityCards.map((c, i) =>
-              <li
-                key={`cc${i + 1}`}
-                className={`card community-card__${i + 1} ${showWinningCards(round)(c)}`}>
-              <Either cond={c.type === 'outline'}>
-                <div className="outline" />
-                <Card card={c.rank + c.suit} />
-              </Either>
-              </li>
-            )}
-          </ul>}
-        </Maybe>
-        <Maybe cond={() => round.pots.pots}>
-          {() => round.pots.pots.map((pot, i) =>
-            <div className="pot" key={i}>
-              <img className={`chip chip__1`} src={chip} alt="chip" />
-              <img className={`chip chip__2`} src={chip} alt="chip" />
-              <img className={`chip chip__3`} src={chip} alt="chip" />
-              <label className="pot-amount">${pot.amount}</label>
-            </div>
+      <Maybe cond={table.players.length > 1}>
+        <ul className="players">
+          {table.players.map((player, i) =>
+            <Player key={i} {...getPlayerProps({player, user, round})} />
           )}
-        </Maybe>
-      </div>
+        </ul>
+        <div className="community-cards-pots">
+          <Maybe cond={safe(false)(() => round.status !== ROUND_STATUS[1])}>
+            <CommunityCards
+              communityCards={communityCards}
+              showWinningCards={showWinningCards(round)} />
+          </Maybe>
+          <Maybe cond={() => round.pots.pots}>
+            {() => round.pots.pots.map((pot, i) =>
+              <div className="pot" key={i}>
+                <img className={`chip chip__1`} src={chip} alt="chip" />
+                <img className={`chip chip__2`} src={chip} alt="chip" />
+                <img className={`chip chip__3`} src={chip} alt="chip" />
+                <label className="pot-amount">${pot.amount}</label>
+              </div>
+            )}
+          </Maybe>
+        </div>
+      </Maybe>
     </div>
   )
 }
