@@ -142,7 +142,7 @@ function* connectP2P([peer, sendToPeers]) {
 }
 
 export function* createPeer([id, sendToPeers]) {
-  const Peer = yield import(/* webpackPreload: true */'peerjs').then(x => x.default)
+  const Peer = yield import(/* webpackPrefetch: true */'peerjs/dist/peerjs.js').then(x => x.default)
 
   const peer = yield call(() => new Peer(id, p2pServerConfig))
   peers[id] = peer
