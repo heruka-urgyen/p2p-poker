@@ -1,31 +1,50 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
-import {Provider} from 'react-redux'
-import {configureStore, getDefaultMiddleware} from '@reduxjs/toolkit'
-import createSagaMiddleware from 'redux-saga'
-import {Router} from 'react-router-dom'
-import {PersistGate} from 'redux-persist/integration/react'
-import {
-  persistStore,
-  persistReducer,
-  FLUSH,
-  REHYDRATE,
-  PAUSE,
-  PERSIST,
-  PURGE,
-  REGISTER
-} from 'redux-persist'
-import storage from 'redux-persist/lib/storage/session'
-import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2'
-
-import history from './history'
-import saga from './sagas'
-import reducer from './reducers'
-
-import './index.css'
-import App from 'client/components/App'
+// eslint-disable-next-line
+import('./index.css')
 
 const render = async isProd => {
+  const ReactDOM = await import('react-dom').then(x => x.default)
+  const {React, configureStore, getDefaultMiddleware, Provider, Router} =
+    await import('./chunk1.js').then(x => x.default)
+
+  const ms = await Promise.all([
+    import(
+      /* webpackchunkname: 'c2' */
+      './chunk2'),
+    import(
+      /* webpackchunkname: 'c2' */
+      './history'),
+    import(
+      /* webpackChunkName: 'c2' */
+      './sagas'),
+    import(
+      /* webpackChunkName: 'c2' */
+      './reducers'),
+    import(
+      /* webpackChunkName: 'c2' */
+      'client/components/App'),
+  ])
+
+  const [
+    {
+      createSagaMiddleware,
+      storage,
+      autoMergeLevel2,
+      PersistGate,
+      persistStore,
+      persistReducer,
+      FLUSH,
+      REHYDRATE,
+      PAUSE,
+      PERSIST,
+      PURGE,
+      REGISTER,
+    },
+    history,
+    saga,
+    reducer,
+    App,
+  ] = ms.map(x => x.default)
+
   const sagaMiddleware = createSagaMiddleware()
 
   const persistConfig = {
