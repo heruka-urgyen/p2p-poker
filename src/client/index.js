@@ -27,11 +27,8 @@ const render = async isProd => {
   const [
     {
       createSagaMiddleware,
-      storage,
-      autoMergeLevel2,
       PersistGate,
       persistStore,
-      persistReducer,
       FLUSH,
       REHYDRATE,
       PAUSE,
@@ -47,13 +44,6 @@ const render = async isProd => {
 
   const sagaMiddleware = createSagaMiddleware()
 
-  const persistConfig = {
-    key: 'root',
-    version: 1,
-    storage,
-    stateReconciler: autoMergeLevel2,
-  }
-
   let middleware = [...getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER]
@@ -67,9 +57,8 @@ const render = async isProd => {
     middleware = [...middleware, logger]
   }
 
-  const persistedReducer = persistReducer(persistConfig, reducer)
   const store = configureStore({
-    reducer: persistedReducer,
+    reducer,
     middleware,
   })
 
