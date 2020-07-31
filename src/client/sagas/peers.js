@@ -10,7 +10,6 @@ import {
   take,
 } from 'redux-saga/effects'
 import {eventChannel} from 'redux-saga'
-import Peer from 'peerjs'
 
 import {safe} from 'client/util'
 import {p2pServerConfig} from 'config'
@@ -143,6 +142,8 @@ function* connectP2P([peer, sendToPeers]) {
 }
 
 export function* createPeer([id, sendToPeers]) {
+  const Peer = yield import(/* webpackPreload: true */'peerjs').then(x => x.default)
+
   const peer = yield call(() => new Peer(id, p2pServerConfig))
   peers[id] = peer
 
