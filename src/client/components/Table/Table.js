@@ -6,8 +6,14 @@ import {Maybe, safe} from 'client/util'
 
 import chip from 'client/images/poker-chip.svg'
 
-const Player = lazy(() => import('./Player'))
-const CommunityCards = lazy(() => import('./CommunityCards'))
+const Player = lazy(() => import(
+  /* webpackChunkName: 'pl' */
+  /* webpackPreload: true */
+'./Player'))
+const CommunityCards = lazy(() => import(
+  /* webpackChunkName: 'cc' */
+  /* webpackPreload: true */
+'./CommunityCards'))
 
 const showWinningCards = round => card => {
   const isWinner = safe(false)(() => round.winners.filter

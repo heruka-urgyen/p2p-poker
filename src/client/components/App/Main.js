@@ -3,8 +3,14 @@ import React, {Suspense, lazy} from 'react'
 import {Maybe, safe} from 'client/util'
 import {ROUND_STATUS, STREETS} from '@heruka_urgyen/poker-solver'
 
-const Table = lazy(() => import('client/components/Table'))
-const Controls = lazy(() => import('client/components/Controls'))
+const Table = lazy(() => import(
+  /* webpackChunkName: 'table' */
+  /* webpackPreload: true */
+'client/components/Table'))
+const Controls = lazy(() => import(
+  /* webpackChunkName: 'controls' */
+  /* webpackPreload: true */
+'client/components/Controls'))
 
 const getMinBet = ({round, user, stack}) => {
   if (round.status !== 'IN_PROGRESS') {

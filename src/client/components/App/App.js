@@ -9,8 +9,14 @@ import {
   Switch,
 } from 'react-router-dom'
 
-const Main = lazy(() => import('./Main'))
-const Login = lazy(() => import('client/components/Login'))
+const Main = lazy(() =>
+  /* webpackChunkName: 'app-main' */
+  /* webpackPreload: true */
+  import('./Main'))
+const Login = lazy(() => import(
+  /* webpackChunkName: 'login' */
+  /* webpackPreload: true */
+'client/components/Login'))
 
 function App() {
   const [user, table, round, ui] =
