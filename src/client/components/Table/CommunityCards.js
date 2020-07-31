@@ -2,7 +2,10 @@ import React, {Suspense, lazy} from 'react'
 
 import {Either} from 'client/util'
 
-const Card = lazy(() => import('@heruka_urgyen/react-playing-cards'))
+const Card = lazy(() => import(
+  /* webpackChunkName: 'rpc' */
+  /* webpackPreload: true */
+'@heruka_urgyen/react-playing-cards/lib/TcN'))
 
 function CommunityCards({communityCards, showWinningCards}) {
   return (
