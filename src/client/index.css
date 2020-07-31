@@ -1,4 +1,7 @@
-* {box-sizing: border-box;}
+@import 'components/App/App.css';
+@import 'components/Login/Login.css';
+
+* {box-sizing: border-box}
 
 html, body {
   height: 100%;
@@ -8,11 +11,10 @@ html, body {
 }
 
 body {
-  /* font-family: 'Montserrat', sans-serif; */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   user-select: none;
 }
 
-input, select, textarea, button {font-family:inherit;}
+input, select, textarea, button {font-family: inherit}
 
