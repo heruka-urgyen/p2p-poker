@@ -6,7 +6,6 @@ import {Either, Maybe, safe} from 'client/util'
 import chip from 'client/images/poker-chip.svg'
 
 const Card = lazy(() => import(
-  /* webpackChunkName: 'rpc' */
   /* webpackPreload: true */
 '@heruka_urgyen/react-playing-cards/lib/TcN'))
 

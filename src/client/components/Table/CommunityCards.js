@@ -4,7 +4,7 @@ import {Either} from 'client/util'
 
 const Card = lazy(() => import(
   /* webpackChunkName: 'rpc' */
-  /* webpackPreload: true */
+  /* webpackLoad: true */
 '@heruka_urgyen/react-playing-cards/lib/TcN'))
 
 function CommunityCards({communityCards, showWinningCards}) {

@@ -1,19 +1,13 @@
-import React, {lazy} from 'react'
-import {showCard, ROUND_STATUS} from '@heruka_urgyen/poker-solver'
+import React from 'react'
+import {showCard} from '@heruka_urgyen/poker-solver'
 
 import EmptyTable from './EmptyTable'
 import {Maybe, safe} from 'client/util'
 
 import chip from 'client/images/poker-chip.svg'
 
-const Player = lazy(() => import(
-  /* webpackChunkName: 'pl' */
-  /* webpackPreload: true */
-'./Player'))
-const CommunityCards = lazy(() => import(
-  /* webpackChunkName: 'cc' */
-  /* webpackPreload: true */
-'./CommunityCards'))
+import Player from './Player'
+import CommunityCards from './CommunityCards'
 
 const showWinningCards = round => card => {
   const isWinner = safe(false)(() => round.winners.filter
